@@ -1,5 +1,5 @@
 var scriptName = "Jesus";
-var scriptVersion = 1.0;
+var scriptVersion = 0.5;
 var scriptAuthor = "Etho Coded By tk400.";
 
 var StrafeModule = moduleManager.getModule("Strafe")
@@ -20,7 +20,7 @@ function Jesus() {
 		return "Jesus2";
 	}
 	this.getDescription = function () {
-		return "Jesus Reloaded";
+		return "i think bypass Cubecraft... i guess..";
 	}
 	this.getCategory = function () {
 		return "Movement";
