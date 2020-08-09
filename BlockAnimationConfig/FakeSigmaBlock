@@ -1,0 +1,19 @@
+BlockAnimations posX 2.0
+BlockAnimations posY 1.21
+BlockAnimations posZ -0.63
+BlockAnimations rotX 30.0
+BlockAnimations rotY -132.63
+BlockAnimations rotZ 60.0
+BlockAnimations deviation 60.0
+BlockAnimations deviateXPos false
+BlockAnimations deviateYPos false
+BlockAnimations deviateZPos false
+BlockAnimations deviateXRot false
+BlockAnimations deviateYRot true
+BlockAnimations deviateZRot false
+BlockAnimations resetValues false
+BlockAnimations toggle true
+
+unchat CzechHek's BlockAnimation is Required!
+unchat Download at
+unchat https://github.com/CzechHek/Core/blob/master/Scripts/BlockAnimation.js
