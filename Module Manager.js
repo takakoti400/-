@@ -1,6 +1,15 @@
 var scriptName = "ModuleManager";
-var scriptVersion = 0.9;
+var scriptVersion = 0.95;
 var scriptAuthor = "tk400.";
+
+/*
+Change log
+
+<0.95>
+Added   : Anti Slime (ReverseStep's Slime HighJump Bug.)
+Added   : onWorld AutoFriendsCleaner
+Removed : Speed Changer This thinking is good(maybe), but coder is sucks...
+*/
 
 var SpeedModule = moduleManager.getModule("Speed");
 var ScaffoldModule = moduleManager.getModule("Scaffold");
@@ -10,35 +19,24 @@ var HighJumpModule = moduleManager.getModule("HighJump");
 var RSModule = moduleManager.getModule("ReverseStep");
 var FlyModule = moduleManager.getModule("Fly");
 
+BlockPos = Java.type('net.minecraft.util.BlockPos')
+SlimeBlock = Java.type('net.minecraft.block.BlockSlime')
+
 function ModuleManager() {
 
   var DebugChat = value.createBoolean("DebugChat", false);
   var ManageSpeed = value.createBoolean("Speed", true);
-  var SpeedModeChange = value.createBoolean("ChangeSpeedMode", false);
-  var SpeedMode = value.createList("SpeedModeType", ["Mineplex", "OldCube", "Custom"], "Mineplex");
-  var BMineplexSpeed = value.createText("BeforeMineplexSpeed", "MineplexGround");
-  var AMineplexSpeed = value.createText("AfterMineplexSpeed", "Custom");
-  var BOldCubeSpeed = value.createText("BeforeOldCubeSpeed", "TeleportCubeCraft");
-  var AOldCubeSpeed = value.createText("AfterOldCubeSpeed", "SlowHop");
-  var BCustomSpeedChange = value.createText("BeforeCustomSpeed", "BCustom");
-  var ACustomSpeedChange = value.createText("AfterCustomSpeed", "ACustom");
   var DamageHighJumper = value.createBoolean("DamageHighJumper", true);
   var ReverseStepFix = value.createBoolean("ReverseStepFix", true);
+  var AutoFClear = value.createBoolean("AutoFClear", true);
 
     this.addValues = function(values) {
       /*values.add(AlwaysTrue);*/
       values.add(DebugChat);
       values.add(ManageSpeed);
-      values.add(SpeedModeChange);
-      values.add(SpeedMode);
-      values.add(BMineplexSpeed);
-      values.add(AMineplexSpeed);
-      values.add(BOldCubeSpeed);
-      values.add(AOldCubeSpeed);
-      values.add(BCustomSpeedChange);
-      values.add(ACustomSpeedChange);
       values.add(DamageHighJumper);
       values.add(ReverseStepFix);
+      values.add(AutoFClear);
     }
 
 	this.getName = function () {
@@ -59,28 +57,15 @@ function ModuleManager() {
     }
     //DamageHighJump
     if(HighJumpModule.getState() && mc.thePlayer.onGround && !mc.gameSettings.keyBindForward.pressed && mc.thePlayer.ticksExisted % 20 == 0) {DamageModule.setState(true)}
-    //SpeedModeChanger
-    if(SpeedModeChange.get() == true && SpeedModule.getState()) {
-        //Mineplex
-      if(mc.gameSettings.keyBindSprint.pressed) {
-        if(SpeedMode.get() == "Mineplex") {SpeedModule.getValue("Mode").set(BMineplexSpeed.get())}}
-      if(!mc.gameSettings.keyBindSprint.pressed) {
-        if(SpeedMode.get() == "Mineplex") {SpeedModule.getValue("Mode").set(AMineplexSpeed.get())}}
-        //OldCube
-        if(mc.gameSettings.keyBindSprint.pressed) {
-          if(SpeedMode.get() == "OldCube") {SpeedModule.getValue("Mode").set(BOldCubeSpeed.get())}}
-        if(!mc.gameSettings.keyBindSprint.pressed) {
-          if(SpeedMode.get() == "OldCube") {SpeedModule.getValue("Mode").set(AOldCubeSpeed.get())}}
-          //Custom
-        if(mc.gameSettings.keyBindSprint.pressed) {
-          if(SpeedMode.get() == "Custom") {SpeedModule.getValue("Mode").set(BCustomSpeedChange.get())}}
-        if(!mc.gameSettings.keyBindSprint.pressed) {
-          if(SpeedMode.get() == "Custom") {SpeedModule.getValue("Mode").set(ACustomSpeedChange.get())}}
-    }
     //ReverseStepFix
+    if(ReverseStepFix.get() == true) {
     if(FlyModule.getState() && RSModule.getState()) {RSModule.setState(false)}
-    if(!FlyModule.getState() && !RSModule.getState()) {RSModule.setState(true)}
-     /*next Feature is AntiSlime etc...?*/
+     if(RSModule.getState() && mc.theWorld.getBlockState(new BlockPos(mc.thePlayer.posX, mc.thePlayer.posY - 0.1, mc.thePlayer.posZ)).getBlock() instanceof SlimeBlock) {RSModule.setState(false)}
+    }
+  }
+  this.onWorld = function () {
+    //This is not Module, But i think this is useful :)
+    if(AutoFClear.get() == true) {commandManager.executeCommand(".friends clear")}
   }
 }
 
