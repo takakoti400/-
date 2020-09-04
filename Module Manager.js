@@ -5,10 +5,15 @@ var scriptAuthor = "tk400.";
 /*
 Change log
 
+[MM]
 <0.95>
 Added   : Anti Slime (ReverseStep's Slime HighJump Bug.)
 Added   : onWorld AutoFriendsCleaner
 Removed : Speed Changer This thinking is good(maybe), but coder is sucks...
+
+[TSMM]
+<1.25>
+Added : JumpScaffolding
 */
 
 var SpeedModule = moduleManager.getModule("Speed");
@@ -18,6 +23,7 @@ var DamageModule = moduleManager.getModule("Damage");
 var HighJumpModule = moduleManager.getModule("HighJump");
 var RSModule = moduleManager.getModule("ReverseStep");
 var FlyModule = moduleManager.getModule("Fly");
+
 
 BlockPos = Java.type('net.minecraft.util.BlockPos')
 SlimeBlock = Java.type('net.minecraft.block.BlockSlime')
@@ -61,6 +67,7 @@ function ModuleManager() {
     if(ReverseStepFix.get() == true) {
     if(FlyModule.getState() && RSModule.getState()) {RSModule.setState(false)}
      if(RSModule.getState() && mc.theWorld.getBlockState(new BlockPos(mc.thePlayer.posX, mc.thePlayer.posY - 0.1, mc.thePlayer.posZ)).getBlock() instanceof SlimeBlock) {RSModule.setState(false)}
+     /*if(!RSModule.getState() && !FlyModule.getState() && !mc.theWorld.getBlockState(new BlockPos(mc.thePlayer.posX, mc.thePlayer.posY - 0.1, mc.thePlayer.posZ)).getBlock() instanceof SlimeBlock) {RSModule.setState(true)}*/
     }
   }
   this.onWorld = function () {
@@ -73,15 +80,19 @@ function ModuleManager() {
 
 
 var scriptName = "TSMM";
-var scriptVersion = 1.0;
+var scriptVersion = 1.25;
 var scriptAuthor = "tk400.";
 
 function TSMM() {
 
   var TSMMMode = value.createList("Mode", ["None", "Sprint", "XZR"], "None");
+  var JumpScaffolding = value.createBoolean("JumpScaffold", false);
+  var JSSprint = value.createBoolean("JSSprint", false);
 
   this.addValues = function(values) {
     values.add(TSMMMode);
+    values.add(JumpScaffolding);
+    values.add(JSSprint);
   }
 	this.getName = function () {
 		return "TSMM";
@@ -112,6 +123,10 @@ function TSMM() {
         if(TSMMMode.get() == "Sprint") {ScaffoldModule.getValue("Sprint").set(true)}
       }
         if(!mc.gameSettings.keyBindForward.pressed && !mc.gameSettings.keyBindRight.pressed && !mc.gameSettings.keyBindLeft.pressed && !mc.gameSettings.keyBindBack.pressed && mc.gameSettings.keyBindJump.pressed) {ScaffoldModule.setState(false); TowerModule.setState(true)}
+        if(JumpScaffolding.get() == true && mc.thePlayer.onGround) {
+          if(mc.gameSettings.keyBindForward.pressed || mc.gameSettings.keyBindLeft.pressed || mc.gameSettings.keyBindRight.pressed || mc.gameSettings.keyBindBack.pressed) {mc.thePlayer.jump(); ScaffoldModule.getValue("SameY").set(true)}
+        if(JSSprint.get() == true) {ScaffoldModule.getValue("Sprint").set(true)}
+        if(JSSprint.get() == false) {ScaffoldModule.getValue("Sprint").set(false)}}
   }
 
   this.onDisable = function() {
