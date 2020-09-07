@@ -1,5 +1,5 @@
 var scriptName = "NoFOVZoom";
-var scriptVersion = 1.0;
+var scriptVersion = 0.1;
 var scriptAuthor = "tk400.";
 
 function NoFOVZoom() {
