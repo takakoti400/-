@@ -2,7 +2,7 @@
 <comment>
 /Fixed
 [SpeddJumpStoper] -Jump is now possible when WASD is not pressed
-[ReNamed values]  -ManageSpeed and ManageSpeedD(isable)
+[ReNamed values]  -ManageSpeed and ManageSpeedD(isable) AndReFixed
 
 /Added
 [Counter, Mark Render] -Added.
@@ -11,7 +11,7 @@ etc...?
 */
 
 var scriptName = "ModuleManager";
-var scriptVersion = 1.00;
+var scriptVersion = 1.05;
 var scriptAuthor = "tk400.";
 
 var KAModule = moduleManager.getModule("KillAura");
@@ -37,8 +37,8 @@ AntiSlab = Java.type('net.minecraft.block.BlockSlab')
 function ModuleManager() {
 
   var DebugChat = value.createBoolean("DebugChat", false);
-  var ManageSpeed = value.createBoolean("Speed", true);
-  var ManageSpeedD = value.createBoolean("SpeedDisabler", true);
+  var SpeedJump = value.createBoolean("Speed", true);
+  var SpeedDisabler = value.createBoolean("SpeedDisabler", true);
   var AutoKAJump = value.createBoolean("AutoKAJump", false);
   var DamageHighJumper = value.createBoolean("DamageHighJumper", true);
   var ReverseStepFix = value.createBoolean("ReverseStepFix", true);
@@ -53,8 +53,8 @@ function ModuleManager() {
     this.addValues = function(values) {
       /*values.add(AlwaysTrue);*/
       values.add(DebugChat);
-      values.add(ManageSpeed);
-      values.add(ManageSpeedD);
+      values.add(SpeedJump);
+      values.add(SpeedDisabler);
       values.add(AutoKAJump);
       values.add(DamageHighJumper);
       values.add(ReverseStepFix);
@@ -78,11 +78,12 @@ function ModuleManager() {
 	}
 
 	this.onUpdate = function () {
-    //Manage Speed / Fly
+    //Manage SpeedJump
     if(ManageSpeed.get() == true && SpeedModule.getState() && mc.thePlayer.onGround ) {
       if(mc.gameSettings.keyBindForward.pressed || mc.gameSettings.keyBindRight.pressed || mc.gameSettings.keyBindLeft.pressed || mc.gameSettings.keyBindBack.pressed) {
       if(DebugChat.get() == true && mc.gameSettings.keyBindJump.pressed) {mc.gameSettings.keyBindJump.pressed = false; chat.print("Disabled Jump.")}}}
-    if(ManageSpeedD.get() == true && SpeedModule.getState() && FlyModule.getState() || FreeCamModule.getState()) {SpeedModule.setState(false)}
+      //SpeedDisabler
+    if(ManageSpeedD.get() == true) {if(SpeedModule.getState() && FlyModule.getState() || FreeCamModule.getState() || ScaffoldModule.getState()) {SpeedModule.setState(false)}}
     //DamageHighJumper
     if(DamageHighJumper.get() == true) {
     if(!NoFallModule.getState() && HighJumpModule.getState() && mc.thePlayer.onGround && !mc.gameSettings.keyBindForward.pressed && mc.thePlayer.ticksExisted % 20 == 0) {DamageModule.setState(true)}
@@ -163,9 +164,6 @@ function TSMM() {
 }
 
 	this.onUpdate = function () {
-      if(SpeedModule.getState()) {
-        SpeedModule.setState(false);
-      }
       if(!mc.gameSettings.keyBindJump.pressed) {TowerModule.setState(false); ScaffoldModule.setState(true)}
       if(ScaffoldModule.getState() && !TowerModule.getState()) {
         if(mc.gameSettings.keyBindJump.pressed && mc.thePlayer.onGround) {
