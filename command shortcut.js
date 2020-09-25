@@ -1,6 +1,6 @@
 var scriptName = "Command Shortcut";
-var scriptAuthor = "Senk Ju tk400";
-var scriptVersion = 1.5;
+var scriptAuthor = "Senk Ju and tk400";
+var scriptVersion = 1.6;
 
 var chatPrefix = "§8[§9§lLiquidBounce§8]";
 
@@ -161,6 +161,26 @@ function GMCommand() {
     }
 }
 
+function ForceSetCommand() {
+
+    this.getName = function() {
+        return "Forceset";
+    }
+
+    this.getAliases = function() {
+        return [];
+    }
+
+    this.execute = function(args) {
+        if (args.length < 3) {
+            log("what the hex!?", true);
+            return;
+        }
+        moduleManager.getModule(args[1]).getValue(args[2]).set(args[3]);
+        //hello, is this good?
+    }
+}
+
 var SampleCommand = new SampleCommand();
 var SampleCommand;
 
@@ -185,6 +205,8 @@ var LSLCommandClient;
 var GMCommand = new GMCommand();
 var GMCommandClient;
 
+var ForceSetCommand = new ForceSetCommand();
+var ForceSetCommandClient;
 
 function onEnable() {
     SampleCommand = commandManager.registerCommand(SampleCommand);
@@ -195,6 +217,7 @@ function onEnable() {
     LSDCommandClient = commandManager.registerCommand(LSDCommand);
     LSLCommandClient = commandManager.registerCommand(LSLCommand);
     GMCommandClient = commandManager.registerCommand(GMCommand);
+    ForceSetCommandClient = commandManager.registerCommand(ForceSetCommand);
 }
 
 function onDisable() {
@@ -206,4 +229,5 @@ function onDisable() {
     commandManager.unregisterCommand(LSDCommandClient);
     commandManager.unregisterCommand(LSLCommandClient);
     commandManager.unregisterCommand(GMCommandClient);
+    commandManager.unregisterCommand(ForceSetCommandClient);
 }
