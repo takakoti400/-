@@ -1,33 +1,27 @@
 /*
-<comment>
-/Fixed
-[SpeddJumpStoper] -Jump is now possible when WASD is not pressed
-[ReNamed values]  -ManageSpeed and ManageSpeedD(isable) AndReFixed
+1.5
+[bug fixes], [Added], [Renamed], etc...
 
-/Added
-[Counter, Mark Render] -Added.
-
-etc...?
+Build for ffe6cb6
+https://dl.ccbluex.net/skip/mLANvV0lDm
 */
 
 var scriptName = "ModuleManager";
-var scriptVersion = 1.05;
+var scriptVersion = 1.2;
 var scriptAuthor = "tk400.";
 
 var KAModule = moduleManager.getModule("KillAura");
 var SpeedModule = moduleManager.getModule("Speed");
+var HighJumpModule = moduleManager.getModule("HighJump");
 var LJModule = moduleManager.getModule("LongJump");
 var RSModule = moduleManager.getModule("ReverseStep");
 var FlyModule = moduleManager.getModule("Fly");
 var SprintModule = moduleManager.getModule("Sprint");
 var VelocityModule = moduleManager.getModule("Velocity");
-var HighJumpModule = moduleManager.getModule("HighJump");
 var ScaffoldModule = moduleManager.getModule("Scaffold");
 var TowerModule = moduleManager.getModule("Tower");
-var NoFallModule = moduleManager.getModule("NoFall");
-var DamageModule = moduleManager.getModule("Damage");
-var FreeCamModule = moduleManager.getModule("FreeCam");
-
+var InvModule = moduleManager.getModule("InventoryCleaner");
+var InvAAModule = moduleManager.getModule("AutoArmor");
 
 BlockPos = Java.type('net.minecraft.util.BlockPos')
 SlimeBlock = Java.type('net.minecraft.block.BlockSlime')
@@ -36,80 +30,112 @@ AntiSlab = Java.type('net.minecraft.block.BlockSlab')
 
 function ModuleManager() {
 
+  var test = value.createBoolean("test", true);
+  var test2 = value.createBoolean("test2", true);
+  var FakeUser = value.createText("FakeUser", "SigmaUser");
+  var ChatCont = value.createText("ChatCont", "LiquidBounce is Best♡♡♡");
   var DebugChat = value.createBoolean("DebugChat", false);
   var SpeedJump = value.createBoolean("Speed", true);
+  var JumpCrit = value.createBoolean("JumpCrit", true);
   var SpeedDisabler = value.createBoolean("SpeedDisabler", true);
+  var VelLJManage = value.createBoolean("VelLongJump", true);
   var AutoKAJump = value.createBoolean("AutoKAJump", false);
-  var DamageHighJumper = value.createBoolean("DamageHighJumper", true);
   var ReverseStepFix = value.createBoolean("ReverseStepFix", true);
   var AutoFClear = value.createBoolean("AutoFClear", true);
-  var FreeCamSlower = value.createBoolean("FreeCamSlower", false);
-  var AfterValue = value.createFloat("AfterValue", 1, 0, 1);
-  var SlowValue = value.createFloat("SlowValue", 0.2, 0, 1);
+  var Inv = value.createBoolean("Inv", true);
+  var InvList = value.createList("Mode", ["None", "Open", "Simulate"], "None");
   var RenderSetting = value.createBoolean("RenderSetting", true);
   var RSCounter = value.createBoolean("Counter", false);
   var RSMark = value.createBoolean("Mark", false);
 
     this.addValues = function(values) {
-      /*values.add(AlwaysTrue);*/
+      values.add(test);
+      values.add(test2);
+      values.add(FakeUser);
+      values.add(ChatCont);
       values.add(DebugChat);
       values.add(SpeedJump);
+      values.add(JumpCrit);
       values.add(SpeedDisabler);
+      values.add(VelLJManage);
       values.add(AutoKAJump);
-      values.add(DamageHighJumper);
       values.add(ReverseStepFix);
       values.add(AutoFClear);
-      values.add(FreeCamSlower);
-      values.add(AfterValue);
-      values.add(SlowValue);
+      values.add(Inv);
+      values.add(InvList);
       values.add(RenderSetting);
       values.add(RSCounter);
       values.add(RSMark);
-    }
+    };
 
 	this.getName = function () {
 		return "ModuleManager";
-	}
+	};
 	this.getDescription = function () {
 		return "Mangement Disable, Setting, Modules.";
-	}
+	};
 	this.getCategory = function () {
 		return "Player";
-	}
+  };
+  
+  this.onEnable = function () {
+    if(test2.get() == true) {
+      chat.print("<" + FakeUser.get() + "> " + ChatCont.get())
+    }};
 
 	this.onUpdate = function () {
-    //Manage SpeedJump
-    if(ManageSpeed.get() == true && SpeedModule.getState() && mc.thePlayer.onGround ) {
+    //Dev
+    if(test.get() == true) {
+      if(mc.thePlayer.onGround) {HighJumpModule.setState(true); LJModule.setState(true)}
+    };
+    //Manage SpeedJump /Fix Jump Boosting
+    if(SpeedJump.get() == true && SpeedModule.getState() && mc.thePlayer.onGround) {
       if(mc.gameSettings.keyBindForward.pressed || mc.gameSettings.keyBindRight.pressed || mc.gameSettings.keyBindLeft.pressed || mc.gameSettings.keyBindBack.pressed) {
-      if(DebugChat.get() == true && mc.gameSettings.keyBindJump.pressed) {mc.gameSettings.keyBindJump.pressed = false; chat.print("Disabled Jump.")}}}
+      if(DebugChat.get() == true && mc.gameSettings.keyBindJump.pressed) {mc.gameSettings.keyBindJump.pressed = false; chat.print("Disabled Jump.")}}};
       //SpeedDisabler
-    if(ManageSpeedD.get() == true) {if(SpeedModule.getState() && FlyModule.getState() || FreeCamModule.getState() || ScaffoldModule.getState()) {SpeedModule.setState(false)}}
-    //DamageHighJumper
-    if(DamageHighJumper.get() == true) {
-    if(!NoFallModule.getState() && HighJumpModule.getState() && mc.thePlayer.onGround && !mc.gameSettings.keyBindForward.pressed && mc.thePlayer.ticksExisted % 20 == 0) {DamageModule.setState(true)}
-    if(HighJumpModule.getState()) {
-      if(mc.thePlayer.onGround && NoFallModule.getState()) {NoFallModule.setState(false)}
-      if(!mc.thePlayer.onGround && !NoFallModule.getState()) {NoFallModule.setState(true)}
-   }
-   if(!HighJumpModule.getState()) {NoFallModule.setState(true)}
-   }
+    if(SpeedDisabler.get() == true && SpeedModule.getState()) {if(FlyModule.getState() || FreeCamModule.getState() || ScaffoldModule.getState()) {SpeedModule.setState(false)}};
+    //VelLJ /Hypixel Fix?
+    if(VelLJManage.get() == true) {
+      if(LJModule.getState() && VelocityModule.getState()) {VelocityModule.setState(false)}
+      if(!LJModule.getState() && !VelocityModule.getState()) {VelocityModule.setState(true)}
+    };
     //ReverseStepFix
     if(ReverseStepFix.get() == true) {
      if(FlyModule.getState() && RSModule.getState()) {RSModule.setState(false)}
       if(RSModule.getState() && mc.theWorld.getBlockState(new BlockPos(mc.thePlayer.posX, mc.thePlayer.posY - 0.1, mc.thePlayer.posZ)).getBlock() instanceof SlimeBlock) {RSModule.setState(false)}
      /*if(!RSModule.getState() && !FlyModule.getState() && !mc.theWorld.getBlockState(new BlockPos(mc.thePlayer.posX, mc.thePlayer.posY - 0.1, mc.thePlayer.posZ)).getBlock() instanceof SlimeBlock) {RSModule.setState(true)}*/
-    }
+    };
     //AutoKAJump
-      if(AutoKAJump.get() == true && KAModule.getState() && mc.thePlayer.onGround && !mc.gameSettings.keyBindSneak.pressed) {mc.thePlayer.jump()}
-    //FreeCamSlower
-    if(FreeCamSlower.get() == true && FreeCamModule.getState() && mc.gameSettings.keyBindSneak.pressed && mc.gameSettings.keyBindJump.pressed) {FreeCamModule.getValue("Speed").set(SlowValue.get())}
-    if(FreeCamSlower.get() == true && FreeCamModule.getState() && !mc.gameSettings.keyBindSneak.pressed && !mc.gameSettings.keyBindJump.pressed) {FreeCamModule.getValue("Speed").set(AfterValue.get())}
-    //RenderSetter
+      if(AutoKAJump.get() == true && KAModule.getState() && mc.thePlayer.onGround && !mc.gameSettings.keyBindSneak.pressed) {mc.thePlayer.jump()};
+    //RenderSetter /fix
     if(RenderSetting.get() == true) {
-      if(RSCounter.get() == true) {if(!ScaffoldModule.getValue("Counter").get()) {ScaffoldModule.getValue("Counter").set(true)}; if(!TowerModule.getValue("Counter").get()) {TowerModule.getValue("Counter").set(true)}}; if(RSCounter.get() == false) {if(ScaffoldModule.getValue("Counter").get()) {ScaffoldModule.getValue("Counter").set(false); if(TowerModule.getValue("Counter").get()) {TowerModule.getValue("Counter").set(false)}}}
-      if(RSMark.get() == true) {if(!ScaffoldModule.getValue("Mark").get()) {ScaffoldModule.getValue("Mark").set(true)}}; if(RSMark.get() == false) {if(ScaffoldModule.getValue("Mark").get()) {ScaffoldModule.getValue("Mark").set(false)}};
-    }
+      //Counter
+      if(RSCounter.get() == true) {if(!ScaffoldModule.getValue("Counter").get()) {ScaffoldModule.getValue("Counter").set(true)}; if(!TowerModule.getValue("Counter").get()) {TowerModule.getValue("Counter").set(true)}}
+      if(RSCounter.get() == false) {if(ScaffoldModule.getValue("Counter").get()) {ScaffoldModule.getValue("Counter").set(false)}; if(TowerModule.getValue("Counter").get()) {TowerModule.getValue("Counter").set(false)}}
+      //Mark
+      if(RSMark.get() == true) {if(!ScaffoldModule.getValue("Mark").get()) {ScaffoldModule.getValue("Mark").set(true)}}
+      if(RSMark.get() == false) {if(ScaffoldModule.getValue("Mark").get()) {ScaffoldModule.getValue("Mark").set(false)}}
+    };
+    //Inv /This is fixing Item Not throwing Bug
+    if(Inv.get() == true) {
+      if(InvList.get() == "None") {
+        if(InvModule.getValue("invOpen").get()) {InvModule.getValue("invOpen").set(false)}; if(InvModule.getValue("SimulateInventory").get()) {InvModule.getValue("SimulateInventory").set(false)}
+        if(InvAAModule.getValue("invOpen").get()) {InvAAModule.getValue("invOpen").set(false)}; if(InvAAModule.getValue("SimulateInventory").get()) {InvAAModule.getValue("SimulateInventory").set(false)}}
+      if(InvList.get() == "Open") {
+        if(!InvModule.getValue("invOpen").get()) {InvModule.getValue("invOpen").set(true)}; if(InvModule.getValue("SimulateInventory").get()) {InvModule.getValue("SimulateInventory").set(false)}
+        if(!InvAAModule.getValue("invOpen").get()) {InvAAModule.getValue("invOpen").set(true)}; if(InvAAModule.getValue("SimulateInventory").get()) {InvAAModule.getValue("SimulateInventory").set(false)}}
+      if(InvList.get() == "Simulate") {
+        if(InvModule.getValue("invOpen").get()) {InvModule.getValue("invOpen").set(false)}; if(!InvModule.getValue("SimulateInventory").get()) {InvModule.getValue("SimulateInventory").set(true)}
+        if(InvAAModule.getValue("invOpen").get()) {InvAAModule.getValue("invOpen").set(false)}; if(!InvAAModule.getValue("SimulateInventory").get()) {InvAAModule.getValue("SimulateInventory").set(true)}}
+    };
   }
+
+  this.onAttack = function () {
+    if(JumpCrit.get() == true) {
+    SpeedModule.setState(false)
+    if(mc.thePlayer.onGround) {mc.thePlayer.jump(); mc.gameSettings.keyBindJump.pressed = false}}
+  }
+
   this.onWorld = function () {
     //This is not Module, But i think this is useful :)
     if(AutoFClear.get() == true) {commandManager.executeCommand(".friends clear")}
@@ -119,10 +145,6 @@ function ModuleManager() {
 
 /* TSMM */
 
-/*
-im forgot update, what updated?
-*/
-
 
 var scriptName = "TSMM";
 var scriptVersion = 1.5;
@@ -131,6 +153,7 @@ var scriptAuthor = "tk400.";
 function TSMM() {
 
   var TSMMMode = value.createList("Mode", ["None", "Sprint", "XZR", "VClip"], "None");
+  var ForceSprint = value.createBoolean("ForceSprint", true);
   var JumpScaffolding = value.createBoolean("JumpScaffold", false);
   var JSSprint = value.createBoolean("JSSprint", false);
   var AntiHalf = value.createBoolean("AntiHalf", false);
@@ -139,6 +162,7 @@ function TSMM() {
 
   this.addValues = function(values) {
     values.add(TSMMMode);
+    values.add(ForceSprint);
     values.add(JumpScaffolding);
     values.add(JSSprint);
     values.add(AntiHalf);
@@ -162,7 +186,6 @@ function TSMM() {
   this.getTag = function() {
     return TSMMMode.get();
 }
-
 	this.onUpdate = function () {
       if(!mc.gameSettings.keyBindJump.pressed) {TowerModule.setState(false); ScaffoldModule.setState(true)}
       if(ScaffoldModule.getState() && !TowerModule.getState()) {
@@ -186,6 +209,8 @@ function TSMM() {
         if(JSSprint.get() == true) {ScaffoldModule.getValue("Sprint").set(true)}
         if(JSSprint.get() == false) {ScaffoldModule.getValue("Sprint").set(false)}
       }
+        //ForceSprint /Fix Can't sprinting Bug... or my setting?
+        if(ForceSprint.get() == true && ScaffoldModule.getState()) {mc.thePlayer.setSprinting(true)}
         //AntiSlab
         if(AntiHalf.get() == true && mc.gameSettings.keyBindForward.pressed && mc.thePlayer.onGround && mc.theWorld.getBlockState(new BlockPos(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ)).getBlock() instanceof AntiSlab) {mc.thePlayer.jump()}
         //MLGScaffold
