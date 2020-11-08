@@ -1,13 +1,13 @@
 /*
-1.25
-[bug fixes], [Added], [Renamed], etc...
+1.37
+[Recode] Speed / Changed onUpdate to onJump. i think optimized
 
-Build for ffe6cb6(Latest)
+Build for Latest / Tested For 2a87660
 https://dl.ccbluex.net/skip/mLANvV0lDm
 */
 
 var scriptName = "ModuleManager";
-var scriptVersion = 1.25;
+var scriptVersion = 1.37;
 var scriptAuthor = "tk400.";
 
 var KAModule = moduleManager.getModule("KillAura");
@@ -27,20 +27,25 @@ var FreeCamModule = moduleManager.getModule("FreeCam");
 var MMDchat = "§5[§dModuleManager§5] "
 var TSMMchat = "§5[§dTSMM§5] "
 
+var Potion = Java.type('net.minecraft.potion.Potion');
+
+
 BlockPos = Java.type('net.minecraft.util.BlockPos')
 SlimeBlock = Java.type('net.minecraft.block.BlockSlime')
+AirBlock = Java.type('net.minecraft.block.BlockAir')
 
 AntiSlab = Java.type('net.minecraft.block.BlockSlab')
 
 function ModuleManager() {
 
+  var SLT = value.createText("SuperLongestTag", "SperMechaMechaSugooooiModule!");
   var CC = value.createText("CustomColor", "a");
   //https://minecraft.gamepedia.com/Formatting_codes
   var test = value.createBoolean("test", true);
-  var test2 = value.createBoolean("test2", true);
   var DebugChat = value.createBoolean("DebugChat", false);
   var SpeedJump = value.createBoolean("Speed", true);
-  var Criticals = value.createList("Criticals", ["None", "Jump", "SpeedModule", "TP", "Motion", "TPStopFall", "TPJumpStopFall"], "None");
+  var Criticals = value.createList("Criticals", ["None", "Jump", "SpeedModule", "TP", "Motion"], "None");
+  var DelayTick = value.createInteger("DelayTicks", 0, 1, 30);
   var Timer = value.createFloat("Timer", 0.1, 0, 10);
   var TP = value.createFloat("TP", 0.05, 0, 1);
   var Motion = value.createFloat("Motion", 0.1, 0, 1);
@@ -56,12 +61,13 @@ function ModuleManager() {
   var RSMark = value.createBoolean("Mark", false);
 
     this.addValues = function(values) {
+      values.add(SLT);
       values.add(CC);
       values.add(test);
-      values.add(test2);
       values.add(DebugChat);
       values.add(SpeedJump);
       values.add(Criticals);
+      values.add(DelayTick);
       values.add(Timer);
       values.add(TP);
       values.add(Motion);
@@ -86,23 +92,28 @@ function ModuleManager() {
 	this.getCategory = function () {
 		return "Player";
   };
+  this.getTag = function() {
+    return SLT.get();
+  };
+
+  this.onMotion = function () {
+    if(test.get() == true) {chat.print("Motion")}
+  };
+
+  this.onJump = function () {
+    //Manage SpeedJump /Fix Jump Boosting
+      if(SpeedJump.get() == true && SpeedModule.getState() && mc.thePlayer.onGround) {
+        if(mc.gameSettings.keyBindForward.pressed || mc.gameSettings.keyBindRight.pressed || mc.gameSettings.keyBindLeft.pressed || mc.gameSettings.keyBindBack.pressed) {
+        if(mc.gameSettings.keyBindJump.pressed) {mc.gameSettings.keyBindJump.pressed = false; DebugChat.get() && chat.print(MMDchat + "§" + CC.get() + "Disabled Jump.")}}};
+  };
 
 	this.onUpdate = function () {
-    if(test.get() == true) {
-    };
-    if(test2.get() == true) {
-    };
-    //Manage SpeedJump /Fix Jump Boosting
-    if(SpeedJump.get() == true && SpeedModule.getState() && mc.thePlayer.onGround) {
-      if(mc.gameSettings.keyBindForward.pressed || mc.gameSettings.keyBindRight.pressed || mc.gameSettings.keyBindLeft.pressed || mc.gameSettings.keyBindBack.pressed) {
-      if(mc.gameSettings.keyBindJump.pressed) {mc.gameSettings.keyBindJump.pressed = false; DebugChat.get() && chat.print(MMDchat + "§" + CC.get() + "Disabled Jump.")}}};
       //SpeedDisabler
     if(SpeedsDisabler.get() == true && SpeedModule.getState() || LJModule.getState()) {if(FlyModule.getState() || FreeCamModule.getState() || ScaffoldModule.getState()) {SpeedModule.setState(false) || LJModule.setState(false); DebugChat.get() && chat.print(MMDchat + "§" + CC.get() + "Disabled Speed or LongJump.")}};
     //VelLJ /Hypixel Fix?
     if(VelLJManage.get() == true) {
       if(LJModule.getState() && VelocityModule.getState()) {VelocityModule.setState(false)}
-      if(!LJModule.getState() && !VelocityModule.getState()) {VelocityModule.setState(true)}
-    };
+      if(!LJModule.getState() && !VelocityModule.getState()) {VelocityModule.setState(true)}};
     //ReverseStepFix
     if(ReverseStepFix.get() == true) {
      if(FlyModule.getState() && RSModule.getState()) {RSModule.setState(false)}
@@ -111,7 +122,10 @@ function ModuleManager() {
     };
     //AutoKAJump
       if(AutoKAJump.get() == true && KAModule.getState() && mc.thePlayer.onGround && !mc.gameSettings.keyBindJump.pressed) {mc.thePlayer.jump()};
-    //RenderSetter /fix
+
+  /* Manage Modules Setting */
+
+      //RenderSetter /fix Replace by other player's Setting
     if(RenderSetting.get() == true) {
       //Counter
       if(RSCounter.get() == true) {if(!ScaffoldModule.getValue("Counter").get()) {ScaffoldModule.getValue("Counter").set(true)}; if(!TowerModule.getValue("Counter").get()) {TowerModule.getValue("Counter").set(true)}}
@@ -120,7 +134,7 @@ function ModuleManager() {
       if(RSMark.get() == true) {if(!ScaffoldModule.getValue("Mark").get()) {ScaffoldModule.getValue("Mark").set(true)}}
       if(RSMark.get() == false) {if(ScaffoldModule.getValue("Mark").get()) {ScaffoldModule.getValue("Mark").set(false)}}
     };
-    //Inv /This is fixing Item Not throwing Bug
+    //Inv /This is ???
     if(Inv.get() == true) {
       if(InvList.get() == "None") {
         if(InvModule.getValue("invOpen").get()) {InvModule.getValue("invOpen").set(false)}; if(InvModule.getValue("SimulateInventory").get()) {InvModule.getValue("SimulateInventory").set(false)}
@@ -135,32 +149,24 @@ function ModuleManager() {
   }
 
   this.onAttack = function () {
+    mc.gameSettings.keyBindUseItem.pressed = mc.gameSettings.keyBindAttack.pressed = false;
+    if(mc.thePlayer.onGround && !mc.gameSettings.keyBindSneak.pressed && mc.thePlayer.ticksExisted % DelayTick.get() == 0) {
     switch (Criticals.get()) {
       case "Jump":
-        SpeedModule.setState(false)
-        if(mc.thePlayer.onGround) {mc.thePlayer.jump(); mc.gameSettings.keyBindJump.pressed = false}
+        SpeedModule.setState(false);
+        mc.thePlayer.jump(); mc.gameSettings.keyBindJump.pressed = false;
       break;
       case "SpeedModule":
-        if(mc.thePlayer.onGround && mc.gameSettings.keyBindForward.pressed || mc.gameSettings.keyBindRight.pressed || mc.gameSettings.keyBindLeft.pressed) {
+        if(mc.gameSettings.keyBindForward.pressed || mc.gameSettings.keyBindRight.pressed || mc.gameSettings.keyBindLeft.pressed) {
           if(!mc.gameSettings.keyBindBack.pressed && !mc.gameSettings.keyBindSneak.pressed && KAModule.getState() && !SpeedModule.getState() && !LJModule.getState() && !ScaffoldModule.getState() && !TowerModule.getState()) {SpeedModule.setState(true); if(DebugChat.get()) {chat.print(MMDchat + "§" + CC.get() + "Enabled Speed!")}}};
       break;
       case "TP":
-        if(mc.thePlayer.onGround) {mc.thePlayer.setPosition(mc.thePlayer.posX, mc.thePlayer.posY + TP.get(), mc.thePlayer.posZ)};
+        mc.thePlayer.setPosition(mc.thePlayer.posX, mc.thePlayer.posY + TP.get(), mc.thePlayer.posZ);
       break;
       case "Motion":
-        if(mc.thePlayer.onGround) {mc.thePlayer.motionY = Motion.get()};
+        mc.thePlayer.motionY = Motion.get();
       break;
-      case "TPStopFall":
-        //Dev
-        if(mc.thePlayer.onGround) {mc.thePlayer.setPosition(mc.thePlayer.posX, mc.thePlayer.posY + TP.get(), mc.thePlayer.posZ)};
-        if(mc.thePlayer.ticksExisted % 2 == 0) {mc.thePlayer.motionY = 0};
-      break;
-      case "TPJumpStopFall":
-        //Dev
-        if(mc.thePlayer.onGround) {mc.thePlayer.jump()};
-        if(!mc.thePlayer.onGround && mc.thePlayer.ticksExisted % 2 == 0) {mc.thePlayer.motionY = 0};
-      break;
-    };
+    }};
   };
 
   this.onWorld = function () {
@@ -173,23 +179,22 @@ function ModuleManager() {
 /* TSMM */
 
 /*
-[improved]
-Tower And Scaffold Management
-
-[Added]
-DebugChat and option and custom color
-NoXZ "NokeyBoard" option / i think better than XZMotionZero
+1.61
+[Removed] TickSneaking and Setting
+1.62
+[added] Using Flog Potion. i think better Tower... But Not Good. :(
 */
 
 var scriptName = "TSMM";
-var scriptVersion = 1.6;
+var scriptVersion = 1.62;
 var scriptAuthor = "tk400.";
 
 function TSMM() {
 
-  var TSMMDebugChat = value.createBoolean("TSMMDebugChat", false);
   var TSCC = value.createText("TSMMCustomColor", "a");
+  var TSMMDebugChat = value.createBoolean("TSMMDebugChat", false);
   var TSMMMode = value.createList("ScaffoldJump", ["None", "Sprint", "XZR", "VClip"], "None");
+  var PotionTower = value.createBoolean("PotionTower", false);
   var ForceSprint = value.createBoolean("ForceSprint", true);
   var JumpScaffolding = value.createBoolean("JumpScaffold", false);
   var JSSprint = value.createBoolean("JSSprint", false);
@@ -198,9 +203,10 @@ function TSMM() {
   var NoXZMotion = value.createList("NoXZMotion", ["None", "MotionZero", "NoKeyBoard"], "None");
 
   this.addValues = function(values) {
-    values.add(TSMMDebugChat);
     values.add(TSCC);
+    values.add(TSMMDebugChat);
     values.add(TSMMMode);
+    values.add(PotionTower);
     values.add(ForceSprint);
     values.add(JumpScaffolding);
     values.add(JSSprint);
@@ -219,13 +225,14 @@ function TSMM() {
 	}
   this.getTag = function() {
     return TSMMMode.get();
-}
+  }
 
   this.onEnable = function() {
     ScaffoldModule.setState(true);
     TowerModule.setState(false);
     TSMMDebugChat.get() && chat.print(TSMMchat + "§a+Enabled TSMM and Scaffold and Tower");
-  }
+  };
+
 	this.onUpdate = function () {
     if(!ScaffoldModule.getState()) {
       if(!mc.gameSettings.keyBindJump.pressed) {ScaffoldModule.setState(true); TowerModule.setState(false); TSMMDebugChat.get() && chat.print(TSMMchat + "§" + TSCC.get() + "Enabled Scaffold, Disabled Tower")}};
@@ -238,24 +245,28 @@ function TSMM() {
         if(TSMMMode.get() == "Sprint") {ScaffoldModule.getValue("Sprint").set(true)}
       }
     }
-    //if press mc.gameSettings.keyBindJump.pressed = enable Tower and Manage Tower
-    if(mc.thePlayer.onGround && mc.gameSettings.keyBindJump.pressed && !mc.gameSettings.keyBindForward.pressed) {ScaffoldModule.setState(false); TowerModule.setState(true); TSMMDebugChat.get() && chat.print(TSMMchat + "§" + TSCC.get() + "Enabled Tower, Disabled Scaffold")};
+    //if press mc.gameSettings.keyBindJump.pressed = enable Tower and Managing
+    if(PotionTower.get() == true) {
+    if(!TowerModule.getState() && mc.thePlayer.onGround && mc.gameSettings.keyBindJump.pressed && !mc.gameSettings.keyBindForward.pressed && !mc.thePlayer.isPotionActive(Potion.jump)) {ScaffoldModule.setState(false); TowerModule.setState(true); TSMMDebugChat.get() && chat.print(TSMMchat + "§" + TSCC.get() + "Enabled Tower, Disabled Scaffold")}};
+    if(PotionTower.get() == false) {
+    if(!TowerModule.getState() && mc.thePlayer.onGround && mc.gameSettings.keyBindJump.pressed && !mc.gameSettings.keyBindForward.pressed) {ScaffoldModule.setState(false); TowerModule.setState(true); TSMMDebugChat.get() && chat.print(TSMMchat + "§" + TSCC.get() + "Enabled Tower, Disabled Scaffold")}};
     if(TowerModule.getState()) {
       if(NoXZMotion.get() == "MotionZero") {mc.thePlayer.motionX = 0; mc.thePlayer.motionZ = 0};
       if(NoXZMotion.get() == "NoKeyBoard") {mc.gameSettings.keyBindForward.pressed = mc.gameSettings.keyBindLeft.pressed = mc.gameSettings.keyBindRight.pressed = mc.gameSettings.keyBindBack.pressed = false}};
-      //if press Jump + wasd disable Tower enable Scaffoldolder
-        if(JumpScaffolding.get() == true) {
-          if(mc.gameSettings.keyBindSneak.pressed || mc.gameSettings.keyBindRight.pressed || mc.gameSettings.keyBindLeft.pressed || mc.gameSettings.keyBindBack.pressed) {if(mc.thePlayer.onGround) {mc.thePlayer.jump(); ScaffoldModule.getValue("SameY").set(true)}}
+      //JumpScaffolding  /Dev
+      if(JumpScaffolding.get() == true) {
+          if(mc.gameSettings.keyBindForward.pressed || mc.gameSettings.keyBindRight.pressed || mc.gameSettings.keyBindLeft.pressed || mc.gameSettings.keyBindBack.pressed) {if(mc.thePlayer.onGround) {mc.thePlayer.jump(); ScaffoldModule.getValue("SameY").set(true)}}
         if(JSSprint.get() == true) {ScaffoldModule.getValue("Sprint").set(true)}
-        if(JSSprint.get() == false) {ScaffoldModule.getValue("Sprint").set(false)}
-      }
+        if(JSSprint.get() == false) {ScaffoldModule.getValue("Sprint").set(false)}}
         //ForceSprint /Fix Can't sprinting Bug... or my setting?
         if(ForceSprint.get() == true && ScaffoldModule.getState()) {mc.thePlayer.setSprinting(true)}
         //AntiSlab
-        if(AntiHalf.get() == true && mc.thePlayer.onGround && mc.theWorld.getBlockState(new BlockPos(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ)).getBlock() instanceof AntiSlab) {mc.thePlayer.jump()}
+        if(AntiHalf.get() == true) {
+        if(mc.thePlayer.onGround && mc.theWorld.getBlockState(new BlockPos(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ)).getBlock() instanceof AntiSlab) {mc.thePlayer.jump()}};
         //MLGScaffold
         if(MLGScaffold.get() == true) {mc.gameSettings.keyBindSneak.pressed = true; mc.gameSettings.keyBindJump.pressed = false; ScaffoldModule.getValue("Sprint").set(false); SprintModule.setState(false); if(mc.thePlayer.onGround) {mc.thePlayer.jump()}; if(SprintModule.getState()) {SprintModule.setState(false)}}
   };
+
 
   this.onDisable = function() {
     ScaffoldModule.setState(false);
