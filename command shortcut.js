@@ -122,9 +122,8 @@ function LSDCommand() {
             log("Syntax: .lsd <name>", true);
             return;
         }
-
-        commandManager.executeCommand(".localautosettings delete " + args[1]);
-    }
+        
+        commandManager.executeCommand(".localautosettings delete " + args[1]);}
 }
 
 function LSLCommand() {
@@ -177,7 +176,40 @@ function ForceSetCommand() {
             return;
         }
         moduleManager.getModule(args[1]).getValue(args[2]).set(args[3]);
-        //hello, is this good?
+    }
+}
+
+function JumpCommand() {
+
+    this.getName = function() {
+        return "jump";
+    }
+
+    this.getAliases = function() {
+        return [];
+    }
+
+    this.execute = function(args) {
+        mc.thePlayer.jump();
+    }
+}
+
+function MJumpCommand() {
+
+    this.getName = function() {
+        return "MotionJump";
+    }
+
+    this.getAliases = function() {
+        return [];
+    }
+
+    this.execute = function(args) {
+        if (args.length < 2) {
+            log(".MotionJump <value>", true);
+            return;
+        }
+        mc.thePlayer.motionY = args[1];
     }
 }
 
@@ -208,6 +240,12 @@ var GMCommandClient;
 var ForceSetCommand = new ForceSetCommand();
 var ForceSetCommandClient;
 
+var JumpCommand = new JumpCommand();
+var JumpCommandClient;
+
+var MJumpCommand = new MJumpCommand();
+var MJumpCommandClient;
+
 function onEnable() {
     SampleCommand = commandManager.registerCommand(SampleCommand);
     CCommandClient = commandManager.registerCommand(CCommand);
@@ -218,6 +256,8 @@ function onEnable() {
     LSLCommandClient = commandManager.registerCommand(LSLCommand);
     GMCommandClient = commandManager.registerCommand(GMCommand);
     ForceSetCommandClient = commandManager.registerCommand(ForceSetCommand);
+    JumpCommandClient = commandManager.registerCommand(JumpCommand);
+    MJumpCommandClient = commandManager.registerCommand(MJumpCommand);
 }
 
 function onDisable() {
@@ -229,5 +269,6 @@ function onDisable() {
     commandManager.unregisterCommand(LSDCommandClient);
     commandManager.unregisterCommand(LSLCommandClient);
     commandManager.unregisterCommand(GMCommandClient);
-    commandManager.unregisterCommand(ForceSetCommandClient);
+    commandManager.unregisterCommand(JumpCommandClient);
+    commandManager.unregisterCommand(MJumpCommandClient);
 }
