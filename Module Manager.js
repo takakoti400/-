@@ -1,14 +1,18 @@
 /*
-1.37
-[Recode] Speed / Changed onUpdate to onJump. i think optimized
+1.38
+[ReName] None To Off
 
+1.39
+[Recode] jump,
+[Added]  Easy to understand debugchat(?) (non duplicate previous chat)
 Build for Latest / Tested For 2a87660
 https://dl.ccbluex.net/skip/mLANvV0lDm
 */
 
-var scriptName = "ModuleManager";
-var scriptVersion = 1.37;
+var scriptName = "tk400s Scripts";
+var scriptVersion = 1.39;
 var scriptAuthor = "tk400.";
+
 
 var KAModule = moduleManager.getModule("KillAura");
 var SpeedModule = moduleManager.getModule("Speed");
@@ -24,11 +28,11 @@ var InvModule = moduleManager.getModule("InventoryCleaner");
 var InvAAModule = moduleManager.getModule("AutoArmor");
 var FreeCamModule = moduleManager.getModule("FreeCam");
 
+
 var MMDchat = "§5[§dModuleManager§5] "
 var TSMMchat = "§5[§dTSMM§5] "
 
 var Potion = Java.type('net.minecraft.potion.Potion');
-
 
 BlockPos = Java.type('net.minecraft.util.BlockPos')
 SlimeBlock = Java.type('net.minecraft.block.BlockSlime')
@@ -44,7 +48,7 @@ function ModuleManager() {
   var test = value.createBoolean("test", true);
   var DebugChat = value.createBoolean("DebugChat", false);
   var SpeedJump = value.createBoolean("Speed", true);
-  var Criticals = value.createList("Criticals", ["None", "Jump", "SpeedModule", "TP", "Motion"], "None");
+  var Criticals = value.createList("Criticals", ["Off", "Jump", "SpeedModule", "TP", "Motion"], "Off");
   var DelayTick = value.createInteger("DelayTicks", 0, 1, 30);
   var Timer = value.createFloat("Timer", 0.1, 0, 10);
   var TP = value.createFloat("TP", 0.05, 0, 1);
@@ -96,18 +100,18 @@ function ModuleManager() {
     return SLT.get();
   };
 
-  this.onMotion = function () {
-    if(test.get() == true) {chat.print("Motion")}
-  };
-
-  this.onJump = function () {
+	this.onUpdate = function () {
+    var rn = Math.floor( Math.random() * 11 );
+    var rc = " [" + rn + "]"
+    /* stolen from https://www.sejuku.net/blog/22432 */
+    if(test.get() == true) {}
     //Manage SpeedJump /Fix Jump Boosting
       if(SpeedJump.get() == true && SpeedModule.getState() && mc.thePlayer.onGround) {
         if(mc.gameSettings.keyBindForward.pressed || mc.gameSettings.keyBindRight.pressed || mc.gameSettings.keyBindLeft.pressed || mc.gameSettings.keyBindBack.pressed) {
-        if(mc.gameSettings.keyBindJump.pressed) {mc.gameSettings.keyBindJump.pressed = false; DebugChat.get() && chat.print(MMDchat + "§" + CC.get() + "Disabled Jump.")}}};
-  };
-
-	this.onUpdate = function () {
+          if(mc.gameSettings.keyBindJump.pressed) {
+          DebugChat.get() && chat.print(MMDchat + "§" + CC.get() + "Disabled Jump." + rc);
+          mc.gameSettings.keyBindJump.pressed = false};
+        }};
       //SpeedDisabler
     if(SpeedsDisabler.get() == true && SpeedModule.getState() || LJModule.getState()) {if(FlyModule.getState() || FreeCamModule.getState() || ScaffoldModule.getState()) {SpeedModule.setState(false) || LJModule.setState(false); DebugChat.get() && chat.print(MMDchat + "§" + CC.get() + "Disabled Speed or LongJump.")}};
     //VelLJ /Hypixel Fix?
@@ -182,34 +186,30 @@ function ModuleManager() {
 1.61
 [Removed] TickSneaking and Setting
 1.62
-[added] Using Flog Potion. i think better Tower... But Not Good. :(
-*/
-
-var scriptName = "TSMM";
-var scriptVersion = 1.62;
-var scriptAuthor = "tk400.";
+[added]
+Using Flog Potion. i think better Tower... But Not Good. :(
+Body Reverser 
+  */
 
 function TSMM() {
-
+  
   var TSCC = value.createText("TSMMCustomColor", "a");
   var TSMMDebugChat = value.createBoolean("TSMMDebugChat", false);
-  var TSMMMode = value.createList("ScaffoldJump", ["None", "Sprint", "XZR", "VClip"], "None");
+  var BR = value.createBoolean("BodyReverser", false);
+  var TSMMMode = value.createList("ScaffoldJump", ["Off", "Sprint", "XZR", "VClip"], "Off");
   var PotionTower = value.createBoolean("PotionTower", false);
   var ForceSprint = value.createBoolean("ForceSprint", true);
-  var JumpScaffolding = value.createBoolean("JumpScaffold", false);
-  var JSSprint = value.createBoolean("JSSprint", false);
   var AntiHalf = value.createBoolean("AntiHalf", false);
   var MLGScaffold = value.createBoolean("MLGSCaffold", false);
-  var NoXZMotion = value.createList("NoXZMotion", ["None", "MotionZero", "NoKeyBoard"], "None");
+  var NoXZMotion = value.createList("NoXZMotion", ["Off", "MotionZero", "NoKeyBoard"], "Off");
 
   this.addValues = function(values) {
     values.add(TSCC);
     values.add(TSMMDebugChat);
+    values.add(BR);
     values.add(TSMMMode);
     values.add(PotionTower);
     values.add(ForceSprint);
-    values.add(JumpScaffolding);
-    values.add(JSSprint);
     values.add(AntiHalf);
     values.add(MLGScaffold);
     values.add(NoXZMotion);
@@ -228,12 +228,22 @@ function TSMM() {
   }
 
   this.onEnable = function() {
+    if(BR.get() == true) {
+      //Please Look At Forward... only this code...ha!
+      mc.thePlayer.rotationYaw += 180
+    }
     ScaffoldModule.setState(true);
     TowerModule.setState(false);
     TSMMDebugChat.get() && chat.print(TSMMchat + "§a+Enabled TSMM and Scaffold and Tower");
   };
 
 	this.onUpdate = function () {
+    if(BR.get() == true) {//Reverse Forward to BackWard
+      if(mc.gameSettings.keyBindForward.pressed) {
+         mc.gameSettings.keyBindBack.pressed = true;
+         mc.gameSettings.keyBindForward.pressed = false;
+        }
+        }
     if(!ScaffoldModule.getState()) {
       if(!mc.gameSettings.keyBindJump.pressed) {ScaffoldModule.setState(true); TowerModule.setState(false); TSMMDebugChat.get() && chat.print(TSMMchat + "§" + TSCC.get() + "Enabled Scaffold, Disabled Tower")}};
       if(ScaffoldModule.getState() && !TowerModule.getState()) {
@@ -253,13 +263,8 @@ function TSMM() {
     if(TowerModule.getState()) {
       if(NoXZMotion.get() == "MotionZero") {mc.thePlayer.motionX = 0; mc.thePlayer.motionZ = 0};
       if(NoXZMotion.get() == "NoKeyBoard") {mc.gameSettings.keyBindForward.pressed = mc.gameSettings.keyBindLeft.pressed = mc.gameSettings.keyBindRight.pressed = mc.gameSettings.keyBindBack.pressed = false}};
-      //JumpScaffolding  /Dev
-      if(JumpScaffolding.get() == true) {
-          if(mc.gameSettings.keyBindForward.pressed || mc.gameSettings.keyBindRight.pressed || mc.gameSettings.keyBindLeft.pressed || mc.gameSettings.keyBindBack.pressed) {if(mc.thePlayer.onGround) {mc.thePlayer.jump(); ScaffoldModule.getValue("SameY").set(true)}}
-        if(JSSprint.get() == true) {ScaffoldModule.getValue("Sprint").set(true)}
-        if(JSSprint.get() == false) {ScaffoldModule.getValue("Sprint").set(false)}}
-        //ForceSprint /Fix Can't sprinting Bug... or my setting?
-        if(ForceSprint.get() == true && ScaffoldModule.getState()) {mc.thePlayer.setSprinting(true)}
+      //ForceSprint /Fix Can't sprinting Bug... or my setting?
+      if(ForceSprint.get() == true && ScaffoldModule.getState()) {mc.thePlayer.setSprinting(true)}
         //AntiSlab
         if(AntiHalf.get() == true) {
         if(mc.thePlayer.onGround && mc.theWorld.getBlockState(new BlockPos(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ)).getBlock() instanceof AntiSlab) {mc.thePlayer.jump()}};
@@ -269,6 +274,10 @@ function TSMM() {
 
 
   this.onDisable = function() {
+    if(BR.get() == true) {
+      //Fix Head Rotation. only this code...
+      mc.thePlayer.rotationYaw += 180
+    }
     ScaffoldModule.setState(false);
     TowerModule.setState(false);
     TSMMDebugChat.get() && chat.print(TSMMchat + "§c-Disabled TSMM and Scaffold and Tower");
@@ -277,14 +286,41 @@ function TSMM() {
 }
 
 
+function GroundJumpFly() {
+
+	
+
+  this.addValues = function(values) {
+  }
+
+this.getName = function () {
+  return "GroundJumpFly";
+}
+this.getDescription = function () {
+  return "Shit Codez";
+}
+this.getCategory = function () {
+  return "Movement";
+}
+
+this.onEnable = function () {
+      if(!mc.thePlayer.onGround) {mc.thePlayer.onGround = true; mc.thePlayer.jump()}}
+}
+this.onUpdate = function () {}
+
+
 var TSMM = moduleManager.registerModule(new TSMM)
 var ModuleManager = moduleManager.registerModule(new ModuleManager)
+var GroundJumpFly = moduleManager.registerModule(new GroundJumpFly)
 function onEnable() {
     ModuleManager;
     TSMM;
+    GroundJumpFly;
 };
 
 function onDisable() {
     moduleManager.unregisterModule(ModuleManager);
     moduleManager.unregisterModule(TSMM);
+    moduleManager.unregisterModule(GroundJumpFly);
+    
 };
