@@ -1,16 +1,10 @@
 /*
-1.38
-[ReName] None To Off
-
-1.39
-[Recode] jump,
-[Added]  Easy to understand debugchat(?) (non duplicate previous chat)
 Build for Latest / Tested For 2a87660
 https://dl.ccbluex.net/skip/mLANvV0lDm
 */
 
-var scriptName = "tk400s Scripts";
-var scriptVersion = 1.39;
+var scriptName = "ModuleManager";
+var scriptVersion = 1.4;
 var scriptAuthor = "tk400.";
 
 
@@ -28,12 +22,17 @@ var InvModule = moduleManager.getModule("InventoryCleaner");
 var InvAAModule = moduleManager.getModule("AutoArmor");
 var FreeCamModule = moduleManager.getModule("FreeCam");
 
-
+//Scripts Shortcut, Addons, Helper...
 var MMDchat = "§5[§dModuleManager§5] "
 var TSMMchat = "§5[§dTSMM§5] "
 
+//Packets
+/*var S12PacketEntityVelocity = Java.type('net.minecraft.network.play.server.S12PacketEntityVelocity');*/
+
+//Player | Mob States
 var Potion = Java.type('net.minecraft.potion.Potion');
 
+//Blocks
 BlockPos = Java.type('net.minecraft.util.BlockPos')
 SlimeBlock = Java.type('net.minecraft.block.BlockSlime')
 AirBlock = Java.type('net.minecraft.block.BlockAir')
@@ -42,7 +41,7 @@ AntiSlab = Java.type('net.minecraft.block.BlockSlab')
 
 function ModuleManager() {
 
-  var SLT = value.createText("SuperLongestTag", "SperMechaMechaSugooooiModule!");
+  var SLT = value.createText("CustomTag", "SuperMechaMechaSugooooiModule!");
   var CC = value.createText("CustomColor", "a");
   //https://minecraft.gamepedia.com/Formatting_codes
   var test = value.createBoolean("test", true);
@@ -99,12 +98,9 @@ function ModuleManager() {
   this.getTag = function() {
     return SLT.get();
   };
-
 	this.onUpdate = function () {
-    var rn = Math.floor( Math.random() * 11 );
     var rc = " [" + rn + "]"
-    /* stolen from https://www.sejuku.net/blog/22432 */
-    if(test.get() == true) {}
+    var rn = Math.floor( Math.random() * 11 );
     //Manage SpeedJump /Fix Jump Boosting
       if(SpeedJump.get() == true && SpeedModule.getState() && mc.thePlayer.onGround) {
         if(mc.gameSettings.keyBindForward.pressed || mc.gameSettings.keyBindRight.pressed || mc.gameSettings.keyBindLeft.pressed || mc.gameSettings.keyBindBack.pressed) {
@@ -125,11 +121,11 @@ function ModuleManager() {
      /*if(!RSModule.getState() && !FlyModule.getState() && !mc.theWorld.getBlockState(new BlockPos(mc.thePlayer.posX, mc.thePlayer.posY - 0.1, mc.thePlayer.posZ)).getBlock() instanceof SlimeBlock) {RSModule.setState(true)}*/
     };
     //AutoKAJump
-      if(AutoKAJump.get() == true && KAModule.getState() && mc.thePlayer.onGround && !mc.gameSettings.keyBindJump.pressed) {mc.thePlayer.jump()};
+      if(AutoKAJump.get() == true && KAModule.getState() && !mc.gameSettings.keyBindJump.pressed) {mc.gameSettings.keyBindJump.pressed = true};
 
   /* Manage Modules Setting */
 
-      //RenderSetter /fix Replace by other player's Setting
+      //RenderSetter /fix Replace by other user's Setting
     if(RenderSetting.get() == true) {
       //Counter
       if(RSCounter.get() == true) {if(!ScaffoldModule.getValue("Counter").get()) {ScaffoldModule.getValue("Counter").set(true)}; if(!TowerModule.getValue("Counter").get()) {TowerModule.getValue("Counter").set(true)}}
@@ -153,8 +149,10 @@ function ModuleManager() {
   }
 
   this.onAttack = function () {
+    CToggleTimerAPI.get() && mc.timer.timerSpeed == Timer.get();
     mc.gameSettings.keyBindUseItem.pressed = mc.gameSettings.keyBindAttack.pressed = false;
     if(mc.thePlayer.onGround && !mc.gameSettings.keyBindSneak.pressed && mc.thePlayer.ticksExisted % DelayTick.get() == 0) {
+      CToggleTimerAPI = true;
     switch (Criticals.get()) {
       case "Jump":
         SpeedModule.setState(false);
@@ -179,19 +177,14 @@ function ModuleManager() {
 }
 }
 
-
-/* TSMM */
+/* TSMM v:1.63, by tk400*/
 
 /*
-1.61
-[Removed] TickSneaking and Setting
-1.62
-[added]
-Using Flog Potion. i think better Tower... But Not Good. :(
-Body Reverser 
-  */
+*/
 
-function TSMM() {
+/* TIP: if ScaffoldJump is set Off, you can Sprint ScaffoldingJump. like shitgma(Jello? XD). */
+
+ function TSMM() {
   
   var TSCC = value.createText("TSMMCustomColor", "a");
   var TSMMDebugChat = value.createBoolean("TSMMDebugChat", false);
@@ -201,6 +194,7 @@ function TSMM() {
   var ForceSprint = value.createBoolean("ForceSprint", true);
   var AntiHalf = value.createBoolean("AntiHalf", false);
   var MLGScaffold = value.createBoolean("MLGSCaffold", false);
+  var MLGSprint = value.createBoolean("AfterSprint", true);
   var NoXZMotion = value.createList("NoXZMotion", ["Off", "MotionZero", "NoKeyBoard"], "Off");
 
   this.addValues = function(values) {
@@ -212,6 +206,7 @@ function TSMM() {
     values.add(ForceSprint);
     values.add(AntiHalf);
     values.add(MLGScaffold);
+    values.add(MLGSprint);
     values.add(NoXZMotion);
   }
 	this.getName = function () {
@@ -230,14 +225,13 @@ function TSMM() {
   this.onEnable = function() {
     if(BR.get() == true) {
       //Please Look At Forward... only this code...ha!
-      mc.thePlayer.rotationYaw += 180
+      mc.thePlayer.rotationYaw += 180;
     }
     ScaffoldModule.setState(true);
     TowerModule.setState(false);
     TSMMDebugChat.get() && chat.print(TSMMchat + "§a+Enabled TSMM and Scaffold and Tower");
   };
-
-	this.onUpdate = function () {
+  this.onUpdate = function () {
     if(BR.get() == true) {//Reverse Forward to BackWard
       if(mc.gameSettings.keyBindForward.pressed) {
          mc.gameSettings.keyBindBack.pressed = true;
@@ -255,7 +249,7 @@ function TSMM() {
         if(TSMMMode.get() == "Sprint") {ScaffoldModule.getValue("Sprint").set(true)}
       }
     }
-    //if press mc.gameSettings.keyBindJump.pressed = enable Tower and Managing
+    //if press mc.gameSettings.keyBindJump.pressed = enable Tower, and Managing
     if(PotionTower.get() == true) {
     if(!TowerModule.getState() && mc.thePlayer.onGround && mc.gameSettings.keyBindJump.pressed && !mc.gameSettings.keyBindForward.pressed && !mc.thePlayer.isPotionActive(Potion.jump)) {ScaffoldModule.setState(false); TowerModule.setState(true); TSMMDebugChat.get() && chat.print(TSMMchat + "§" + TSCC.get() + "Enabled Tower, Disabled Scaffold")}};
     if(PotionTower.get() == false) {
@@ -272,55 +266,25 @@ function TSMM() {
         if(MLGScaffold.get() == true) {mc.gameSettings.keyBindSneak.pressed = true; mc.gameSettings.keyBindJump.pressed = false; ScaffoldModule.getValue("Sprint").set(false); SprintModule.setState(false); if(mc.thePlayer.onGround) {mc.thePlayer.jump()}; if(SprintModule.getState()) {SprintModule.setState(false)}}
   };
 
-
   this.onDisable = function() {
-    if(BR.get() == true) {
-      //Fix Head Rotation. only this code...
-      mc.thePlayer.rotationYaw += 180
-    }
-    ScaffoldModule.setState(false);
-    TowerModule.setState(false);
-    TSMMDebugChat.get() && chat.print(TSMMchat + "§c-Disabled TSMM and Scaffold and Tower");
-    if(MLGScaffold.get() == true) {SprintModule.setState(true)}
+    BR.get() && mc.thePlayer.rotationYaw + 180; /*Fix Head Rotation. only this code...*/ 
+    ScaffoldModule.setState(false); TowerModule.setState(false);
+    MLGSprint.get() && SprintModule.setState(true);
+    !MLGSprint.get() && SprintModule.setState(false);
   }
+//Dev* this.onRender2D = function() {mc.ingameGUI.drawCenteredString(mc.fontRendererObj, TSMMchat + "§c-Disabled TSMM and Scaffold and Tower", mc.displayWidth / 4, (mc.displayHeight / 2.5) + 8, -1)}
 }
 
 
-function GroundJumpFly() {
-
-	
-
-  this.addValues = function(values) {
-  }
-
-this.getName = function () {
-  return "GroundJumpFly";
-}
-this.getDescription = function () {
-  return "Shit Codez";
-}
-this.getCategory = function () {
-  return "Movement";
-}
-
-this.onEnable = function () {
-      if(!mc.thePlayer.onGround) {mc.thePlayer.onGround = true; mc.thePlayer.jump()}}
-}
-this.onUpdate = function () {}
-
-
-var TSMM = moduleManager.registerModule(new TSMM)
 var ModuleManager = moduleManager.registerModule(new ModuleManager)
-var GroundJumpFly = moduleManager.registerModule(new GroundJumpFly)
+var TSMM = moduleManager.registerModule(new TSMM);
+
 function onEnable() {
     ModuleManager;
     TSMM;
-    GroundJumpFly;
 };
 
 function onDisable() {
     moduleManager.unregisterModule(ModuleManager);
     moduleManager.unregisterModule(TSMM);
-    moduleManager.unregisterModule(GroundJumpFly);
-    
 };
