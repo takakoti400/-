@@ -1,13 +1,24 @@
-/*
-Build for Latest / Tested For 2a87660
-https://dl.ccbluex.net/skip/mLANvV0lDm
-*/
-
+/**
+ * 
+ * Script of tk400's
+ * this script contains ModuleManager, TowerScaffoldzzzz, HypixelGameChanger.
+ * 
+ * ※ModuleManger is Help, Improve Bypass, And Your Cheating Life.
+ * 
+ * ※TSMM(TowwrScaffoldzzzz) is Brunch Of CzechHek's TowerScaffodldz,
+ * that is Not Bad, But rly fucking simply code, so,,i mean that is uncode!!!! (This is also the reason for the development of the script xd)
+ * 
+ * 
+ * Build for Latest / Tested For 2a87660
+ * https://dl.ccbluex.net/skip/mLANvV0lDm
+ * 
+ */
 var scriptName = "ModuleManager";
 var scriptVersion = 1.4;
 var scriptAuthor = "shirouto Co-Da- tk400.";
 
 //Modules
+var AutoLeaveModule = moduleManager.getModule("AutoLeave");
 var KAModule = moduleManager.getModule("KillAura");
 var SpeedModule = moduleManager.getModule("Speed");
 var HighJumpModule = moduleManager.getModule("HighJump");
@@ -27,8 +38,6 @@ var FreeCamModule = moduleManager.getModule("FreeCam");
 var MMDchat = "§5[§dModuleManager§5] "
 var TSMMchat = "§5[§dTSMM§5] "
 
-var TSMMisEnabled = false;
-
 var LAB=01
 
 //Packets
@@ -47,6 +56,8 @@ AntiSlab = Java.type('net.minecraft.block.BlockSlab')
 
 function ModuleManager() {
 
+  var Max = value.createInteger("Max", 10, 0, 10);
+  var Min = value.createInteger("Min", 0, 0, 10);
   var SLT = value.createText("CustomTag", "SuperMechaMechaSugooooiModule!");
   var CC = value.createText("CustomColor", "a");
   //https://minecraft.gamepedia.com/Formatting_codes
@@ -68,8 +79,11 @@ function ModuleManager() {
   var RenderSetting = value.createBoolean("RenderSetting", true);
   var RSCounter = value.createBoolean("Counter", false);
   var RSMark = value.createBoolean("Mark", false);
+  var AutoLeave = value.createBoolean("AlwaysAutoLeave", false); //Always Enable LB's AutoLeave Module.
 
     this.addValues = function(values) {
+      values.add(Max);
+      values.add(Min);
       values.add(SLT);
       values.add(CC);
       values.add(test);
@@ -90,6 +104,7 @@ function ModuleManager() {
       values.add(RenderSetting);
       values.add(RSCounter);
       values.add(RSMark);
+      values.add(AutoLeave);
     };
 
 	this.getName = function () {
@@ -166,7 +181,7 @@ function ModuleManager() {
       break;
       case "SpeedModule":
         if(mc.gameSettings.keyBindForward.pressed || mc.gameSettings.keyBindRight.pressed || mc.gameSettings.keyBindLeft.pressed) {
-          if(!mc.gameSettings.keyBindBack.pressed && !mc.gameSettings.keyBindSneak.pressed && KAModule.getState() && !SpeedModule.getState() && !LJModule.getState() && !ScaffoldModule.getState() && !TowerModule.getState()) {SpeedModule.setState(true); if(DebugChat.get()) {chat.print(MMDchat + "§" + CC.get() + "Enabled Speed!")}}};
+          if(!mc.gameSettings.keyBindBack.pressed && KAModule.getState() && !SpeedModule.getState() && !LJModule.getState() && !ScaffoldModule.getState() && !TowerModule.getState()) {SpeedModule.setState(true); if(DebugChat.get()) {chat.print(MMDchat + "§" + CC.get() + "Enabled Speed!")}}};
       break;
       case "TP":
         mc.thePlayer.setPosition(mc.thePlayer.posX, mc.thePlayer.posY + TP.get(), mc.thePlayer.posZ);
@@ -180,6 +195,9 @@ function ModuleManager() {
   this.onWorld = function () {
     //This is not Module, But i think this is useful (Ex:Mineplex) :)
     if(AutoFClear.get() == true) {commandManager.executeCommand(".friends clear")}
+    
+    //Check AutoLeave was Disabled.
+    if(AutoLeave.get() == true) {if(!AutoLeaveModule.getState()) {AutoLeaveModule.setState(true)}}
 }
 }
 
@@ -189,6 +207,8 @@ function ModuleManager() {
  * ReCoded(?) JumpScaffolding but it sh1t xd.
  * Added EnableBlink Option, it may helps Bypassing.
  * 
+ * [1.66]
+ * Forgot add Sneak Option, Remove BackWard option.
 */
 
 
@@ -279,7 +299,7 @@ function ModuleManager() {
     if(mc.thePlayer.onGround && mc.theWorld.getBlockState(new BlockPos(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ)).getBlock() instanceof AntiSlab) {mc.thePlayer.jump()}};
   //Jump Scaffolding
     if(JumpScaffolding.get() == true) {
-      if(ScaffoldModule.getState() && mc.thePlayer.onGround) {if(mc.gameSettings.keyBindForward.pressed || mc.gameSettings.keyBindRight.pressed || mc.gameSettings.keyBindLeft.pressed || mc.gameSettings.keyBindBack.pressed) {mc.gameSettings.keyBindJump.pressed = false; mc.thePlayer.jump()}}
+      if(ScaffoldModule.getState() && mc.thePlayer.onGround && !mc.gameSettings.keyBindSneak.pressed) {if(mc.gameSettings.keyBindForward.pressed || mc.gameSettings.keyBindRight.pressed || mc.gameSettings.keyBindLeft.pressed) {mc.gameSettings.keyBindJump.pressed = false; mc.thePlayer.jump()}}
     }
   //MLGScaffold
     if(MLGScaffold.get() == true) {mc.gameSettings.keyBindSneak.pressed = true; mc.gameSettings.keyBindJump.pressed = false; ScaffoldModule.getValue("Sprint").set(false); SprintModule.setState(false); if(mc.thePlayer.onGround) {mc.thePlayer.jump()}; if(SprintModule.getState()) {SprintModule.setState(false)}}
@@ -309,6 +329,8 @@ function HypixelGameChange() {
   var murder = value.createList("Murder Mystery", ["Classic", "Double Up", "Assassins", "Infection", ""], "");
   var UHC = value.createList("UHC", ["solo", "teams", "event", "Speed Solo", "Speed Team", ""], "");
   var MegaWall = value.createList("MegaWalls", ["Standard", "Face Off", ""], "");
+  var Custom = value.createBoolean("Custom", false);
+  var CTex = value.createText("CustomCommand", "arcade_mini_walls");
  //Other Play Commands here https://hypixel.net/threads/guide-play-commands-useful-tools-mods-more-updated-11-17-19.1025608/
     this.addValues = function(values) {
       values.add(Hub);
@@ -318,6 +340,8 @@ function HypixelGameChange() {
       values.add(murder);
       values.add(UHC);
       values.add(MegaWall);
+      values.add(Custom);
+      values.add(CTex);
     }
 
 	this.getName = function () {
@@ -329,11 +353,6 @@ function HypixelGameChange() {
 	this.getCategory = function () {
 		return "Player";
 	}
-
-  this.onEnable = function() {
-    chat.print("HypixelGameChanger Module Enabled Check.");
-  }
-
 	this.onUpdate = function () {
     fv = ["bedwars_eight_one", "bedwars_eight_two", "Solo_Insane"][["BedWars Solo","BedWars Team","SkyWars Solo Insane"].indexOf(favorite.get())];
     bw = ["bedwars_eight_one", "bedwars_eight_two", "bedwars_four_three", "bedwars_four_four"][["Solo","Team","3v3","4v4"].indexOf(BedWars.get())];
@@ -348,6 +367,7 @@ function HypixelGameChange() {
     if(!murder.get() == "") {mc.thePlayer.sendChatMessage("/play " + mm); murder.getValue("Murder Mystery").set("")}
     if(!UHC.get() == "") {mc.thePlayer.sendChatMessage("/play " + uhccmd); UHC.getValue("UHC").set("")}
     if(!MegaWall.get() == "") {mc.thePlayer.sendChatMessage("/play " + MegaW); MegaWall.getValue("MegaWalls").set("")}
+    if(Custom.get()) {chat.print(CTex)}
   }
 }
 
