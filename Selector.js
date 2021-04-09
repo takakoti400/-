@@ -5,8 +5,6 @@
     authors: ["CzechHek", "yorik100"]
 })).import("Core.lib");
 
-mp = '.mineplx.com'
-
 list = [
     AutoDetect = value.createBoolean("AutoDetect", false),
     mode = value.createList("Mode", ["Bed", "Cake", "Dragon_Egg", "Obsidian", "Enchanting_Table", "Crafting_Table", "Custom"], "Bed"),
