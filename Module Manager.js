@@ -18,8 +18,11 @@ var scriptVersion = 1.4;
 var scriptAuthor = "shirouto Co-Da- tk400.";
 
 //Modules
+var FuckerModule = moduleManager.getModule("Fucker");
+var BlockESPModule = moduleManager.getModule("BlockESP");
 var AutoLeaveModule = moduleManager.getModule("AutoLeave");
 var KAModule = moduleManager.getModule("KillAura");
+var BugUpModule = moduleManager.getModule("BugUp");
 var SpeedModule = moduleManager.getModule("Speed");
 var HighJumpModule = moduleManager.getModule("HighJump");
 var LJModule = moduleManager.getModule("LongJump");
@@ -37,6 +40,7 @@ var FreeCamModule = moduleManager.getModule("FreeCam");
 //Scripts Shortcut, Addons, Helper...
 var MMDchat = "§5[§dModuleManager§5] "
 var TSMMchat = "§5[§dTSMM§5] "
+var saveconfigname = 'default';
 
 var LAB=01
 
@@ -56,55 +60,84 @@ AntiSlab = Java.type('net.minecraft.block.BlockSlab')
 
 function ModuleManager() {
 
-  var Max = value.createInteger("Max", 10, 0, 10);
-  var Min = value.createInteger("Min", 0, 0, 10);
+  var Text1 = value.createText(">MMSettings", "");
   var SLT = value.createText("CustomTag", "SuperMechaMechaSugooooiModule!");
-  var CC = value.createText("CustomColor", "a");
-  //https://minecraft.gamepedia.com/Formatting_codes
-  var test = value.createBoolean("test", true);
+  var CC = value.createText("CustomColor", "a"); //https://minecraft.gamepedia.com/Formatting_codes
   var DebugChat = value.createBoolean("DebugChat", false);
+  //var test = value.createBoolean("test", true); //Using on Develop, tset.
   var SpeedJump = value.createBoolean("Speed", true);
-  var Criticals = value.createList("Criticals", ["Off", "Jump", "SpeedModule", "TP", "Motion"], "Off");
-  var DelayTick = value.createInteger("DelayTicks", 0, 1, 30);
-  var Timer = value.createFloat("Timer", 0.1, 0, 10);
-  var TP = value.createFloat("TP", 0.05, 0, 1);
-  var Motion = value.createFloat("Motion", 0.1, 0, 1);
   var SpeedsDisabler = value.createBoolean("SpeedsDisabler", true);
   var VelLJManage = value.createBoolean("VelLongJump", true);
   var AutoKAJump = value.createBoolean("AutoKAJump", false);
   var ReverseStepFix = value.createBoolean("ReverseStepFix", true);
+  var Criticals = value.createList("Criticals", ["Off", "Jump", "SpeedModule", "TP", "Motion"], "Off");
+  var DelayTick = value.createInteger("DelayTicks", 1, 0, 30);
+  var Timer = value.createFloat("Timer", 0.1, 0, 10);
+  var TP = value.createFloat("TP", 0.05, 0, 1);
+  var Motion = value.createFloat("Motion", 0.1, 0, 1);
   var AutoFClear = value.createBoolean("AutoFClear", true);
+  var Text2 = value.createText(">InvModeManager", "");
   var Inv = value.createBoolean("Inv", true);
   var InvList = value.createList("Mode", ["None", "Open", "Simulate"], "None");
+  var Text3 = value.createText(">BlockRenderManager", "");
   var RenderSetting = value.createBoolean("RenderSetting", true);
   var RSCounter = value.createBoolean("Counter", false);
   var RSMark = value.createBoolean("Mark", false);
+  var Text4 = value.createText(">BlockSelection", "");
+  var Selection = value.createBoolean("Selection", false);
+  var DSBlock = value.createBoolean("DetectServer'sBlock", false);
+  var mode = value.createList("SetBlock", ["Bed", "Cake", "Dragon_Egg", "Obsidian", "Enchanting_Table", "Crafting_Table", "Custom"], "Bed");
+  var customid = value.createInteger("CustomID", 0, 0, 197);
+  var fucker = value.createBoolean("Fucker", true);
+  var EnableFucker = value.createBoolean("EnableFucker", false);
+  var blockesp = value.createBoolean("BlockESP", true);
+  var EnableESP = value.createBoolean("EnableESP", true);
   var AutoLeave = value.createBoolean("AlwaysAutoLeave", false); //Always Enable LB's AutoLeave Module.
+  var Text5 = value.createText(">ConfigManager", "");
+  var LoadConfig = value.createBoolean("LoadConfig", false);
+  var SaveConfig = value.createBoolean("SaveConfig", false);
+  var SavingName = value.createText("CurrentLoad/SaveFileName", "N/A");
+  var DSConfig = value.createBoolean("ServerDetect", false);
 
     this.addValues = function(values) {
-      values.add(Max);
-      values.add(Min);
+      values.add(Text1);
       values.add(SLT);
       values.add(CC);
-      values.add(test);
+      //values.add(test);
       values.add(DebugChat);
+      values.add(SpeedsDisabler);
+      values.add(VelLJManage);
+      values.add(AutoKAJump);
+      values.add(ReverseStepFix);
       values.add(SpeedJump);
       values.add(Criticals);
       values.add(DelayTick);
       values.add(Timer);
       values.add(TP);
       values.add(Motion);
-      values.add(SpeedsDisabler);
-      values.add(VelLJManage);
-      values.add(AutoKAJump);
-      values.add(ReverseStepFix);
       values.add(AutoFClear);
+      values.add(Text2);
       values.add(Inv);
       values.add(InvList);
+      values.add(Text3);
       values.add(RenderSetting);
       values.add(RSCounter);
+      values.add(Text4);
       values.add(RSMark);
+      values.add(Selection);
+      values.add(DSBlock);
+      values.add(mode);
+      values.add(customid);
+      values.add(fucker);
+      values.add(EnableFucker);
+      values.add(blockesp);
+      values.add(EnableESP);
       values.add(AutoLeave);
+      values.add(Text5);
+      values.add(LoadConfig);
+      values.add(SaveConfig)
+      values.add(SavingName);
+      values.add(DSConfig);
     };
 
 	this.getName = function () {
@@ -121,7 +154,7 @@ function ModuleManager() {
   };
 	this.onUpdate = function () {
     //Manage SpeedJump /Fix Jump Boosting
-      if(SpeedJump.get() == true && SpeedModule.getState() && mc.thePlayer.onGround) {
+      if(SpeedJump.get() && SpeedModule.getState() && mc.thePlayer.onGround) {
         if(mc.gameSettings.keyBindJump.pressed) {
         if(mc.gameSettings.keyBindForward.pressed || mc.gameSettings.keyBindRight.pressed || mc.gameSettings.keyBindLeft.pressed || mc.gameSettings.keyBindBack.pressed) {
           mc.gameSettings.keyBindJump.pressed = false;
@@ -130,33 +163,33 @@ function ModuleManager() {
            DebugChat.get() && chat.print(MMDchat + "§" + CC.get() + "Disabled Jump." + rc)};
         }};
       //SpeedDisabler
-    if(SpeedsDisabler.get() == true && SpeedModule.getState() || LJModule.getState()) {if(FlyModule.getState() || FreeCamModule.getState() || ScaffoldModule.getState()) {SpeedModule.setState(false) || LJModule.setState(false); DebugChat.get() && chat.print(MMDchat + "§" + CC.get() + "Disabled Speed or LongJump.")}};
+    if(SpeedsDisabler.get() && SpeedModule.getState() || LJModule.getState()) {if(FlyModule.getState() || FreeCamModule.getState() || ScaffoldModule.getState()) {SpeedModule.setState(false) || LJModule.setState(false); DebugChat.get() && chat.print(MMDchat + "§" + CC.get() + "Disabled Speed or LongJump.")}};
     //VelLJ /Hypixel Fix?
-    if(VelLJManage.get() == true) {
+    if(VelLJManage.get()) {
       if(LJModule.getState() && VelocityModule.getState()) {VelocityModule.setState(false)}
       if(!LJModule.getState() && !VelocityModule.getState()) {VelocityModule.setState(true)}};
     //ReverseStepFix
-    if(ReverseStepFix.get() == true) {
+    if(ReverseStepFix.get()) {
      if(FlyModule.getState() && RSModule.getState()) {RSModule.setState(false)}
       if(RSModule.getState() && mc.theWorld.getBlockState(new BlockPos(mc.thePlayer.posX, mc.thePlayer.posY - 0.1, mc.thePlayer.posZ)).getBlock() instanceof SlimeBlock) {RSModule.setState(false)}
      /*if(!RSModule.getState() && !FlyModule.getState() && !mc.theWorld.getBlockState(new BlockPos(mc.thePlayer.posX, mc.thePlayer.posY - 0.1, mc.thePlayer.posZ)).getBlock() instanceof SlimeBlock) {RSModule.setState(true)}*/
     };
     //AutoKAJump
-      if(AutoKAJump.get() == true && KAModule.getState() && !mc.gameSettings.keyBindJump.pressed) {mc.gameSettings.keyBindJump.pressed = true};
+      if(AutoKAJump.get() && KAModule.getState() && !mc.gameSettings.keyBindJump.pressed) {mc.gameSettings.keyBindJump.pressed = true};
 
   /* Manage Modules Setting */
 
       //RenderSetter /fix Replace by other user's Setting
-    if(RenderSetting.get() == true) {
+    if(RenderSetting.get()) {
       //Counter
-      if(RSCounter.get() == true) {if(!ScaffoldModule.getValue("Counter").get()) {ScaffoldModule.getValue("Counter").set(true)}; if(!TowerModule.getValue("Counter").get()) {TowerModule.getValue("Counter").set(true)}}
-      if(RSCounter.get() == false) {if(ScaffoldModule.getValue("Counter").get()) {ScaffoldModule.getValue("Counter").set(false)}; if(TowerModule.getValue("Counter").get()) {TowerModule.getValue("Counter").set(false)}}
+      if(RSCounter.get()) {if(!ScaffoldModule.getValue("Counter").get()) {ScaffoldModule.getValue("Counter").set(true)}; if(!TowerModule.getValue("Counter").get()) {TowerModule.getValue("Counter").set(true)}}
+      if(!RSCounter.get()) {if(ScaffoldModule.getValue("Counter").get()) {ScaffoldModule.getValue("Counter").set(false)}; if(TowerModule.getValue("Counter").get()) {TowerModule.getValue("Counter").set(false)}}
       //Mark
-      if(RSMark.get() == true) {if(!ScaffoldModule.getValue("Mark").get()) {ScaffoldModule.getValue("Mark").set(true)}}
-      if(RSMark.get() == false) {if(ScaffoldModule.getValue("Mark").get()) {ScaffoldModule.getValue("Mark").set(false)}}
+      if(RSMark.get()) {if(!ScaffoldModule.getValue("Mark").get()) {ScaffoldModule.getValue("Mark").set(true)}}
+      if(!RSMark.get()) {if(ScaffoldModule.getValue("Mark").get()) {ScaffoldModule.getValue("Mark").set(false)}}
     };
     //Inv /This is ???
-    if(Inv.get() == true) {
+    if(Inv.get()) {
       if(InvList.get() == "None") {
         if(InvModule.getValue("invOpen").get()) {InvModule.getValue("invOpen").set(false)}; if(InvModule.getValue("SimulateInventory").get()) {InvModule.getValue("SimulateInventory").set(false)}
         if(InvAAModule.getValue("invOpen").get()) {InvAAModule.getValue("invOpen").set(false)}; if(InvAAModule.getValue("SimulateInventory").get()) {InvAAModule.getValue("SimulateInventory").set(false)}}
@@ -167,13 +200,61 @@ function ModuleManager() {
         if(InvModule.getValue("invOpen").get()) {InvModule.getValue("invOpen").set()}; if(!InvModule.getValue("SimulateInventory").get()) {InvModule.getValue("SimulateInventory").set(true)}
         if(InvAAModule.getValue("invOpen").get()) {InvAAModule.getValue("invOpen").set(false)}; if(!InvAAModule.getValue("SimulateInventory").get()) {InvAAModule.getValue("SimulateInventory").set(true)}}
     };
+    //Selection
+    if(Selection.get()) {
+      switch (mode.get()) { //Test
+        case "Bed": id = 26; break;
+        case "Cake": id = 92; break;
+        case "Dragon_Egg": id = 122; break;
+        case "Obsidian": id = 49; break;
+        case "Enchanting_Table": id = 116; break;
+        case "Crafting_Table": id = 58; break;
+        case "Custom": id = customid.get(); break;
+      }
+    if(DSBlock.get()) {
+      if(mc.getCurrentServerData().serverIP.match(".hypixel.net" || "hypixel.cn")) {
+          !FuckerModule.getValue("Block").get(26) && FuckerModule.getValue("Block").set(26);
+          !BlockESPModule.getValue("Block").get(26) && BlockESPModule.getValue("Block").set(26);
+      }
+      if(mc.getCurrentServerData().serverIP.match(".mineplex.com")) {
+          !FuckerModule.getValue("Block").get(92) && FuckerModule.getValue("Block").set(92);
+          !BlockESPModule.getValue("Block").get(92) && BlockESPModule.getValue("Block").set(92);
+      }
+      if(mc.getCurrentServerData().serverIP.match(".cubecraft.net" || "cubecraft.net")) {
+          !FuckerModule.getValue("Block").get(122)==1 && FuckerModule.getValue("Block").set(122);
+          !BlockESPModule.getValue("Block").get(122)==1 && BlockESPModule.getValue("Block").set(122);
+      }
+      if(mc.getCurrentServerData().serverIP.match(".ccbluex.net")) {
+        chat.print("checked.")
+          FuckerModule.getValue("Block").set(1);
+          BlockESPModule.getValue("Block").set(1);
+      }
+    }
+    if(!DSBlock.get()) {
+      FuckerModule.getValue("Block").set(id); BlockESPModule.getValue("Block").set(id);
+    }
+      if(EnableFucker.get()) {!FuckerModule.getState() && FuckerModule.setState(true)}
+      if(EnableESP.get()) {!BlockESPModule.getState() && BlockESPModule.setState(true)}
+      Selection.set(false);
+    }
+    //Dev// //(Auto)Config Loader
+    if(LoadConfig.get()) {
+      LoadConfig.set(false);
+      if(DSConfig.get()) { //I cant Code using switch method..? iF Is bESt foR nEwbIe cODerS
+        if(mc.getCurrentServerData().serverIP.match(".ccbluex.net")) {commandManager.executeCommand(".localautosettings load testccbluex"); saveconfigname = 'testccbluex'};
+        if(mc.getCurrentServerData().serverIP.match(".hypixel.net")) {commandManager.executeCommand(".localautosettings load hypixel"); saveconfigname = 'hypixel'};
+        if(mc.getCurrentServerData().serverIP.match(".cubecraft.net")) {commandManager.executeCommand(".localautosettings load Cubecraft"); saveconfigname = 'cubecraft'};
+        if(mc.getCurrentServerData().serverIP.match(".mineplex.com")) {commandManager.executeCommand(".localautosettings load mineplex"); saveconfigname = 'mineplex'};
+      }
+      if(!DSConfig.get()) {
+      }
+    }
+    if(SaveConfig.get()) {SaveConfig.set(false); commandManager.executeCommand(".localautosettings save " + saveconfigname); chat.print("§4Debug[SaveConfig]§f: Saved for §l" + saveconfigname)}
   }
 
   this.onAttack = function () {
-    CToggleTimerAPI.get() && mc.timer.timerSpeed == Timer.get();
     mc.gameSettings.keyBindUseItem.pressed = mc.gameSettings.keyBindAttack.pressed = false;
     if(mc.thePlayer.onGround && !mc.gameSettings.keyBindSneak.pressed && mc.thePlayer.ticksExisted % DelayTick.get() == 0) {
-      CToggleTimerAPI = true;
     switch (Criticals.get()) {
       case "Jump":
         SpeedModule.setState(false);
@@ -194,11 +275,16 @@ function ModuleManager() {
 
   this.onWorld = function () {
     //This is not Module, But i think this is useful (Ex:Mineplex) :)
-    if(AutoFClear.get() == true) {commandManager.executeCommand(".friends clear")}
-    
+    if(AutoFClear.get()) {commandManager.executeCommand(".friends clear")}
     //Check AutoLeave was Disabled.
-    if(AutoLeave.get() == true) {if(!AutoLeaveModule.getState()) {AutoLeaveModule.setState(true)}}
-}
+    if(AutoLeave.get()) {if(!AutoLeaveModule.getState()) {AutoLeaveModule.setState(true)}}
+    //Use for ConfigSaver
+      if(mc.getCurrentServerData().serverIP.match(".ccbluex.net")) {saveconfigname = 'testccbluex'};
+      if(mc.getCurrentServerData().serverIP.match(".hypixel.net" || "hypixel.net")) {saveconfigname = 'hypixel'};
+      if(mc.getCurrentServerData().serverIP.match(".cubecraft.net" || "cubeaft.net")) {saveconfigname = 'cubecraft'};
+      if(mc.getCurrentServerData().serverIP.match(".mineplex.com")) {saveconfigname = 'mineplex'};
+      SavingName.set(saveconfigname);
+  }
 }
 
 /* TSMM v:1.65, by tk400
@@ -256,17 +342,16 @@ function ModuleManager() {
     return TSMMMode.get();
   }
   this.onEnable = function() {
-    TSMMisEnabled == true;
     BR.get() && mc.thePlayer.rotationYaw + 180;
     ScaffoldModule.setState(true);
     TowerModule.setState(false);
-    if(JumpScaffolding.get() == true) {TSMMMode.set("Off"); if(!ScaffoldModule.getValue("SameY").get()) {ScaffoldModule.getValue("SameY").set(true)}}
+    if(JumpScaffolding.get()) {TSMMMode.set("Off"); if(!ScaffoldModule.getValue("SameY").get()) {ScaffoldModule.getValue("SameY").set(true)}}
     // //
     WithBlinkAPI.get() && BlinkModule.setState(true);
     TSMMDebugChat.get() && chat.print(TSMMchat + "§a+Enabled TSMM and Scaffold and Tower");
   };
   this.onUpdate = function () {
-    if(BR.get() == true) {//Reverse Forward to BackWard
+    if(BR.get()) {//Reverse Forward to BackWard
       if(mc.gameSettings.keyBindForward.pressed) {
          mc.gameSettings.keyBindBack.pressed = true;
          mc.gameSettings.keyBindForward.pressed = false;
@@ -276,37 +361,51 @@ function ModuleManager() {
       if(!mc.gameSettings.keyBindJump.pressed) {ScaffoldModule.setState(true); TowerModule.setState(false); TSMMDebugChat.get() && chat.print(TSMMchat + "§" + TSCC.get() + "Enabled Scaffold, Disabled Tower")}};
       if(ScaffoldModule.getState() && !TowerModule.getState()) {
         if(mc.gameSettings.keyBindJump.pressed && mc.thePlayer.onGround) {
-        if(TSMMMode.get() == "Sprint") {ScaffoldModule.getValue("Sprint").set(false)}
-        if(TSMMMode.get() == "XZR") {mc.thePlayer.motionX = 0, mc.thePlayer.motionZ = 0}
-        if(TSMMMode.get() == "VClip") {mc.thePlayer.setPosition(mc.thePlayer.posX, mc.thePlayer.posY + 1, mc.thePlayer.posZ)}}
+          switch (TSMMMode.get()) {
+            case "Sprint":
+              ScaffoldModule.getValue("Sprint").set(false);
+              break;
+            case "XZR":
+              mc.thePlayer.motionX = 0, mc.thePlayer.motionZ = 0;
+              break;
+            case "VClip":
+              mc.thePlayer.setPosition(mc.thePlayer.posX, mc.thePlayer.posY + 1, mc.thePlayer.posZ);
+              break;
+          }
+        }
       if(!mc.gameSettings.keyBindJump.pressed) {
         if(TSMMMode.get() == "Sprint") {ScaffoldModule.getValue("Sprint").set(true)}
       }
     }
   //if press mc.gameSettings.keyBindJump.pressed = enable Tower, and Managing
-    if(PotionTower.get() == true) {
+    if(PotionTower.get()) {
     if(!TowerModule.getState() && mc.thePlayer.onGround && mc.gameSettings.keyBindJump.pressed && !mc.gameSettings.keyBindForward.pressed && !mc.thePlayer.isPotionActive(Potion.jump)) {ScaffoldModule.setState(false); TowerModule.setState(true); TSMMDebugChat.get() && chat.print(TSMMchat + "§" + TSCC.get() + "Enabled Tower, Disabled Scaffold")}};
-    if(PotionTower.get() == false) {
+    if(!PotionTower.get()) {
     if(!TowerModule.getState() && mc.thePlayer.onGround && mc.gameSettings.keyBindJump.pressed && !mc.gameSettings.keyBindForward.pressed) {ScaffoldModule.setState(false); TowerModule.setState(true); TSMMDebugChat.get() && chat.print(TSMMchat + "§" + TSCC.get() + "Enabled Tower, Disabled Scaffold")}};
     if(TowerModule.getState()) {
-      if(NoXZMotion.get() == "MotionZero") {mc.thePlayer.motionX = 0; mc.thePlayer.motionZ = 0};
-      if(NoXZMotion.get() == "NoKeyBoard") {mc.gameSettings.keyBindForward.pressed = mc.gameSettings.keyBindLeft.pressed = mc.gameSettings.keyBindRight.pressed = mc.gameSettings.keyBindBack.pressed = false};
+      switch (NoXZMotion.get()) {
+        case "MotionZero":
+          mc.thePlayer.motionX = 0; mc.thePlayer.motionZ = 0;
+          break;
+        case "NoKeyBoard":
+          mc.gameSettings.keyBindForward.pressed = mc.gameSettings.keyBindLeft.pressed = mc.gameSettings.keyBindRight.pressed = mc.gameSettings.keyBindBack.pressed = false;
+          break;
+      }
     };
   //ForceSprint /Fix Can't sprinting Bug... or my setting?
-    if(ForceSprint.get() == true && ScaffoldModule.getState()) {mc.thePlayer.setSprinting(true)}
+    if(ForceSprint.get() && ScaffoldModule.getState()) {mc.thePlayer.setSprinting(true)}
   //AntiSlab
-    if(AntiHalf.get() == true) {
+    if(AntiHalf.get()) {
     if(mc.thePlayer.onGround && mc.theWorld.getBlockState(new BlockPos(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ)).getBlock() instanceof AntiSlab) {mc.thePlayer.jump()}};
   //Jump Scaffolding
-    if(JumpScaffolding.get() == true) {
+    if(JumpScaffolding.get()) {
       if(ScaffoldModule.getState() && mc.thePlayer.onGround && !mc.gameSettings.keyBindSneak.pressed) {if(mc.gameSettings.keyBindForward.pressed || mc.gameSettings.keyBindRight.pressed || mc.gameSettings.keyBindLeft.pressed) {mc.gameSettings.keyBindJump.pressed = false; mc.thePlayer.jump()}}
     }
   //MLGScaffold
-    if(MLGScaffold.get() == true) {mc.gameSettings.keyBindSneak.pressed = true; mc.gameSettings.keyBindJump.pressed = false; ScaffoldModule.getValue("Sprint").set(false); SprintModule.setState(false); if(mc.thePlayer.onGround) {mc.thePlayer.jump()}; if(SprintModule.getState()) {SprintModule.setState(false)}}
+    if(MLGScaffold.get()) {mc.gameSettings.keyBindSneak.pressed = true; mc.gameSettings.keyBindJump.pressed = false; ScaffoldModule.getValue("Sprint").set(false); SprintModule.setState(false); if(mc.thePlayer.onGround) {mc.thePlayer.jump()}; if(SprintModule.getState()) {SprintModule.setState(false)}}
   };
 
   this.onDisable = function() {
-    TSMMisEnabled == false;
     BR.get() && mc.thePlayer.rotationYaw + 180; /*Fix Head Rotation. only this code...*/ 
     ScaffoldModule.setState(false); TowerModule.setState(false);
     MLGSprint.get() && SprintModule.setState(true);
@@ -360,7 +459,7 @@ function HypixelGameChange() {
     mm = ["murder_classic", "murder_double_up", "murder_assassins", "murder_infection"][["Classic", "Double Up", "Assassins", "Infection"].indexOf(murder.get())];
     uhccmd = ["uhc_solo", "uhc_teams", "uhc_events", "speed_solo_normal", "speed_team_normal"][["solo", "teams", "event", "Speed Solo", "Speed Team"].indexOf(UHC.get())];
     MegaW = ["mw_standard", "mw_face_off"][["Standard", "Face Off"].indexOf(MegaWall.get())];
-    if(Hub.get() == true) {mc.thePlayer.sendChatMessage("/hub"); Hub.set(false)}
+    if(Hub.get()) {mc.thePlayer.sendChatMessage("/hub"); Hub.set(false)}
     if(!favorite.get() == "") {mc.thePlayer.sendChatMessage("/play " + fv); favorite.getValue("Favorite").set("")}
     if(!BedWars.get() == "") {mc.thePlayer.sendChatMessage("/play " + bw); BedWars.getValue("BedWars").set("")}
     if(!SkyWars.get() == "") {mc.thePlayer.sendChatMessage("/play " + sw); SkyWars.getValue("SkyWars").set("")}
@@ -371,6 +470,30 @@ function HypixelGameChange() {
   }
 }
 
+var scriptName = "ForceBugUper";
+var scriptVersion = 1.0;
+var scriptAuthor = "tk400.";
+
+function ForceBugUper() {
+
+	this.getName = function () {
+		return "ForceBugUper";
+	}
+	this.getDescription = function () {
+		return "";
+	}
+	this.getCategory = function () {
+		return "";
+	}
+
+  this.onEnable = function() {
+    BugUpModule.getValue("MaxDistanceToSetBlock").get(n)
+  }
+  
+  this.onDisable = function() {
+    BugUpModule.getValue("MaxDistanceToSetBlock").set(n)
+  }
+}
 
 
 var ModuleManager = moduleManager.registerModule(new ModuleManager)
