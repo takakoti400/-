@@ -93,7 +93,7 @@ function ModuleManager() {
   var EnableFucker = value.createBoolean("EnableFucker", false);
   var blockesp = value.createBoolean("BlockESP", true);
   var EnableESP = value.createBoolean("EnableESP", true);
-  var PSToggle = value.createBoolean("PingSpoofReToggler", false);
+  var AutoLeave = value.createBoolean("AlwaysAutoLeave", false); //Always Enable LB's AutoLeave Module.
   var Text5 = value.createText(">ConfigManager", "");
   var LoadConfig = value.createBoolean("LoadConfig", false);
   var SaveConfig = value.createBoolean("SaveConfig", false);
