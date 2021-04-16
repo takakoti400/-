@@ -18,6 +18,7 @@ var scriptVersion = 1.4;
 var scriptAuthor = "shirouto Co-Da- tk400.";
 
 //Modules
+var PingSpoofModule = moduleManager.getModule("PingSpoof");
 var FuckerModule = moduleManager.getModule("Fucker");
 var BlockESPModule = moduleManager.getModule("BlockESP");
 var AutoLeaveModule = moduleManager.getModule("AutoLeave");
@@ -92,7 +93,7 @@ function ModuleManager() {
   var EnableFucker = value.createBoolean("EnableFucker", false);
   var blockesp = value.createBoolean("BlockESP", true);
   var EnableESP = value.createBoolean("EnableESP", true);
-  var AutoLeave = value.createBoolean("AlwaysAutoLeave", false); //Always Enable LB's AutoLeave Module.
+  var PSToggle = value.createBoolean("PingSpoofReToggler", false);
   var Text5 = value.createText(">ConfigManager", "");
   var LoadConfig = value.createBoolean("LoadConfig", false);
   var SaveConfig = value.createBoolean("SaveConfig", false);
@@ -213,16 +214,16 @@ function ModuleManager() {
       }
     if(DSBlock.get()) {
       if(mc.getCurrentServerData().serverIP.match(".hypixel.net" || "hypixel.cn")) {
-          !FuckerModule.getValue("Block").get(26) && FuckerModule.getValue("Block").set(26);
-          !BlockESPModule.getValue("Block").get(26) && BlockESPModule.getValue("Block").set(26);
+          FuckerModule.getValue("Block").set(26);
+          BlockESPModule.getValue("Block").set(26);
       }
       if(mc.getCurrentServerData().serverIP.match(".mineplex.com")) {
-          !FuckerModule.getValue("Block").get(92) && FuckerModule.getValue("Block").set(92);
-          !BlockESPModule.getValue("Block").get(92) && BlockESPModule.getValue("Block").set(92);
+          FuckerModule.getValue("Block").set(92);
+          BlockESPModule.getValue("Block").set(92);
       }
       if(mc.getCurrentServerData().serverIP.match(".cubecraft.net" || "cubecraft.net")) {
-          !FuckerModule.getValue("Block").get(122)==1 && FuckerModule.getValue("Block").set(122);
-          !BlockESPModule.getValue("Block").get(122)==1 && BlockESPModule.getValue("Block").set(122);
+          FuckerModule.getValue("Block").set(122);
+          BlockESPModule.getValue("Block").set(122);
       }
       if(mc.getCurrentServerData().serverIP.match(".ccbluex.net")) {
         chat.print("checked.")
@@ -231,7 +232,8 @@ function ModuleManager() {
       }
     }
     if(!DSBlock.get()) {
-      FuckerModule.getValue("Block").set(id); BlockESPModule.getValue("Block").set(id);
+      FuckerModule.getValue("Block").get() != id && FuckerModule.getValue("Block").set(id);
+      BlockESPModule.getValue("Block").set(id);
     }
       if(EnableFucker.get()) {!FuckerModule.getState() && FuckerModule.setState(true)}
       if(EnableESP.get()) {!BlockESPModule.getState() && BlockESPModule.setState(true)}
@@ -249,7 +251,7 @@ function ModuleManager() {
       if(!DSConfig.get()) {
       }
     }
-    if(SaveConfig.get()) {SaveConfig.set(false); commandManager.executeCommand(".localautosettings save " + saveconfigname); chat.print("§4Debug[SaveConfig]§f: Saved for §l" + saveconfigname)}
+    if(SaveConfig.get()) {SaveConfig.set(false); commandManager.executeCommand(".localautosettings save " + saveconfigname + "all"); chat.print("§4Debug[SaveConfig]§f: Saved for §l" + saveconfigname)}
   }
 
   this.onAttack = function () {
