@@ -14,7 +14,7 @@
  * 
  */
 var scriptName = "ModuleManager";
-var scriptVersion = 1.4;
+var scriptVersion = 1.42;
 var scriptAuthor = "shirouto Co-Da- tk400.";
 
 //Modules
@@ -43,6 +43,8 @@ var MMDchat = "§5[§dModuleManager§5] "
 var TSMMchat = "§5[§dTSMM§5] "
 var saveconfigname = 'default';
 
+var MoveDir = 'A';
+
 var LAB=01
 
 //Packets
@@ -67,6 +69,7 @@ function ModuleManager() {
   var DebugChat = value.createBoolean("DebugChat", false);
   //var test = value.createBoolean("test", true); //Using on Develop, tset.
   var SpeedJump = value.createBoolean("Speed", true);
+  var WASDSpeed = value.createBoolean("AntiHorizontalSpeedStrafing", false);
   var SpeedsDisabler = value.createBoolean("SpeedsDisabler", true);
   var VelLJManage = value.createBoolean("VelLongJump", true);
   var AutoKAJump = value.createBoolean("AutoKAJump", false);
@@ -111,6 +114,7 @@ function ModuleManager() {
       values.add(AutoKAJump);
       values.add(ReverseStepFix);
       values.add(SpeedJump);
+      values.add(WASDSpeed)
       values.add(Criticals);
       values.add(DelayTick);
       values.add(Timer);
@@ -163,7 +167,33 @@ function ModuleManager() {
           rn = Math.floor(Math.random() * 11);
            DebugChat.get() && chat.print(MMDchat + "§" + CC.get() + "Disabled Jump." + rc)};
         }};
-      //SpeedDisabler
+    //WASDSpeed 
+    if(WASDSpeed.get()) { //==> this code is working, but i think Inefficient. good for Detecting Faster Strafing Cheat <==//
+      if(SpeedModule.getState()) {
+        switch (MoveDir) {
+          case 'F':
+            mc.gameSettings.keyBindBack.pressed = false;
+            break;
+          case 'R':
+            mc.gameSettings.keyBindLeft.pressed = false;
+            break;
+          case 'L':
+            mc.gameSettings.keyBindRight.pressed = false;
+            break;
+          case 'B':
+            mc.gameSettings.keyBindForward.pressed = false;
+            break;
+        }
+        if(!mc.thePlayer.onGround) {
+          if(mc.gameSettings.keyBindForward.pressed) {MoveDir = 'F'}
+          if(mc.gameSettings.keyBindRight.pressed) {MoveDir = 'R'}
+          if(mc.gameSettings.keyBindLeft.pressed) {MoveDir = 'L'}
+          if(mc.gameSettings.keyBindBack.pressed) {MoveDir = 'B'}
+        }
+        if(mc.thePlayer.onGround) {MoveDir = 'A'}
+      }
+    }
+    //SpeedDisabler
     if(SpeedsDisabler.get() && SpeedModule.getState() || LJModule.getState()) {if(FlyModule.getState() || FreeCamModule.getState() || ScaffoldModule.getState()) {SpeedModule.setState(false) || LJModule.setState(false); DebugChat.get() && chat.print(MMDchat + "§" + CC.get() + "Disabled Speed or LongJump.")}};
     //VelLJ /Hypixel Fix?
     if(VelLJManage.get()) {
