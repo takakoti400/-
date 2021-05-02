@@ -42,7 +42,6 @@ var FreeCamModule = moduleManager.getModule("FreeCam");
 var MMDchat = "§5[§dModuleManager§5] "
 var TSMMchat = "§5[§dTSMM§5] "
 var saveconfigname = 'default';
-
 var MoveDir = 'A';
 
 var LAB=01
@@ -57,9 +56,7 @@ var Potion = Java.type('net.minecraft.potion.Potion');
 BlockPos = Java.type('net.minecraft.util.BlockPos')
 SlimeBlock = Java.type('net.minecraft.block.BlockSlime')
 AirBlock = Java.type('net.minecraft.block.BlockAir')
-
 AntiSlab = Java.type('net.minecraft.block.BlockSlab')
-
 
 function ModuleManager() {
 
@@ -82,7 +79,7 @@ function ModuleManager() {
   var AutoFClear = value.createBoolean("AutoFClear", true);
   var Text2 = value.createText(">InvModeManager", "");
   var Inv = value.createBoolean("Inv", true);
-  var InvList = value.createList("Mode", ["None", "Open", "Simulate"], "None");
+  var InvList = value.createList("Mode", ["None", "Open", "Simulate", "Both"], "None");
   var Text3 = value.createText(">BlockRenderManager", "");
   var RenderSetting = value.createBoolean("RenderSetting", true);
   var RSCounter = value.createBoolean("Counter", false);
@@ -140,7 +137,7 @@ function ModuleManager() {
       values.add(AutoLeave);
       values.add(Text5);
       values.add(LoadConfig);
-      values.add(SaveConfig)
+      values.add(SaveConfig);
       values.add(SavingName);
       values.add(DSConfig);
     };
@@ -157,16 +154,27 @@ function ModuleManager() {
   this.getTag = function() {
     return SLT.get();
   };
+  this.onLoad = function () {
+    switch (mode.get()) { //Test
+      case "Bed": id = 26; break;
+      case "Cake": id = 92; break;
+      case "Dragon_Egg": id = 122; break;
+      case "Obsidian": id = 49; break;
+      case "Enchanting_Table": id = 116; break;
+      case "Crafting_Table": id = 58; break;
+      case "Custom": id = customid.get(); break;
+    }}
 	this.onUpdate = function () {
     //Manage SpeedJump /Fix Jump Boosting
-      if(SpeedJump.get() && SpeedModule.getState() && mc.thePlayer.onGround) {
-        if(mc.gameSettings.keyBindJump.pressed) {
-        if(mc.gameSettings.keyBindForward.pressed || mc.gameSettings.keyBindRight.pressed || mc.gameSettings.keyBindLeft.pressed || mc.gameSettings.keyBindBack.pressed) {
-          mc.gameSettings.keyBindJump.pressed = false;
-          rc = " [" + rn + "]"
-          rn = Math.floor(Math.random() * 11);
-           DebugChat.get() && chat.print(MMDchat + "§" + CC.get() + "Disabled Jump." + rc)};
-        }};
+      if(SpeedJump.get()) {
+        if(SpeedModule.getState() && mc.thePlayer.onGround) {
+          if(mc.gameSettings.keyBindJump.pressed) {
+            if(mc.gameSettings.keyBindForward.pressed || mc.gameSettings.keyBindRight.pressed || mc.gameSettings.keyBindLeft.pressed || mc.gameSettings.keyBindBack.pressed) {
+              mc.gameSettings.keyBindJump.pressed = false;
+              rc = " [" + rn + "]"
+              rn = Math.floor(Math.random() * 11);
+              DebugChat.get() && chat.print(MMDchat + "§" + CC.get() + "Disabled Jump." + rc)};
+        }}};
     //WASDSpeed 
     if(WASDSpeed.get()) { //==> this code is working, but i think Inefficient. good for Detecting Faster Strafing Cheat <==//
       if(SpeedModule.getState()) {
@@ -183,12 +191,28 @@ function ModuleManager() {
           case 'B':
             mc.gameSettings.keyBindForward.pressed = false;
             break;
+          case 'FR':
+            mc.gameSettings.keyBindBack.pressed = false; mc.gameSettings.keyBindLeft.pressed = false; mc.gameSettings.keyBindRight.pressed = true;
+            break;
+          case 'FL':
+            mc.gameSettings.keyBindBack.pressed = false; mc.gameSettings.keyBindRight.pressed = false; mc.gameSettings.keyBindLeft.pressed = true;
+            break;
+          case 'BL':
+            mc.gameSettings.keyBindForward.pressed = false; mc.gameSettings.keyBindRight.pressed = false; mc.gameSettings.keyBindLeft.pressed = true;
+            break;
+          case 'BR':
+            mc.gameSettings.keyBindForward.pressed = false; mc.gameSettings.keyBindLeft.pressed = false; mc.gameSettings.keyBindRight.pressed = true;
+            break;
         }
         if(!mc.thePlayer.onGround) {
           if(mc.gameSettings.keyBindForward.pressed) {MoveDir = 'F'}
           if(mc.gameSettings.keyBindRight.pressed) {MoveDir = 'R'}
           if(mc.gameSettings.keyBindLeft.pressed) {MoveDir = 'L'}
           if(mc.gameSettings.keyBindBack.pressed) {MoveDir = 'B'}
+          if(mc.gameSettings.keyBindForward.pressed && mc.gameSettings.keyBindRight.pressed) {MoveDir = 'FR'}
+          if(mc.gameSettings.keyBindForward.pressed && mc.gameSettings.keyBindLeft.pressed) {MoveDir = 'FL'}
+          if(mc.gameSettings.keyBindBack.pressed && mc.gameSettings.keyBindLeft.pressed) {MoveDir = 'BL'}
+          if(mc.gameSettings.keyBindBack.pressed && mc.gameSettings.keyBindRight.pressed) {MoveDir = 'BR'}
         }
         if(mc.thePlayer.onGround) {MoveDir = 'A'}
       }
@@ -221,27 +245,27 @@ function ModuleManager() {
     };
     //Inv /This is ???
     if(Inv.get()) {
-      if(InvList.get() == "None") {
-        if(InvModule.getValue("invOpen").get()) {InvModule.getValue("invOpen").set(false)}; if(InvModule.getValue("SimulateInventory").get()) {InvModule.getValue("SimulateInventory").set(false)}
-        if(InvAAModule.getValue("invOpen").get()) {InvAAModule.getValue("invOpen").set(false)}; if(InvAAModule.getValue("SimulateInventory").get()) {InvAAModule.getValue("SimulateInventory").set(false)}}
-      if(InvList.get() == "Open") {
-        if(!InvModule.getValue("invOpen").get()) {InvModule.getValue("invOpen").set(true)}; if(InvModule.getValue("SimulateInventory").get()) {InvModule.getValue("SimulateInventory").set(false)}
-        if(!InvAAModule.getValue("invOpen").get()) {InvAAModule.getValue("invOpen").set(true)}; if(InvAAModule.getValue("SimulateInventory").get()) {InvAAModule.getValue("SimulateInventory").set(false)}}
-      if(InvList.get() == "Simulate") {
-        if(InvModule.getValue("invOpen").get()) {InvModule.getValue("invOpen").set()}; if(!InvModule.getValue("SimulateInventory").get()) {InvModule.getValue("SimulateInventory").set(true)}
-        if(InvAAModule.getValue("invOpen").get()) {InvAAModule.getValue("invOpen").set(false)}; if(!InvAAModule.getValue("SimulateInventory").get()) {InvAAModule.getValue("SimulateInventory").set(true)}}
-    };
+      switch (InvList.get()) {
+        case "None":
+          if(InvModule.getValue("invOpen").get()) {InvModule.getValue("invOpen").set(false)}; if(InvModule.getValue("SimulateInventory").get()) {InvModule.getValue("SimulateInventory").set(false)}
+          if(InvAAModule.getValue("invOpen").get()) {InvAAModule.getValue("invOpen").set(false)}; if(InvAAModule.getValue("SimulateInventory").get()) {InvAAModule.getValue("SimulateInventory").set(false)}
+          break;
+        case "Open":
+          if(!InvModule.getValue("invOpen").get()) {InvModule.getValue("invOpen").set(true)}; if(InvModule.getValue("SimulateInventory").get()) {InvModule.getValue("SimulateInventory").set(false)}
+          if(!InvAAModule.getValue("invOpen").get()) {InvAAModule.getValue("invOpen").set(true)}; if(InvAAModule.getValue("SimulateInventory").get()) {InvAAModule.getValue("SimulateInventory").set(false)}
+          break;
+        case "Simulate":
+          if(InvModule.getValue("invOpen").get()) {InvModule.getValue("invOpen").set(false)}; if(!InvModule.getValue("SimulateInventory").get()) {InvModule.getValue("SimulateInventory").set(true)}
+          if(InvAAModule.getValue("invOpen").get()) {InvAAModule.getValue("invOpen").set(false)}; if(!InvAAModule.getValue("SimulateInventory").get()) {InvAAModule.getValue("SimulateInventory").set(true)}
+          break;
+        case "Both":
+          if(!InvModule.getValue("invOpen").get()) {InvModule.getValue("invOpen").set(true)}; if(!InvModule.getValue("SimulateInventory").get()) {InvModule.getValue("SimulateInventory").set(true)}
+          if(!InvAAModule.getValue("invOpen").get()) {InvAAModule.getValue("invOpen").set(true)}; if(!InvAAModule.getValue("SimulateInventory").get()) {InvAAModule.getValue("SimulateInventory").set(true)}
+      }
+    }
+    
     //Selection
     if(Selection.get()) {
-      switch (mode.get()) { //Test
-        case "Bed": id = 26; break;
-        case "Cake": id = 92; break;
-        case "Dragon_Egg": id = 122; break;
-        case "Obsidian": id = 49; break;
-        case "Enchanting_Table": id = 116; break;
-        case "Crafting_Table": id = 58; break;
-        case "Custom": id = customid.get(); break;
-      }
     if(DSBlock.get()) {
       if(mc.getCurrentServerData().serverIP.match(".hypixel.net" || "hypixel.cn")) {
           FuckerModule.getValue("Block").set(26);
@@ -281,7 +305,7 @@ function ModuleManager() {
       if(!DSConfig.get()) {
       }
     }
-    if(SaveConfig.get()) {SaveConfig.set(false); commandManager.executeCommand(".localautosettings save " + saveconfigname + "all"); chat.print("§4Debug[SaveConfig]§f: Saved for §l" + saveconfigname)}
+    if(SaveConfig.get()) {SaveConfig.set(false); commandManager.executeCommand(".localautosettings save " + saveconfigname + " all"); chat.print("§4Debug[SaveConfig]§f: Saved for §l" + saveconfigname)}
   }
 
   this.onAttack = function () {
@@ -431,7 +455,7 @@ function ModuleManager() {
     if(mc.thePlayer.onGround && mc.theWorld.getBlockState(new BlockPos(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ)).getBlock() instanceof AntiSlab) {mc.thePlayer.jump()}};
   //Jump Scaffolding
     if(JumpScaffolding.get()) {
-      if(ScaffoldModule.getState() && mc.thePlayer.onGround && !mc.gameSettings.keyBindSneak.pressed) {if(mc.gameSettings.keyBindForward.pressed || mc.gameSettings.keyBindRight.pressed || mc.gameSettings.keyBindLeft.pressed) {mc.gameSettings.keyBindJump.pressed = false; mc.thePlayer.jump()}}
+        if(ScaffoldModule.getState() && mc.thePlayer.onGround && !mc.gameSettings.keyBindSneak.pressed) {if(mc.gameSettings.keyBindForward.pressed || mc.gameSettings.keyBindRight.pressed || mc.gameSettings.keyBindLeft.pressed) {mc.gameSettings.keyBindJump.pressed = false; mc.thePlayer.jump()}}
     }
   //MLGScaffold
     if(MLGScaffold.get()) {mc.gameSettings.keyBindSneak.pressed = true; mc.gameSettings.keyBindJump.pressed = false; ScaffoldModule.getValue("Sprint").set(false); SprintModule.setState(false); if(mc.thePlayer.onGround) {mc.thePlayer.jump()}; if(SprintModule.getState()) {SprintModule.setState(false)}}
