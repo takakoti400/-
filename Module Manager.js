@@ -18,6 +18,7 @@ var scriptVersion = 1.42;
 var scriptAuthor = "shirouto Co-Da- tk400.";
 
 //Modules
+var SpammerModule = moduleManager.getModule("Spammer");
 var PingSpoofModule = moduleManager.getModule("PingSpoof");
 var FuckerModule = moduleManager.getModule("Fucker");
 var BlockESPModule = moduleManager.getModule("BlockESP");
@@ -38,11 +39,24 @@ var InvAAModule = moduleManager.getModule("AutoArmor");
 var BlinkModule = moduleManager.getModule("Blink");
 var FreeCamModule = moduleManager.getModule("FreeCam");
 
+//Java Utils
+//var Timer = Java.type("java.util.Timer");
+
+
 //Scripts Shortcut, Addons, Helper...
 var MMDchat = "§5[§dModuleManager§5] "
 var TSMMchat = "§5[§dTSMM§5] "
 var saveconfigname = 'default';
 var MoveDir = 'A';
+var servername;
+
+var jps = ""
+var br = ""
+var ar = ""
+
+ContJP = "あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをんアイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン　"
+clientname = ["LiqBounce", "Bounce of Liquidz", "LaquidBounce", "LiquidBounce", "Bounce of liquid", "LIQUIDBOUNCE"]
+insultword = ["Fools", "Foolishes", "Dumbs", "Idiots", "GAYMER", "Loser", "GarbageHuman"]
 
 var LAB=01
 
@@ -124,8 +138,8 @@ function ModuleManager() {
       values.add(Text3);
       values.add(RenderSetting);
       values.add(RSCounter);
-      values.add(Text4);
       values.add(RSMark);
+      values.add(Text4);
       values.add(Selection);
       values.add(DSBlock);
       values.add(mode);
@@ -226,8 +240,7 @@ function ModuleManager() {
     //ReverseStepFix
     if(ReverseStepFix.get()) {
      if(FlyModule.getState() && RSModule.getState()) {RSModule.setState(false)}
-      if(RSModule.getState() && mc.theWorld.getBlockState(new BlockPos(mc.thePlayer.posX, mc.thePlayer.posY - 0.1, mc.thePlayer.posZ)).getBlock() instanceof SlimeBlock) {RSModule.setState(false)}
-     /*if(!RSModule.getState() && !FlyModule.getState() && !mc.theWorld.getBlockState(new BlockPos(mc.thePlayer.posX, mc.thePlayer.posY - 0.1, mc.thePlayer.posZ)).getBlock() instanceof SlimeBlock) {RSModule.setState(true)}*/
+      if(mc.theWorld.getBlockState(new BlockPos(mc.thePlayer.posX, mc.thePlayer.posY - 1, mc.thePlayer.posZ)).getBlock() instanceof SlimeBlock) {RSModule.setState(false)}else{RSModule.setState(true)}
     };
     //AutoKAJump
       if(AutoKAJump.get() && KAModule.getState() && !mc.gameSettings.keyBindJump.pressed) {mc.gameSettings.keyBindJump.pressed = true};
@@ -297,20 +310,18 @@ function ModuleManager() {
     if(LoadConfig.get()) {
       LoadConfig.set(false);
       if(DSConfig.get()) { //I cant Code using switch method..? iF Is bESt foR nEwbIe cODerS
-        if(mc.getCurrentServerData().serverIP.match(".ccbluex.net")) {commandManager.executeCommand(".localautosettings load testccbluex"); saveconfigname = 'testccbluex'};
-        if(mc.getCurrentServerData().serverIP.match(".hypixel.net")) {commandManager.executeCommand(".localautosettings load hypixel"); saveconfigname = 'hypixel'};
-        if(mc.getCurrentServerData().serverIP.match(".cubecraft.net")) {commandManager.executeCommand(".localautosettings load Cubecraft"); saveconfigname = 'cubecraft'};
-        if(mc.getCurrentServerData().serverIP.match(".mineplex.com")) {commandManager.executeCommand(".localautosettings load mineplex"); saveconfigname = 'mineplex'};
+        commandManager.executeCommand(".localautosettings load "+ servererna + " all"); 
       }
       if(!DSConfig.get()) {
+        chat.print("i have no 'Idea', sorry.")
       }
     }
-    if(SaveConfig.get()) {SaveConfig.set(false); commandManager.executeCommand(".localautosettings save " + saveconfigname + " all"); chat.print("§4Debug[SaveConfig]§f: Saved for §l" + saveconfigname)}
+    if(SaveConfig.get()) {SaveConfig.set(false); commandManager.executeCommand(".localautosettings save " + servername + " all"); chat.print("§4Debug[SaveConfig]§f: Saved for §l" + servername)}
   }
 
   this.onAttack = function () {
     mc.gameSettings.keyBindUseItem.pressed = mc.gameSettings.keyBindAttack.pressed = false;
-    if(mc.thePlayer.onGround && !mc.gameSettings.keyBindSneak.pressed && mc.thePlayer.ticksExisted % DelayTick.get() == 0) {
+    if(mc.thePlayer.onGround && !mc.gameSettings.keyBindSneak.pressed && mc.thePlayer.ticksExisted % DelayTick.get() == 0 && !mc.thePlayer.isOnLadder() && !mc.thePlayer.isInWeb && !mc.thePlayer.isInWater() && !mc.thePlayer.isInLava()) {
     switch (Criticals.get()) {
       case "Jump":
         SpeedModule.setState(false);
@@ -335,11 +346,12 @@ function ModuleManager() {
     //Check AutoLeave was Disabled.
     if(AutoLeave.get()) {if(!AutoLeaveModule.getState()) {AutoLeaveModule.setState(true)}}
     //Use for ConfigSaver
-      if(mc.getCurrentServerData().serverIP.match(".ccbluex.net")) {saveconfigname = 'testccbluex'};
-      if(mc.getCurrentServerData().serverIP.match(".hypixel.net" || "hypixel.net")) {saveconfigname = 'hypixel'};
-      if(mc.getCurrentServerData().serverIP.match(".cubecraft.net" || "cubeaft.net")) {saveconfigname = 'cubecraft'};
-      if(mc.getCurrentServerData().serverIP.match(".mineplex.com")) {saveconfigname = 'mineplex'};
-      SavingName.set(saveconfigname);
+      if(mc.getCurrentServerData().serverIP.match(".ccbluex.net")) {servername = 'testccbluex'};
+      if(mc.getCurrentServerData().serverIP.match(".hypixel.net" || "hypixel.net")) {servername = 'hypixel'};
+      if(mc.getCurrentServerData().serverIP.match(".cubecraft.net" || "cubeaft.net")) {servername = 'cubecraft'};
+      if(mc.getCurrentServerData().serverIP.match(".mineplex.com")) {servername = 'mineplex'};
+      // EXPEPIMENTAL //
+      SavingName.set(servername);
   }
 }
 
@@ -365,6 +377,8 @@ function ModuleManager() {
   var PotionTower = value.createBoolean("PotionTower", false);
   var ForceSprint = value.createBoolean("ForceSprint", true);
   var JumpScaffolding = value.createBoolean("JumpScaffolding", true); //Beta
+  var JSMode = value.createList("Type", ["SimplyJump", "Motion", "TP"], "SimplyJump");
+  var JSV = value.createFloat("Value", 0.42, -1, 2);
   var AntiHalf = value.createBoolean("AntiHalf", false);
   var WithBlinkAPI = value.createBoolean("WithLB'sBlink", false);
   var MLGScaffold = value.createBoolean("MLGSCaffold", false);
@@ -379,6 +393,8 @@ function ModuleManager() {
     values.add(PotionTower);
     values.add(ForceSprint);
     values.add(JumpScaffolding);
+    values.add(JSMode);
+    values.add(JSV);
     values.add(AntiHalf);
     values.add(WithBlinkAPI);
     values.add(MLGScaffold);
@@ -433,11 +449,12 @@ function ModuleManager() {
         if(TSMMMode.get() == "Sprint") {ScaffoldModule.getValue("Sprint").set(true)}
       }
     }
-  //if press mc.gameSettings.keyBindJump.pressed = enable Tower, and Managing
-    if(PotionTower.get()) {
-    if(!TowerModule.getState() && mc.thePlayer.onGround && mc.gameSettings.keyBindJump.pressed && !mc.gameSettings.keyBindForward.pressed && !mc.thePlayer.isPotionActive(Potion.jump)) {ScaffoldModule.setState(false); TowerModule.setState(true); TSMMDebugChat.get() && chat.print(TSMMchat + "§" + TSCC.get() + "Enabled Tower, Disabled Scaffold")}};
-    if(!PotionTower.get()) {
-    if(!TowerModule.getState() && mc.thePlayer.onGround && mc.gameSettings.keyBindJump.pressed && !mc.gameSettings.keyBindForward.pressed) {ScaffoldModule.setState(false); TowerModule.setState(true); TSMMDebugChat.get() && chat.print(TSMMchat + "§" + TSCC.get() + "Enabled Tower, Disabled Scaffold")}};
+    //if press mc.gameSettings.keyBindJump.pressed = enable Tower, and Managing
+  if(!TowerModule.getState() && mc.thePlayer.onGround && mc.gameSettings.keyBindJump.pressed && !mc.gameSettings.keyBindForward.pressed) {
+      if(PotionTower.get()) {
+        if(!mc.thePlayer.isPotionActive(Potion.jump)) {ScaffoldModule.setState(false); TowerModule.setState(true); TSMMDebugChat.get() && chat.print(TSMMchat + "§" + TSCC.get() + "Enabled Tower, Disabled Scaffold")}}else if(!TowerModule.getState() && mc.thePlayer.onGround && mc.gameSettings.keyBindJump.pressed && !mc.gameSettings.keyBindForward.pressed)
+          {ScaffoldModule.setState(false); TowerModule.setState(true); TSMMDebugChat.get() && chat.print(TSMMchat + "§" + TSCC.get() + "Enabled Tower, Disabled Scaffold")};
+  }
     if(TowerModule.getState()) {
       switch (NoXZMotion.get()) {
         case "MotionZero":
@@ -455,7 +472,18 @@ function ModuleManager() {
     if(mc.thePlayer.onGround && mc.theWorld.getBlockState(new BlockPos(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ)).getBlock() instanceof AntiSlab) {mc.thePlayer.jump()}};
   //Jump Scaffolding
     if(JumpScaffolding.get()) {
-        if(ScaffoldModule.getState() && mc.thePlayer.onGround && !mc.gameSettings.keyBindSneak.pressed) {if(mc.gameSettings.keyBindForward.pressed || mc.gameSettings.keyBindRight.pressed || mc.gameSettings.keyBindLeft.pressed) {mc.gameSettings.keyBindJump.pressed = false; mc.thePlayer.jump()}}
+        if(ScaffoldModule.getState() && mc.thePlayer.onGround && !mc.thePlayer.isOnLadder() && !mc.thePlayer.isInWeb && !mc.thePlayer.isInWater() && !mc.thePlayer.isInLava() && !mc.gameSettings.keyBindSneak.pressed) {if(mc.gameSettings.keyBindForward.pressed || mc.gameSettings.keyBindRight.pressed || mc.gameSettings.keyBindLeft.pressed) {mc.gameSettings.keyBindJump.pressed = false;
+        switch (JSMode.get()) {
+          case "SimplyJump":
+            mc.thePlayer.jump()
+            break;
+          case "Motion":
+            mc.thePlayer.motionY = JSV.get();
+            break;
+          case "TP":
+            mc.thePlayer.setPosition(mc.thePlayer.posX, mc.thePlayer.posY + JSV.get(), mc.thePlayer.posZ);
+            break;
+        }}}
     }
   //MLGScaffold
     if(MLGScaffold.get()) {mc.gameSettings.keyBindSneak.pressed = true; mc.gameSettings.keyBindJump.pressed = false; ScaffoldModule.getValue("Sprint").set(false); SprintModule.setState(false); if(mc.thePlayer.onGround) {mc.thePlayer.jump()}; if(SprintModule.getState()) {SprintModule.setState(false)}}
@@ -464,9 +492,8 @@ function ModuleManager() {
   this.onDisable = function() {
     BR.get() && mc.thePlayer.rotationYaw + 180; /*Fix Head Rotation. only this code...*/ 
     ScaffoldModule.setState(false); TowerModule.setState(false);
-    MLGSprint.get() && SprintModule.setState(true);
-    !MLGSprint.get() && SprintModule.setState(false);
-    WithBlinkAPI.get() && BlinkModule.setState(false);
+    if(MLGSprint.get()) {SprintModule.setState(true)}else{SprintModule.setState(false)}
+    WithBlinkAPI.get() || BlinkTower.get() && BlinkModule.setState(false);
   }
   /*this.onRender2D = function() {
     if(TSMMisEnabled == true) {mc.ingameGUI.drawCenteredString(mc.fontRendererObj, TSMMchat + "§c-Disabled TSMM and Scaffold and Tower", mc.displayWidth / 4, (mc.displayHeight / 2.5) + 8, -1)}
@@ -522,48 +549,242 @@ function HypixelGameChange() {
     if(!murder.get() == "") {mc.thePlayer.sendChatMessage("/play " + mm); murder.getValue("Murder Mystery").set("")}
     if(!UHC.get() == "") {mc.thePlayer.sendChatMessage("/play " + uhccmd); UHC.getValue("UHC").set("")}
     if(!MegaWall.get() == "") {mc.thePlayer.sendChatMessage("/play " + MegaW); MegaWall.getValue("MegaWalls").set("")}
-    if(Custom.get()) {chat.print(CTex)}
+    if(Custom.get()) {Custom.set(false); mc.thePlayer.sendChatMessage("/play " + CTex.get())}//... i forgot this '.GET()' smh...
   }
 }
 
-var scriptName = "ForceBugUper";
+function randomString(length) {
+  var text = "";
+  var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 " + jps;
+
+  for (var i = 0; i < length; i++) {
+      text += possible.charAt(Math.floor(Math.random() * possible.length));
+  }
+  return text;
+}
+
+//Add Hypixel Bypasser later and AutoReplay? xd
+function ChatManager() {
+  var i = 0;
+  var delay = 0;
+
+  var SpamMode = value.createList("Mode", ["onEnabled", "ValueChanged", "AutoSpam"], "ValueChanged");
+  var spamlist = value.createList("SpamProfile", ["Mineplex", "GameEnd", "Thx4Server", "LiquidAd", "DefaultLiquidSpammer", "TrulySpeach", "All", "Custom//", ""], "");
+  var yourname = value.createText("hackedBy", "[EnterNameHere]");
+  var maxDelay = value.createInteger("MaxDelay", 400,0,5000); // 10 = 1s.
+  var minDelay = value.createInteger("MinDelay", 100,0,5000);
+  var randomish = value.createBoolean("Ramdomizer", true);
+  var BeforeR = value.createBoolean("Before", false);
+  var AfterR = value.createBoolean("After", false);
+  var Incjp = value.createBoolean("#IncludeJapaneseString", false);
+  var AllowBet = value.createBoolean("Between", false); //Im Recommanding set false.
+  var RandomBet = value.createBoolean("RandomBetween", false);
+  var RBA = value.createInteger("Amount", 1,1,5);
+  var BetStB = value.createText("StringBefore", ">");
+  var BetStA = value.createText("StringAfter", "|");
+
+    this.addValues = function(values) {
+      values.add(SpamMode);
+      values.add(spamlist);
+      values.add(yourname);
+      values.add(maxDelay);
+      values.add(minDelay);
+      values.add(randomish);
+      values.add(BeforeR);
+      values.add(AfterR);
+      values.add(Incjp);
+      values.add(AllowBet);
+      values.add(RandomBet);
+      values.add(RBA);
+      values.add(BetStB);
+      values.add(BetStA);
+    }
+
+	this.getName = function () {
+		return "ChatManager";
+	}
+	this.getDescription = function () {
+		return "Spammer, But Addition Profiler Mode, Simple Code";
+	}
+	this.getCategory = function () {
+		return "Misc";
+	}
+  this.onEnable = function() {
+    i=0;
+    delay = Math.floor(Math.random() * ((maxDelay.get()-minDelay.get())+1) + minDelay.get());
+    if(SpamMode.get() == "onEnabled") {mc.thePlayer.sendChatMessage(MSG)}
+  }
+	this.onUpdate = function () {
+    Mineplex = [
+      "Don't Worry Mineplex! You've server is rly not popular. Alts are Almost all unbanned! xd!!",
+      "Hello mineplex, you've BAN is doesn't have much of an effect at all. why? A is Simple you've server is not popular. ",
+      "Hi mineplex! Don't worry The hackers stop coming to play. you've server is rly not popular. ",
+      "mineplex, Do you want to banned hackers on this server? i think answer is not. ",
+      "Lol! lagplex! We can never BANNED! Don't Worryyyyy!!!",
+      "hey guys im back! ;) don't worry guys!"
+    ]
+    GameEnd = [
+      "EZist haxied by " + yourname.get() + ", And " + clientname[parseInt(Math.random()*clientname.length)] + " Client. Download Now.",
+      "E Z! :) this game was fun!!! | HACKED BY " + yourname.get() + ", and " + clientname[parseInt(Math.random()*clientname.length)] + " Client.",
+      "E Z!! XD You are hacked by " + yourname.get() + ", and " + clientname[parseInt(Math.random()*clientname.length)] + " Client. ",
+      "hacked by " + yourname.get() + " and " + clientname[parseInt(Math.random()*clientname.length)] + " Client",
+      "gg! XD this game is rly fast ended! Guys Let's use " + clientname[parseInt(Math.random()*clientname.length)] + ", this's made 4 "+servername+ " Client!",
+      "yeah excited won in this game. i'm Used " + clientname[parseInt(Math.random()*clientname.length)] + " Client! Best for grade up pvp experience!!",
+      "gg! noobs. don't waste my time. you can't Never win! We "+clientname[parseInt(Math.random()*clientname.length)]+". Do you Vanilla?",
+      "THIS GAME WAS HAXIED BY "+yourname.get()+", and "+clientname[parseInt(Math.random()*clientname.length)]+"!",
+      "hahaha noobs, VanillaClient is sucks, Let's Use " +clientname[parseInt(Math.random()*clientname.length)]+" Client!",
+      "gg! you guys client are sucks, Download Modern "+clientname[parseInt(Math.random()*clientname.length)]+" Client! this is Update you gaming performance!"
+    ]
+    LiquidAd = [
+      clientname[parseInt(Math.random()*clientname.length)] + " is Best Client. Download Now.",
+      clientname[parseInt(Math.random()*clientname.length)] + " , is totaly Free!",
+       "Donate now " +clientname[parseInt(Math.random()*clientname.length)] + " Client!",
+       "Sigma Client Is sucks, FREEDOWNLOAD " +clientname[parseInt(Math.random()*clientname.length)] + " Now.",
+       "gg! XD this game is rly fast ended! Guys Let's use " + clientname[parseInt(Math.random()*clientname.length)] + ", this's made 4 "+servername+ " Client!",
+       "yeah excited won in this game. i'm Used " + clientname[parseInt(Math.random()*clientname.length)] + " Client! Best for grade up pvp experience!!",
+       "gg! noobs. don't waste my time. you can't Never win! We "+clientname[parseInt(Math.random()*clientname.length)]+". Do you Vanilla?",
+       "hahaha noobs, VanillaClient is sucks, Let's Use " +clientname[parseInt(Math.random()*clientname.length)]+" Client!",
+       "gg! you guys client are sucks, Download Modern "+clientname[parseInt(Math.random()*clientname.length)]+" Client! this is Update you gaming performance!"
+    ]
+    TrulySpeach = [
+      "Sigma Client is Good for " +insultword[parseInt(Math.random()*insultword.length)] + " Gift Client",
+      "Sigma User Never don't want to know. 'Im scammed.' ",
+      "Sigma Need to Know "  +insultword[parseInt(Math.random()*insultword.length)],
+      "Paid Client is Good for rich. But Never recommanded Student, Poor. ",
+      "Why you using Shit gma? i never understand your thinking. ",
+      "i Admit Using Paid Client. (if they good performance), But Sigma is sucks. ",
+      "const SigmaClient = sucks",
+      "const SigmaClient = shit",
+      "const SigmaClient = worstclient",
+      "const SigmaClient = Paid",
+      "const SigmaClientDev = Scammer",
+      "const SigmaClientDev = Fraudsters",
+      "const Korean = " + insultword[parseInt(Math.random()*insultword.length)] + "",
+      "const Korean = Raqed-Humans",
+      "const Korean = !Smart",
+    ]
+  if(Incjp.get()) {jps = ContJP}else{jps = ""}
+    if(randomish.get()) {
+      if(AllowBet.get()) {
+        if(RandomBet.get()) {
+          StB = randomString(RBA.get());
+          StA = randomString(RBA.get());
+        } else {
+          StB = BetStB.get();
+          StA = BetStA.get();
+        }
+      } else {
+        StB = "";
+        StA = "";
+      }
+      if(BeforeR.get()) {br = StB + randomString(8) + StA}else {br = ""}
+      if(AfterR.get()) { ar = StB + randomString(8) + StA}else {ar = ""}
+    }
+    switch (spamlist.get()) {
+      case "Mineplex":
+        message = Mineplex;break;
+      case "HackedBy":
+        message = GameEnd;break;
+      case "LiquidAd":
+        message = LiquidAd;break;
+      case "TrulySpeach": //like hate speach(propaganda?), im not recommanded using this option. xd! but hope they are true
+        message = TrulySpeach;break;
+      case "All":
+        message = Mineplex,HackedBy,LiquidAd,TrulySpeach;break;
+      default:
+        message = "please select Profile.";break;
+    }
+    MSG = br + message[parseInt(Math.random()*message.length)] + ar;
+    switch (SpamMode.get()) {
+      case "ValueChanged":
+        if(!spamlist.get() == "") {mc.thePlayer.sendChatMessage(MSG); spamlist.set("")}break;
+      case "AutoSpam":
+        if (i ==delay) {mc.thePlayer.sendChatMessage(MSG);delay = Math.floor(Math.random() * ((maxDelay.get()-minDelay.get())+1) + minDelay.get());i=0}else{i+=1}break;
+    }
+  }
+}
+
+/*
+//
+//hmm...
+var Count = -1;
+var EndGame;
+
+var scriptName = "Quiter";
 var scriptVersion = 1.0;
 var scriptAuthor = "tk400.";
 
-function ForceBugUper() {
+function Quiter() {
+
+  var EndGame = value.createInteger("End", 20, 0, 100);
+  var AutoQuit = value.createBoolean("AutoQuit", false);
+
+    this.addValues = function(values) {
+      values.add(EndGame);
+      values.add(AutoQuit);
+    }
 
 	this.getName = function () {
-		return "ForceBugUper";
+		return "Quiter";
 	}
 	this.getDescription = function () {
-		return "";
+		return "Allow you to make playing Time to stop.";
 	}
 	this.getCategory = function () {
-		return "";
+		return "Fun";
 	}
+  this.onLoad = function () {Count == 0; chat.print("changed to :" + Count)}
 
-  this.onEnable = function() {
-    BugUpModule.getValue("MaxDistanceToSetBlock").get(n)
+  this.onWorld = function() {
+    Count += 1;
+    chat.print("Now:" + Count)
+    if(EndGame.get() == Count) {chat.print("it's time to stop")}
+    if((EndGame.get() + 1) <= Count) {chat.print("are you enjoied Cheating? xd but time to stop."); AutoQuit.get() && moduleManager.getModule("Kick").set(true)}
   }
-  
-  this.onDisable = function() {
-    BugUpModule.getValue("MaxDistanceToSetBlock").set(n)
+
+	this.onRender2D = function () {
+    mc.ingameGUI.drawCenteredString(mc.fontRendererObj, EndGame.get() + "/" + Count, mc.displayWidth / 4, mc.displayHeight / 2.5, -1)
   }
 }
+
+//var Quiter = moduleManager.registerModule(new Quiter)
+//function onEnable () {Quiter};
+//function onDisable () {moduleManager.unregisterModule(Quiter);};
+
+//
+*/
+
 
 
 var ModuleManager = moduleManager.registerModule(new ModuleManager)
 var TSMM = moduleManager.registerModule(new TSMM);
 var HypixelGameChange = moduleManager.registerModule(new HypixelGameChange);
+var ChatManager = moduleManager.registerModule(new ChatManager)
+//var Quiter = moduleManager.registerModule(new Quiter)
 
 function onEnable() {
-    ModuleManager;
-    TSMM;
-    HypixelGameChange;
+  ModuleManager;
+  TSMM;
+  HypixelGameChange;
+  ChatManager;
+  //Quiter;
 };
 
 function onDisable() {
-    moduleManager.unregisterModule(ModuleManager);
-    moduleManager.unregisterModule(TSMM);
-    moduleManager.unregisterModule(HypixelGameChange);
+  moduleManager.unregisterModule(ModuleManager);
+  moduleManager.unregisterModule(TSMM);
+  moduleManager.unregisterModule(HypixelGameChange);
+  moduleManager.unregisterModule(ChatManager);
+  //moduleManager.unregisterModule(Quiter);
 };
+
+/** thank you for
+ * AutoL Script(Used MessageRandomizer System, for ChatManager)
+ * FileSpammer Script(Senk Ju) (Used RandomStringer, for ChatManager)
+ * Scriptolotl (Scorpion) Used for FileSpammer...?
+ * etc...!
+ */
+
+
+
+//functions?
