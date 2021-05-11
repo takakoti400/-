@@ -683,7 +683,7 @@ function ChatManager() {
     switch (spamlist.get()) {
       case "Mineplex":
         message = Mineplex;break;
-      case "HackedBy":
+      case "GameEnd":
         message = GameEnd;break;
       case "LiquidAd":
         message = LiquidAd;break;
