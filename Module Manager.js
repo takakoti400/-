@@ -9,8 +9,8 @@
  * that is Not Bad, But rly fucking simply code, so,,i mean that is uncode!!!! (This is also the reason for the development of the script xd)
  * 
  * 
- * Build for Latest / Tested For 2a87660 not tested on 
- * https://dl.ccbluex.net/skip/mLANvV0lDm
+ * script for Latest build. (tested on 401b3c5)
+ * https://dl.ccbluex.net/skip/lgJeAGuKh9
  * 
  */
 var scriptName = "ModuleManager";
@@ -69,6 +69,7 @@ var LAB=01
 
 //Packets
 /*var S12PacketEntityVelocity = Java.type('net.minecraft.network.play.server.S12PacketEntityVelocity');*/
+var clientchat = Java.type("net.minecraft.network.play.client.C01PacketChatMessage");
 
 //Player | Mob States
 var Potion = Java.type('net.minecraft.potion.Potion');
@@ -174,7 +175,7 @@ function ModuleManager() {
 		return "ModuleManager";
 	};
 	this.getDescription = function () {
-		return "Mangement Disable, Setting, Modules. A Simple Script";
+		return "Management Disable, Setting, Modules. A Simple Script";
 	};
 	this.getCategory = function () {
 		return "Player";
@@ -403,9 +404,9 @@ function ModuleManager() {
   var AutoSneak = value.createBoolean("AutoSneak", false);
   var MinDelay = value.createFloat("MinDelay", 5, 0, 30);
   var MaxDelay = value.createFloat("MaxDelay", 10, 0, 30);
-  var RAutoSneak = value.createList("ReleaseKeyMode", ["Instant(UseElse)","Delay"], "Delay");
-  var RMinDelay = value.createFloat("ReleaseMinDelay", 5, 0, 30);
-  var RMaxDelay = value.createFloat("ReleaseMaxDelay", 10, 0, 30);
+  var RAutoSneak = value.createList("ReleaseKeyMode", ["Instant","Delay"], "Delay");
+  var RMinDelay = value.createFloat("ReleaseMinDelay", 0, 0, 3);
+  var RMaxDelay = value.createFloat("ReleaseMaxDelay", 1, 0, 3);
   var MLGScaffold = value.createBoolean("MLGSCaffold", false);
   var MLGSprint = value.createBoolean("AfterSprint", true);
   var NoXZMotion = value.createList("NoXZMotion", ["Off", "MotionZero", "NoKeyBoard"], "Off");
@@ -518,6 +519,7 @@ function ModuleManager() {
     if(MLGScaffold.get()) {mc.gameSettings.keyBindSneak.pressed = true; mc.gameSettings.keyBindJump.pressed = false; ScaffoldModule.getValue("Sprint").set(false); SprintModule.setState(false); if(mc.thePlayer.onGround) {mc.thePlayer.jump()}; if(SprintModule.getState()) {SprintModule.setState(false)}}
   };
   this.onMove = function () {
+    if (mc.gameSettings.keyBindForward.isKeyDown() || mc.gameSettings.keyBindLeft.isKeyDown() || mc.gameSettings.keyBindRight.isKeyDown() || mc.gameSettings.keyBindBack.isKeyDown()) {
     if(BR.get()) {//Reverse Forward to BackWard
       if(mc.gameSettings.keyBindForward.pressed) {
          mc.gameSettings.keyBindBack.pressed = true;
@@ -526,17 +528,20 @@ function ModuleManager() {
         }
     //AutoSneaker
       if(AutoSneak.get()) {
-        ScaffoldModule.getValue("Down").set(false);
-        if(i == delay) {mc.gameSettings.keyBindSneak.pressed = true;delay = DelayCal(MaxDelay.get(),MinDelay.get());i=0;
-        }else{
-          switch (RAutoSneak.get()) {
-            case "Instant(UseElse)":
-              mc.gameSettings.keyBindSneak.pressed = false;break;
-            case "Delay":
-              r+=0;
-              RDelay =DelayCal(RMaxDelay.get(), RMinDelay.get());
-              if(r==RDelay) {mc.gameSettings.keyBindSneak.pressed = false}break;
-          }i+=1}
+        if(!mc.gameSettings.keyBindJump.isKeyDown()) {
+          ScaffoldModule.getValue("Down").set(false);
+          if(i == delay) {mc.gameSettings.keyBindSneak.pressed = true;delay = DelayCal(MaxDelay.get(),MinDelay.get());i=0;
+          }else{
+            switch (RAutoSneak.get()) {
+              case "Instant(UseElse)":
+                mc.gameSettings.keyBindSneak.pressed = false;break;
+              case "Delay":
+                r+=0;
+                RDelay =DelayCal(RMaxDelay.get(), RMinDelay.get());
+                if(r==RDelay) {mc.gameSettings.keyBindSneak.pressed = false}break;
+            }i+=1}
+          }
+        }
       }
     }
   this.onDisable = function() {
@@ -672,7 +677,7 @@ function ChatManager() {
       case "AutoSpam":
         if (i ==delay) {messageCont(spamlist.get(),yourname.get(),randomish.get(),BeforeR.get(),AfterR.get(),Incjp.get(),AllowBet.get(),RandomBet.get(),RBA.get(),BetStB.get(),BetStA.get());delay =DelayCal(MaxDelay.get(),MinDelay.get());i=0}else{i+=1}break;
       case "test.ccbluex.netBlockGiver":
-        if (i ==100) {mc.thePlayer.sendChatMessage("/give planks 64");i=0}else{i+=1}break;
+        if (i ==50) {mc.thePlayer.sendChatMessage("/give planks 64");i=0}else{i+=1}break;
     }
   }
 }
@@ -688,6 +693,10 @@ function tk400sAdditonalModule() {
   var ClimbSpeed = value.createList("ClimbSpeed", ["Off", "TP", "Motion", ""], "Off");
   var BlockAnimation = value.createBoolean("BlockAnimation", false);
   var animation = value.createFloat("Animation", 0.75, 0, 1);
+  var AutoLeaver = value.createBoolean("AutoLeave", false);
+  var ALMode = value.createList("ALMode", ["NextGame", "Lobby"],"");
+  var ReJoinServer = value.createList("ALServer", ["Hypixel", "Cubecraft","?"],"");
+  //var AntiTypo = value.createBoolean("AntiTypo", true);
 
     this.addValues = function(values) {
       values.add(Values);
@@ -699,6 +708,9 @@ function tk400sAdditonalModule() {
       values.add(ClimbSpeed);
       values.add(BlockAnimation);
       values.add(animation);
+      values.add(ALMode);
+      values.add(ReJoinServer);
+      //values.add(AntiTypo);
     }
 
 	this.getName = function () {
@@ -723,6 +735,12 @@ function tk400sAdditonalModule() {
           mc.thePlayer.motionY + Motion.get();break;
       }
     }
+    if(AutoLeaver.get()) {
+      switch (ALMode.get()) {
+        case "ReJoin":
+          mc.thePlayer.sendChatMessage("/")
+      }
+    }
   }
   this.onMotion = function () {
     if(animation.get()){
@@ -734,7 +752,7 @@ function tk400sAdditonalModule() {
       switch (Criticals.get()) {
         case "Jump":
           SpeedModule.setState(false);
-          mc.thePlayer.jump(); mc.gameSettings.keyBindJump.pressed = false;
+          mc.gameSettings.keyBindJump.pressed = true;
         break;
         case "SpeedModule":
           if(mc.gameSettings.keyBindForward.pressed || mc.gameSettings.keyBindRight.pressed || mc.gameSettings.keyBindLeft.pressed) {
@@ -748,6 +766,116 @@ function tk400sAdditonalModule() {
         break;
       }};
   }
+  /*this.onPacket = function (eventData) {
+    if(AntiTypo.get()) {
+      if (packet instanceof clientchat) {
+      var packet = eventData.getPacket();
+      if (packet.message.match("autOL" || "autol" || "utoL" || "utOL")) {
+        eventData.cancelEvent();
+        chat.print("§c[Debug] §7 Event(Chatpacket) was canceled");
+      }
+      if (packet.message.contains("antitypo")) {
+        eventData.cancelEvent();
+        chat.print("a")
+      }
+      }
+    }
+  }*/
+
+  this.onDisable = function() {
+  }
+}
+
+
+function MCMusicPlayer() {
+  var soviets =0;
+
+  var PlayingMusic = value.createList("Music", ["Roup", "Soviet", ""], "SovietMusic"); //i want create another template. but...hm
+  var Volume = value.createFloat("Volume", 10, 0, 255);
+
+    this.addValues = function(values) {
+      values.add(PlayingMusic);
+      values.add(Volume);
+    }
+
+	this.getName = function () {
+		return "MCMusicPlayer";
+	}
+	this.getDescription = function () {
+		return "Allow you to hear Music. But its played by Minecraft Sounds.";
+	}
+	this.getCategory = function () {
+		return "Fun";
+	}
+
+  this.onEnable = function() {
+    chat.print("[Dev] Playing" + random.anvil_use);
+    playSound("random.anvil_use", 10, 1);
+  }
+
+	this.onUpdate = function () {
+    switch (PlayingMusic.get()) {
+      case "Soviet":
+        if(soviets >= 216){soviets =0}else{soviets+=1}
+        switch (soviets) {
+        case soviets > 0 && soviets < 30:
+           playSound("note.harp", Volume.get(), 1.7);
+            break;
+        case 40:
+           playSound("note.harp", Volume.get(), 1.3);
+            break;
+        case 55:
+           playSound("note.harp", Volume.get(), 1.7);
+            break;
+        case 65:
+           playSound("note.harp", Volume.get(), 1.3);
+            break;
+        case 75:
+           playSound("note.harp", Volume.get(), 1.4);
+            break;
+        case 82:
+           playSound("note.harp", Volume.get(), 1.6);
+            break;
+        case 90 || 95:
+           playSound("note.harp", Volume.get(), 1.1);
+            break;
+        case 100:
+           playSound("note.harp", Volume.get(), 1.4);
+            break;
+        case 115:
+           playSound("note.harp", Volume.get(), 1.3);
+            break;
+        case 125:
+           playSound("note.harp", Volume.get(), 1.2);
+            break;
+        case 135:
+           playSound("note.harp", Volume.get(), 1.3);
+            break;
+        case 145:
+           playSound("note.harp", Volume.get(), 0.85);
+            break;
+        case 155:
+           playSound("note.harp", Volume.get(), 0.85);
+            break;
+        case 165 || 180:
+           playSound("note.harp", Volume.get(), 0.95);
+            break;
+        case 190:
+           playSound("note.harp", Volume.get(), 1.05);
+            break;
+        case 200:
+           playSound("note.harp", Volume.get(), 1.15);
+            break;
+        case 215:
+           playSound("note.harp", Volume.get(), 1.25);
+            break;
+        case soviets <= 216:
+            soviets = 0;
+            break;
+        }
+        break;
+      }
+  }
 
   this.onDisable = function() {
   }
@@ -760,6 +888,7 @@ var HypixelGameChange = moduleManager.registerModule(new HypixelGameChange);
 var ChatManager = moduleManager.registerModule(new ChatManager)
 //var Quiter = moduleManager.registerModule(new Quiter)
 var tk400sAdditonalModule = moduleManager.registerModule(new tk400sAdditonalModule)
+var MCMusicPlayer = moduleManager.registerModule(new MCMusicPlayer)
 
 function onEnable() {
   ModuleManager;
@@ -768,6 +897,7 @@ function onEnable() {
   ChatManager;
   //Quiter;
   tk400sAdditonalModule;
+  MCMusicPlayer;
 };
 
 function onDisable() {
@@ -777,13 +907,16 @@ function onDisable() {
   moduleManager.unregisterModule(ChatManager);
   //moduleManager.unregisterModule(Quiter);
   moduleManager.unregisterModule(tk400sAdditonalModule);
+  moduleManager.unregisterModule(MCMusicPlayer);
 };
 
 /**
  * thank you for
  * AutoL Script(Used MessageRandomizer System, for ChatManager)
  * FileSpammer Script(Senk Ju) (Used RandomStringer, for ChatManager)
+ * AutoBot Script(soulplexis) used Command System, used for AntiTypo.
  * Scriptolotl (Scorpion) Used from FileSpammer.
+ * AutoBot used for MCMusicPlayer.
  * CzechHek's BlockAnimation and BlockSelector.
  * etc...!
 **/
@@ -798,6 +931,10 @@ function DelayCal (MaxDelay, MinDelay) {
 function rt (t) {//Shorten it longer randomizer code.
   var text = t[parseInt(Math.random()*t.length)]
   return text;
+}
+
+function playSound (name,a,b) {
+  mc.theWorld.playSound(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ, name, a, b, false);
 }
 
 function messageCont (spamlist, urname,randomish, BeforeR, AfterR, IncJP, AllowBet, RandomBet, RBA, BetStB, BetStA) {
@@ -896,4 +1033,4 @@ if(IncJP) {jps = ContJP}else{jps = ""}
   mc.thePlayer.sendChatMessage(MSG);
   rtt = rt(clientnames);
   chat.print(rtt);
-}
+}//used only for CM.
