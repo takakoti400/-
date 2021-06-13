@@ -3,12 +3,6 @@
  * Script of tk400's
  * this script contains ModuleManager, TowerScaffoldzzzz, HypixelGameChanger, Quitter(new) ChatManager(New!).
  * 
- * ※ModuleManger is Help, Improve Bypass, And Your Cheating Life.
- * 
- * ※TSMM(TowwrScaffoldzzzz) is Brunch Of CzechHek's TowerScaffodldz,
- * that is Not Bad, But rly fucking simply code, so,,i mean that is uncode!!!! (This is also the reason for the development of the script xd)
- * 
- * 
  * script for Latest build. (tested on 401b3c5)
  * https://dl.ccbluex.net/skip/lgJeAGuKh9
  * 
@@ -40,6 +34,8 @@ var InvModule = moduleManager.getModule("InventoryCleaner");
 var InvAAModule = moduleManager.getModule("AutoArmor");
 var BlinkModule = moduleManager.getModule("Blink");
 var FreeCamModule = moduleManager.getModule("FreeCam");
+var StoESPModule = moduleManager.getModule("StorageESP");
+var ESPModule = moduleManager.getModule("ESP");
 
 //Java
 //var Timer = Java.type("java.util.Timer");
@@ -68,8 +64,8 @@ ClientNameJA = ["LiqBounce", "Bounce of Liquidz", "LaquidBounce", "LiquidBounce"
 var LAB=01
 
 //Packets
-/*var S12PacketEntityVelocity = Java.type('net.minecraft.network.play.server.S12PacketEntityVelocity');*/
-var clientchat = Java.type("net.minecraft.network.play.client.C01PacketChatMessage");
+//var S12PacketEntityVelocity = Java.type('net.minecraft.network.play.server.S12PacketEntityVelocity');
+//var clientchat = Java.type("net.minecraft.network.play.client.C01PacketChatMessage");
 
 //Player | Mob States
 var Potion = Java.type('net.minecraft.potion.Potion');
@@ -80,26 +76,15 @@ SlimeBlock = Java.type('net.minecraft.block.BlockSlime')
 AirBlock = Java.type('net.minecraft.block.BlockAir')
 AntiSlab = Java.type('net.minecraft.block.BlockSlab')
 
-//function
-function vClip(offset) {
-  mc.thePlayer.setPosition(mc.thePlayer.posX, mc.thePlayer.posY + offset, mc.thePlayer.posZ);
-}
-function hclip(offset) {
-  mc.thePlayer.setPosition(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ);
-}
-function HMotion(offset) {
-  var sin = Math.sin(mc.thePlayer.rotationYaw / 180.0 * 3.1415927)*offset;
-  var cos = Math.cos(mc.thePlayer.rotationYaw / 180.0 * 3.1415927)*offset;
-  mc.thePlayer.motionX -= sin; mc.thePlayer.motionZ += cos;
-}
 
 function ModuleManager() {
 
+  var Profile = value.createList("MMMode", ["Lite", "", "All", ""],"");
   var Text1 = value.createText(">MMSettings", "");
   var SLT = value.createText("CustomTag", "SuperMechaMechaSugooooiModule!");
   var CC = value.createText("CustomColor", "a"); //https://minecraft.gamepedia.com/Formatting_codes
   var DebugChat = value.createBoolean("DebugChat", false);
-  //var test = value.createBoolean("test", true); //Using on Develop, tset.
+//var test = value.createBoolean("test", true); //Using on Develop, tset.
   var SpeedJump = value.createBoolean("Speed", true);
   var WASDSpeed = value.createBoolean("AntiHorizontalSpeedStrafing", false);
   var SpeedsDisabler = value.createBoolean("SpeedsDisabler", true);
@@ -131,44 +116,49 @@ function ModuleManager() {
   var SaveConfig = value.createBoolean("SaveConfig", false);
   var SavingName = value.createText("CurrentLoad/SaveFileName", "N/A");
   var DSConfig = value.createBoolean("ServerDetect", false);
-
-    this.addValues = function(values) {
-      values.add(Text1);
-      values.add(SLT);
-      values.add(CC);
-      //values.add(test);
-      values.add(DebugChat);
-      values.add(SpeedsDisabler);
-      values.add(ChangeMode)
-      values.add(VelLJManage);
-      values.add(AutoKAJump);
-      values.add(ReverseStepFix);
-      values.add(AntiNoCritical);
-      values.add(SpeedJump);
-      values.add(WASDSpeed)
-      values.add(AutoFClear);
-      values.add(Text2);
-      values.add(Inv);
-      values.add(InvList);
-      values.add(Text3);
-      values.add(RenderSetting);
-      values.add(RSCounter);
-      values.add(RSMark);
-      values.add(Text4);
-      values.add(Selection);
-      values.add(DSBlock);
-      values.add(mode);
-      values.add(customid);
-      values.add(fucker);
-      values.add(EnableFucker);
-      values.add(blockesp);
-      values.add(EnableESP);
-      values.add(AutoLeave);
-      values.add(Text5);
-      values.add(LoadConfig);
-      values.add(SaveConfig);
-      values.add(SavingName);
-      values.add(DSConfig);
+  var AntiESP = value.createBoolean("AntiControlableESP", false);
+  var NoMouse = value.createBoolean("NoMouseWhenAttack", false);
+  
+    this.addValues = function(v) {
+      v.add(Profile);
+      v.add(Text1);
+      v.add(SLT);
+      v.add(CC);
+    //v.add(test);
+      v.add(DebugChat);
+      v.add(SpeedsDisabler);
+      v.add(ChangeMode)
+      v.add(VelLJManage);
+      v.add(AutoKAJump);
+      v.add(ReverseStepFix);
+      v.add(AntiNoCritical);
+      v.add(SpeedJump);
+      v.add(WASDSpeed)
+      v.add(AutoFClear);
+      v.add(Text2);
+      v.add(Inv);
+      v.add(InvList);
+      v.add(Text3);
+      v.add(RenderSetting);
+      v.add(RSCounter);
+      v.add(RSMark);
+      v.add(Text4);
+      v.add(Selection);
+      v.add(DSBlock);
+      v.add(mode);
+      v.add(customid);
+      v.add(fucker);
+      v.add(EnableFucker);
+      v.add(blockesp);
+      v.add(EnableESP);
+      v.add(AutoLeave);
+      v.add(Text5);
+      v.add(LoadConfig);
+      v.add(SaveConfig);
+      v.add(SavingName);
+      v.add(DSConfig);
+      v.add(AntiESP);
+      v.add(NoMouse);
     };
 
 	this.getName = function () {
@@ -184,6 +174,13 @@ function ModuleManager() {
     return SLT.get();
   };
 	this.onUpdate = function () {
+    if(Profile.get() != "") {
+      switch (Profile.get()) {
+        case "Lite": break;
+        case "All": break;
+      }
+      Profile.set("");
+    }
     //Manage SpeedJump /Fix Jump Boosting
       if(SpeedJump.get()) {
         if(SpeedModule.getState() && mc.thePlayer.onGround) {
@@ -268,7 +265,7 @@ function ModuleManager() {
     };
     //AntiNoCritical
     if(AntiNoCritical.get()) {
-      if(!NoFallModule.getState() && mc.thePlayer.fallDistance >= 2.6){NoFallModule.setState(true)}
+      if(!NoFallModule.getState() && mc.thePlayer.fallDistance >= 3.1){NoFallModule.setState(true)}
     }
     //AutoKAJump
     if(AutoKAJump.get() && KAModule.getState() && !mc.gameSettings.keyBindJump.pressed) {mc.gameSettings.keyBindJump.pressed = true};
@@ -288,52 +285,48 @@ function ModuleManager() {
     if(Inv.get()) {
       switch (InvList.get()) {
         case "None":
-          if(InvModule.getValue("invOpen").get()) {InvModule.getValue("invOpen").set(false)}; if(InvModule.getValue("SimulateInventory").get()) {InvModule.getValue("SimulateInventory").set(false)}
-          if(InvAAModule.getValue("invOpen").get()) {InvAAModule.getValue("invOpen").set(false)}; if(InvAAModule.getValue("SimulateInventory").get()) {InvAAModule.getValue("SimulateInventory").set(false)}
+          if(InvModule.getValue("invOpen").get() == true) {InvModule.getValue("invOpen").set(false)}; if(InvModule.getValue("SimulateInventory").get()==true) {InvModule.getValue("SimulateInventory").set(false)}
+          if(InvAAModule.getValue("invOpen").get() == true) {InvAAModule.getValue("invOpen").set(false)}; if(InvAAModule.getValue("SimulateInventory").get()==true) {InvAAModule.getValue("SimulateInventory").set(false)}
           break;
         case "Open":
-          if(!InvModule.getValue("invOpen").get()) {InvModule.getValue("invOpen").set(true)}; if(InvModule.getValue("SimulateInventory").get()) {InvModule.getValue("SimulateInventory").set(false)}
-          if(!InvAAModule.getValue("invOpen").get()) {InvAAModule.getValue("invOpen").set(true)}; if(InvAAModule.getValue("SimulateInventory").get()) {InvAAModule.getValue("SimulateInventory").set(false)}
+          if(InvModule.getValue("invOpen").get() == false) {InvModule.getValue("invOpen").set(true)}; if(InvModule.getValue("SimulateInventory").get()==true) {InvModule.getValue("SimulateInventory").set(false)}
+          if(InvAAModule.getValue("invOpen").get() == false) {InvAAModule.getValue("invOpen").set(true)}; if(InvAAModule.getValue("SimulateInventory").get()==true) {InvAAModule.getValue("SimulateInventory").set(false)}
           break;
         case "Simulate":
-          if(InvModule.getValue("invOpen").get()) {InvModule.getValue("invOpen").set(false)}; if(!InvModule.getValue("SimulateInventory").get()) {InvModule.getValue("SimulateInventory").set(true)}
-          if(InvAAModule.getValue("invOpen").get()) {InvAAModule.getValue("invOpen").set(false)}; if(!InvAAModule.getValue("SimulateInventory").get()) {InvAAModule.getValue("SimulateInventory").set(true)}
+          if(InvModule.getValue("invOpen").get() == true) {InvModule.getValue("invOpen").set(false)}; if(InvModule.getValue("SimulateInventory").get()==false) {InvModule.getValue("SimulateInventory").set(true)}
+          if(InvAAModule.getValue("invOpen").get() == true) {InvAAModule.getValue("invOpen").set(false)}; if(InvAAModule.getValue("SimulateInventory").get()==false) {InvAAModule.getValue("SimulateInventory").set(true)}
           break;
-        case "Both":
-          if(!InvModule.getValue("invOpen").get()) {InvModule.getValue("invOpen").set(true)}; if(!InvModule.getValue("SimulateInventory").get()) {InvModule.getValue("SimulateInventory").set(true)}
-          if(!InvAAModule.getValue("invOpen").get()) {InvAAModule.getValue("invOpen").set(true)}; if(!InvAAModule.getValue("SimulateInventory").get()) {InvAAModule.getValue("SimulateInventory").set(true)}
+          case "Both":
+          if(InvModule.getValue("invOpen").get() == false) {InvModule.getValue("invOpen").set(true)}; if(InvModule.getValue("SimulateInventory").get()==false) {InvModule.getValue("SimulateInventory").set(true)}
+          if(InvAAModule.getValue("invOpen").get() == false) {InvAAModule.getValue("invOpen").set(true)}; if(InvAAModule.getValue("SimulateInventory").get()==false) {InvAAModule.getValue("SimulateInventory").set(true)}
+          break;
       }
     }
-    
     //Selection
     if(Selection.get()) {
-      switch (mode.get()) { //Test
-        case "Bed": id = 26; break;
-        case "Cake": id = 92; break;
-        case "Dragon_Egg": id = 122; break;
-        case "Obsidian": id = 49; break;
-        case "Enchanting_Table": id = 116; break;
-        case "Crafting_Table": id = 58; break;
-        case "Custom": id = customid.get(); break;
-      }
+      id = [26,92,122,9,116,58,customid.get()][["Bed", "Cake", "Dragon_Egg", "Obsidian","Enchanting_Table","Crafting_Table","Custom"].indexOf(mode.get())];
     if(DSBlock.get()) {
-      if(mc.getCurrentServerData().serverIP.match(".hypixel.net" || "hypixel.cn")) {
+      switch (serverip) {
+        case ".hypixel.net" || "hypixel.cn":
           FuckerModule.getValue("Block").set(26);
-          BlockESPModule.getValue("Block").set(26);
-      }
-      if(mc.getCurrentServerData().serverIP.match(".mineplex.com")) {
+          BlockESPModule.getValue("Block").set(26);break;
+        case ".mineplex.com":
           FuckerModule.getValue("Block").set(92);
-          BlockESPModule.getValue("Block").set(92);
-      }
-      if(mc.getCurrentServerData().serverIP.match(".cubecraft.net" || "cubecraft.net")) {
+          BlockESPModule.getValue("Block").set(92);break;
+        case "hypixel.net" || "hypixel.cn":
+          FuckerModule.getValue("Block").set(26);
+          BlockESPModule.getValue("Block").set(26);break;
+        case ".cubecraft.net" || "cubecraft.net":
           FuckerModule.getValue("Block").set(122);
-          BlockESPModule.getValue("Block").set(122);
-      }
-      if(mc.getCurrentServerData().serverIP.match(".ccbluex.net")) {
-        chat.print("checked.")
+          BlockESPModule.getValue("Block").set(122);break;
+        case ".ccbluex.net":
+          chat.print("DEV | Checked!");
           FuckerModule.getValue("Block").set(1);
-          BlockESPModule.getValue("Block").set(1);
+          BlockESPModule.getValue("Block").set(1);break;
       }
+    }else{
+      FuckerModule.getValue("Block").set(id);
+      BlockESPModule.getValue("Block").set(id);
     }
       if(EnableFucker.get()) {!FuckerModule.getState() && FuckerModule.setState(true)}
       if(EnableESP.get()) {!BlockESPModule.getState() && BlockESPModule.setState(true)}
@@ -346,15 +339,22 @@ function ModuleManager() {
         commandManager.executeCommand(".localautosettings load "+ servererna + " all"); 
       }else{chat.print("i have no 'Idea', sorry.")}
     }
-    if(SaveConfig.get()) {SaveConfig.set(false); commandManager.executeCommand(".localautosettings save " + servername + " all"); chat.print("§4Debug[SaveConfig]§f: Saved for §l" + servername)}
+    if(SaveConfig.get()) {SaveConfig.set(false); commandManager.executeCommand(".localautosettings save " + servername + " all"); chat.print("§4Debug[SaveConfig]§f: Saved for §l" + servername)};
+    //AntiCESP
+    if(AntiESP.get()) {
+      if(ESPModule.getValue("Mode").get() == "ShaderOutline" || ESPModule.getValue("Mode").get() == "ShaderGlow") {ESPModule.getValue("Mode").set("2D");chat.print("Detected")}
+      if(StoESPModule.getValue("Mode").get() =="ShaderOutline" || StoESPModule.getValue("Mode").get() =="ShaderGlow") {StoESPModule.getValue("Mode").set("2D");chat.print("detected")}
+    }
   }
 
   this.onAttack = function () {
-    mc.gameSettings.keyBindUseItem.pressed = mc.gameSettings.keyBindAttack.pressed = false;
+    if(NoMouse.get()) {
+      mc.gameSettings.keyBindUseItem.pressed = mc.gameSettings.keyBindAttack.pressed = false;
+    }
     //AntiNoCritical
     if(AntiNoCritical.get()) {
-      if(CriticalsModule.getState() && NoFallModule.getState() && !mc.thePlayer.fallDistance <= 3) {NoFallModule.setState(false)}
-    }
+      if(NoFallModule.getState() && !mc.thePlayer.fallDistance <= 3) {NoFallModule.setState(false)}
+      }
   };
 
   this.onWorld = function () {
@@ -363,10 +363,13 @@ function ModuleManager() {
     //Check AutoLeave was Disabled.
     if(AutoLeave.get()) {if(!AutoLeaveModule.getState()) {AutoLeaveModule.setState(true)}}
     //Used for ConfigSaver
-      if(mc.getCurrentServerData().serverIP.match(".ccbluex.net")) {servername = 'testccbluex'};
-      if(mc.getCurrentServerData().serverIP.match(".hypixel.net" || "hypixel.net")) {servername = 'hypixel'};
-      if(mc.getCurrentServerData().serverIP.match(".cubecraft.net" || "cubeaft.net")) {servername = 'cubecraft'};
-      if(mc.getCurrentServerData().serverIP.match(".mineplex.com")) {servername = 'mineplex'};
+    var serverip = mc.getCurrentServerData().serverIP;
+      switch (serverip) {
+        case ".ccbluex.net": servername = 'testccbluex'; break;
+        case ".hypixel.net" || "hypixel.net": servername = 'hypixel'; break;
+        case ".cubecraft.net" || "cubeaft.net": servername = 'cubecraft'; break;
+        case ".mineplex.com": servername = 'mineplex'; break;
+      }
     // EXPEPIMENTAL //
     SavingName.set(servername);
   }
@@ -409,30 +412,30 @@ function ModuleManager() {
   var RMaxDelay = value.createFloat("ReleaseMaxDelay", 1, 0, 3);
   var MLGScaffold = value.createBoolean("MLGSCaffold", false);
   var MLGSprint = value.createBoolean("AfterSprint", true);
-  var NoXZMotion = value.createList("NoXZMotion", ["Off", "MotionZero", "NoKeyBoard"], "Off");
+  var NoXZMotion = value.createList("NoXZMotion", ["Off", "MotionZero", "NoKeyBoard", "BothAlgorism"], "Off");
 
-  this.addValues = function(values) {
-    values.add(TSCC);
-    values.add(TSMMDebugChat);
-    values.add(BR);
-    values.add(TSMMMode);
-    values.add(PotionTower);
-    values.add(SCATower);
-    values.add(ForceSprint);
-    values.add(JumpScaffolding);
-    values.add(JSMode);
-    values.add(JSV);
-    values.add(AntiHalf);
-    values.add(WithBlinkAPI);
-    values.add(AutoSneak);
-    values.add(MinDelay)
-    values.add(MaxDelay)
-    values.add(RAutoSneak);
-    values.add(RMinDelay);
-    values.add(RMaxDelay);
-    values.add(MLGScaffold);
-    values.add(MLGSprint);
-    values.add(NoXZMotion);
+  this.addValues = function(v) {
+    v.add(TSCC);
+    v.add(TSMMDebugChat);
+    v.add(BR);
+    v.add(TSMMMode);
+    v.add(PotionTower);
+    v.add(SCATower);
+    v.add(ForceSprint);
+    v.add(JumpScaffolding);
+    v.add(JSMode);
+    v.add(JSV);
+    v.add(AntiHalf);
+    v.add(WithBlinkAPI);
+    v.add(AutoSneak);
+    v.add(MinDelay)
+    v.add(MaxDelay)
+    v.add(RAutoSneak);
+    v.add(RMinDelay);
+    v.add(RMaxDelay);
+    v.add(MLGScaffold);
+    v.add(MLGSprint);
+    v.add(NoXZMotion);
   }
 	this.getName = function () {
 		return "TSMM";
@@ -493,6 +496,10 @@ function ModuleManager() {
         case "NoKeyBoard":
           mc.gameSettings.keyBindForward.pressed = mc.gameSettings.keyBindLeft.pressed = mc.gameSettings.keyBindRight.pressed = mc.gameSettings.keyBindBack.pressed = false;
           break;
+        case "BothAlgorism":
+          mc.gameSettings.keyBindForward.pressed = mc.gameSettings.keyBindLeft.pressed = mc.gameSettings.keyBindRight.pressed = mc.gameSettings.keyBindBack.pressed = false;
+          mc.thePlayer.motionX = 0; mc.thePlayer.motionZ = 0;
+          break;
       }
     };
   //ForceSprint /Fix Can't sprinting Bug... or my setting?
@@ -504,15 +511,9 @@ function ModuleManager() {
     if(JumpScaffolding.get()) {
         if(ScaffoldModule.getState() && mc.thePlayer.onGround && !mc.thePlayer.isOnLadder() && !mc.thePlayer.isInWeb && !mc.thePlayer.isInWater() && !mc.thePlayer.isInLava() && !mc.gameSettings.keyBindSneak.pressed) {if(mc.gameSettings.keyBindForward.pressed || mc.gameSettings.keyBindRight.pressed || mc.gameSettings.keyBindLeft.pressed) {mc.gameSettings.keyBindJump.pressed = false;
         switch (JSMode.get()) {
-          case "SimplyJump":
-            mc.thePlayer.jump()
-            break;
-          case "Motion":
-            mc.thePlayer.motionY = JSV.get();
-            break;
-          case "TP":
-            mc.thePlayer.setPosition(mc.thePlayer.posX, mc.thePlayer.posY + JSV.get(), mc.thePlayer.posZ);
-            break;
+          case "SimplyJump":mc.thePlayer.jump();break;
+          case "Motion":mc.thePlayer.motionY = JSV.get();break;
+          case "TP":mc.thePlayer.setPosition(mc.thePlayer.posX, mc.thePlayer.posY + JSV.get(), mc.thePlayer.posZ);break;
         }}}
     }
   //MLGScaffold
@@ -529,11 +530,10 @@ function ModuleManager() {
     //AutoSneaker
       if(AutoSneak.get()) {
         if(!mc.gameSettings.keyBindJump.isKeyDown()) {
-          ScaffoldModule.getValue("Down").set(false);
           if(i == delay) {mc.gameSettings.keyBindSneak.pressed = true;delay = DelayCal(MaxDelay.get(),MinDelay.get());i=0;
           }else{
             switch (RAutoSneak.get()) {
-              case "Instant(UseElse)":
+              case "Instant":
                 mc.gameSettings.keyBindSneak.pressed = false;break;
               case "Delay":
                 r+=0;
@@ -569,16 +569,16 @@ function HypixelGameChange() {
   var Custom = value.createBoolean("Custom", false);
   var CTex = value.createText("CustomCommand", "arcade_mini_walls");
  //Other Play Commands here https://hypixel.net/threads/guide-play-commands-useful-tools-mods-more-updated-11-17-19.1025608/
-    this.addValues = function(values) {
-      values.add(Hub);
-      values.add(favorite);
-      values.add(BedWars);
-      values.add(SkyWars);
-      values.add(murder);
-      values.add(UHC);
-      values.add(MegaWall);
-      values.add(Custom);
-      values.add(CTex);
+    this.addValues = function(v) {
+      v.add(Hub);
+      v.add(favorite);
+      v.add(BedWars);
+      v.add(SkyWars);
+      v.add(murder);
+      v.add(UHC);
+      v.add(MegaWall);
+      v.add(Custom);
+      v.add(CTex);
     }
 
 	this.getName = function () {
@@ -638,21 +638,21 @@ function ChatManager() {
   var BetStB = value.createText("StringBefore", ">");
   var BetStA = value.createText("StringAfter", "|");
 
-    this.addValues = function(values) {
-      values.add(SpamMode);
-      values.add(spamlist);
-      values.add(yourname);
-      values.add(MaxDelay);
-      values.add(MinDelay);
-      values.add(randomish);
-      values.add(BeforeR);
-      values.add(AfterR);
-      values.add(Incjp);
-      values.add(AllowBet);
-      values.add(RandomBet);
-      values.add(RBA);
-      values.add(BetStB);
-      values.add(BetStA);
+    this.addValues = function(v) {
+      v.add(SpamMode);
+      v.add(spamlist);
+      v.add(yourname);
+      v.add(MaxDelay);
+      v.add(MinDelay);
+      v.add(randomish);
+      v.add(BeforeR);
+      v.add(AfterR);
+      v.add(Incjp);
+      v.add(AllowBet);
+      v.add(RandomBet);
+      v.add(RBA);
+      v.add(BetStB);
+      v.add(BetStA);
     }
 
 	this.getName = function () {
@@ -684,7 +684,7 @@ function ChatManager() {
 
 function tk400sAdditonalModule() {
 
-  var Values = value.createText("Values", "");
+  var values = value.createText("values", "");
   var DelayTick = value.createInteger("DelayTicks", 1, 0, 30);
   var Timer = value.createFloat("Timer", 0.1, 0, 10);
   var TP = value.createFloat("TP", 0.05, 0, 1);
@@ -693,24 +693,26 @@ function tk400sAdditonalModule() {
   var ClimbSpeed = value.createList("ClimbSpeed", ["Off", "TP", "Motion", ""], "Off");
   var BlockAnimation = value.createBoolean("BlockAnimation", false);
   var animation = value.createFloat("Animation", 0.75, 0, 1);
+  var animation2 = value.createFloat("Animation2", 0.75, 0, 1);
   var AutoLeaver = value.createBoolean("AutoLeave", false);
   var ALMode = value.createList("ALMode", ["NextGame", "Lobby"],"");
   var ReJoinServer = value.createList("ALServer", ["Hypixel", "Cubecraft","?"],"");
   //var AntiTypo = value.createBoolean("AntiTypo", true);
 
-    this.addValues = function(values) {
-      values.add(Values);
-      values.add(DelayTick);
-      values.add(Timer);
-      values.add(TP);
-      values.add(Motion);
-      values.add(Criticals);
-      values.add(ClimbSpeed);
-      values.add(BlockAnimation);
-      values.add(animation);
-      values.add(ALMode);
-      values.add(ReJoinServer);
-      //values.add(AntiTypo);
+    this.addValues = function(v) {
+      v.add(values);
+      v.add(DelayTick);
+      v.add(Timer);
+      v.add(TP);
+      v.add(Motion);
+      v.add(Criticals);
+      v.add(ClimbSpeed);
+      v.add(BlockAnimation);
+      v.add(animation);
+      v.add(animation2);
+      v.add(ALMode);
+      v.add(ReJoinServer);
+    //v.add(AntiTypo);
     }
 
 	this.getName = function () {
@@ -739,6 +741,7 @@ function tk400sAdditonalModule() {
       switch (ALMode.get()) {
         case "ReJoin":
           mc.thePlayer.sendChatMessage("/")
+          break;
       }
     }
   }
@@ -793,9 +796,9 @@ function MCMusicPlayer() {
   var PlayingMusic = value.createList("Music", ["Roup", "Soviet", ""], "SovietMusic"); //i want create another template. but...hm
   var Volume = value.createFloat("Volume", 10, 0, 255);
 
-    this.addValues = function(values) {
-      values.add(PlayingMusic);
-      values.add(Volume);
+    this.addvalues = function(v) {
+      v.add(PlayingMusic);
+      v.add(Volume);
     }
 
 	this.getName = function () {
@@ -809,7 +812,6 @@ function MCMusicPlayer() {
 	}
 
   this.onEnable = function() {
-    chat.print("[Dev] Playing" + random.anvil_use);
     playSound("random.anvil_use", 10, 1);
   }
 
@@ -819,59 +821,39 @@ function MCMusicPlayer() {
         if(soviets >= 216){soviets =0}else{soviets+=1}
         switch (soviets) {
         case soviets > 0 && soviets < 30:
-           playSound("note.harp", Volume.get(), 1.7);
-            break;
+           playSound("note.harp", Volume.get(), 1.7);break;
         case 40:
-           playSound("note.harp", Volume.get(), 1.3);
-            break;
+           playSound("note.harp", Volume.get(), 1.3);break;
         case 55:
-           playSound("note.harp", Volume.get(), 1.7);
-            break;
+           playSound("note.harp", Volume.get(), 1.7);break;
         case 65:
-           playSound("note.harp", Volume.get(), 1.3);
-            break;
+           playSound("note.harp", Volume.get(), 1.3);break;
         case 75:
-           playSound("note.harp", Volume.get(), 1.4);
-            break;
+           playSound("note.harp", Volume.get(), 1.4);break;
         case 82:
-           playSound("note.harp", Volume.get(), 1.6);
-            break;
+           playSound("note.harp", Volume.get(), 1.6);break;
         case 90 || 95:
-           playSound("note.harp", Volume.get(), 1.1);
-            break;
+           playSound("note.harp", Volume.get(), 1.1);break;
         case 100:
-           playSound("note.harp", Volume.get(), 1.4);
-            break;
+           playSound("note.harp", Volume.get(), 1.4);break;
         case 115:
-           playSound("note.harp", Volume.get(), 1.3);
-            break;
+           playSound("note.harp", Volume.get(), 1.3);break;
         case 125:
-           playSound("note.harp", Volume.get(), 1.2);
-            break;
+           playSound("note.harp", Volume.get(), 1.2);break;
         case 135:
-           playSound("note.harp", Volume.get(), 1.3);
-            break;
+           playSound("note.harp", Volume.get(), 1.3);break;
         case 145:
-           playSound("note.harp", Volume.get(), 0.85);
-            break;
+           playSound("note.harp", Volume.get(), 0.85);break;
         case 155:
-           playSound("note.harp", Volume.get(), 0.85);
-            break;
+           playSound("note.harp", Volume.get(), 0.85);break;
         case 165 || 180:
-           playSound("note.harp", Volume.get(), 0.95);
-            break;
+           playSound("note.harp", Volume.get(), 0.95);break;
         case 190:
-           playSound("note.harp", Volume.get(), 1.05);
-            break;
+           playSound("note.harp", Volume.get(), 1.05);break;
         case 200:
-           playSound("note.harp", Volume.get(), 1.15);
-            break;
+           playSound("note.harp", Volume.get(), 1.15);break;
         case 215:
-           playSound("note.harp", Volume.get(), 1.25);
-            break;
-        case soviets <= 216:
-            soviets = 0;
-            break;
+           playSound("note.harp", Volume.get(), 1.25);break;
         }
         break;
       }
@@ -1034,3 +1016,18 @@ if(IncJP) {jps = ContJP}else{jps = ""}
   rtt = rt(clientnames);
   chat.print(rtt);
 }//used only for CM.
+
+
+function vClip(offset) {
+  mc.thePlayer.setPosition(mc.thePlayer.posX, mc.thePlayer.posY + offset, mc.thePlayer.posZ);
+}
+function hclip(offset) {
+  var sin = Math.sin(mc.thePlayer.rotationYaw / 180.0 * 3.1415927)*offset;
+  var cos = Math.cos(mc.thePlayer.rotationYaw / 180.0 * 3.1415927)*offset;
+  mc.thePlayer.setPosition(mc.thePlayer.posX -=sin, mc.thePlayer.posY, mc.thePlayer.posZ+=cos);
+}
+function HMotion(offset) {
+  var sin = Math.sin(mc.thePlayer.rotationYaw / 180.0 * 3.1415927)*offset;
+  var cos = Math.cos(mc.thePlayer.rotationYaw / 180.0 * 3.1415927)*offset;
+  mc.thePlayer.motionX -= sin; mc.thePlayer.motionZ += cos;
+}
