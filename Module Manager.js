@@ -12,6 +12,8 @@ var scriptVersion = 1.42;
 var scriptAuthor = "shirouto Co-Da- tk400.";
 
 //Modules
+var KickModule = moduleManager.getModule("Kick");
+var ConSpamModule = moduleManager.getModule("ConsoleSpammer");
 var CriticalsModule = moduleManager.getModule("Criticals");
 var NoFallModule = moduleManager.getModule("NoFall");
 var SpammerModule = moduleManager.getModule("Spammer");
@@ -38,28 +40,10 @@ var StoESPModule = moduleManager.getModule("StorageESP");
 var ESPModule = moduleManager.getModule("ESP");
 
 //Java
-//var Timer = Java.type("java.util.Timer");
 LiquidBounce = Java.type("net.ccbluex.liquidbounce.LiquidBounce").moduleManager;
 KillAura = Java.type("net.ccbluex.liquidbounce.features.module.modules.combat.KillAura").class;
 
-//Scripts Shortcut, Addons, Helper...
-//ModuMane / TSMM / and other
-var MMDchat = "§5[§dModuleManager§5] "
-var TSMMchat = "§5[§dTSMM§5] "
-var saveconfigname = 'default';
-var MoveDir = 'A';
-var servername;
-
-//Chat Manger
-var jps = ""
-var br = ""
-var ar = ""
-ContJP = ["あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをんアイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン　"]
-clientnameEN = ["LiqBounce", "Bounce of Liquidz", "LaquidBounce", "LiquidBounce", "Bounce of liquid", "LIQUIDBOUNCE"]
-insultEN = ["Fools", "Foolishes", "Dumbs", "Idiots", "GAYMER", "Loser", "GarbageHuman"]
-insultJA = ["Fools", "Foolishes", "Dumbs", "Idiots", "GAYMER", "Loser", "GarbageHuman","馬鹿","間抜け","愚者","クソ雑魚","阿呆","あほ","馬鹿者","キチガイ","穀潰し","クソニート","無能","ボケナス","ゴミ","カス","役立たず","愚か者","社会の癌","社会不適合者","染色体x3マン","短小"]
-ClientNameJA = ["LiqBounce", "Bounce of Liquidz", "LaquidBounce", "LiquidBounce", "Bounce of liquid", "LIQUIDBOUNCE","リキッドバウンス", "リキッドバウンス。net","りきっどばうんす♡"]
-// i cant code c = a + b... hm
+var servername = '';
 
 var LAB=01
 
@@ -69,6 +53,8 @@ var LAB=01
 
 //Player | Mob States
 var Potion = Java.type('net.minecraft.potion.Potion');
+GuiInventory = Java.type("net.minecraft.client.gui.inventory.GuiInventory");
+GuiIChest = Java.type("net.minecraft.client.gui.inventory.GuiChest");
 
 //Blocks
 BlockPos = Java.type('net.minecraft.util.BlockPos')
@@ -76,9 +62,33 @@ SlimeBlock = Java.type('net.minecraft.block.BlockSlime')
 AirBlock = Java.type('net.minecraft.block.BlockAir')
 AntiSlab = Java.type('net.minecraft.block.BlockSlab')
 
-
 function ModuleManager() {
+  var MMDchat = "§5[§dModuleManager§5] ";
+  //var WasFallen = false;
+  var GaTex = 'LiquidBounce';
+  var GaTT = '';
+  var GaTexTix = 0;
+  var ColourTixes =0;
+  var GaTexProgress=0;
+  var ColourProgress=0;
+  var Rev = false;
+  var CRev = false;
+  var CCQ = false;
+  var Colour="§1";
+  var saveconfigname = 'default';
+  var MoveDir = 'A';
 
+  var ReadMe = value.createBoolean("ReadMe.js", false);
+  var GamingText = value.createBoolean("GamingText", false);
+  var GTMode = value.createList("AnimationMode", ["Rainbow", "Gradation"],"Rainbow");
+  var TextAnimationMode = value.createList("TextAnimationMode", ["RegisterString", "UnderbarChange","Obfus"],"RegisterString");
+  var GraColor = value.createList("GradationColorType", ["Sakura/CherryBlossom","Light","Gold","Green","Blue"],"Rainbow");
+  var ColourTix = value.createInteger("ColourTix", 10, 0, 50);
+  var TextDelay = value.createInteger("TextDelay", 10, 0, 30);
+  var GTDebug = value.createBoolean("DebugInfo", false);
+  var height = value.createFloat("Height", 2.5, 0, 50);
+  var Width = value.createFloat("Width", 4, 0, 50);
+  var Reseter = value.createBoolean("Reseter", false);
   var Profile = value.createList("MMMode", ["Lite", "", "All", ""],"");
   var Text1 = value.createText(">MMSettings", "");
   var SLT = value.createText("CustomTag", "SuperMechaMechaSugooooiModule!");
@@ -118,8 +128,21 @@ function ModuleManager() {
   var DSConfig = value.createBoolean("ServerDetect", false);
   var AntiESP = value.createBoolean("AntiControlableESP", false);
   var NoMouse = value.createBoolean("NoMouseWhenAttack", false);
+  var AntiVoid = value.createBoolean("AntiVoidFallingViaScaffold", false);
+  var MinFallDis = value.createFloat("MinFallDistance", 1.5, 0, 30);
   
     this.addValues = function(v) {
+      v.add(ReadMe);
+      v.add(GamingText);
+      v.add(GTMode);
+      v.add(TextAnimationMode)
+      v.add(GraColor);
+      v.add(ColourTix);
+      v.add(TextDelay);
+      v.add(GTDebug);
+      v.add(height);
+      v.add(Width);
+      v.add(Reseter);
       v.add(Profile);
       v.add(Text1);
       v.add(SLT);
@@ -159,6 +182,7 @@ function ModuleManager() {
       v.add(DSConfig);
       v.add(AntiESP);
       v.add(NoMouse);
+      v.add(AntiVoid)
     };
 
 	this.getName = function () {
@@ -173,13 +197,189 @@ function ModuleManager() {
   this.getTag = function() {
     return SLT.get();
   };
+  this.onEnabled = function () {
+  }
 	this.onUpdate = function () {
-    if(Profile.get() != "") {
+    if(ReadMe.get()) {
+      chat.print("//==> Module manager<==//\n> this Script was coded By tk400.\n互 hm..")
+      ReadMe.set(false);
+    }
+    if(!Profile.get() == "") {
       switch (Profile.get()) {
         case "Lite": break;
         case "All": break;
       }
       Profile.set("");
+    }
+    if(Reseter.get()) {
+      GaTexTix = 0;
+      Rev = false;
+      CRev = false;
+      GaTex = '';
+      ColourTixes =0;
+      GaTexProgress=0;
+      ColourProgress=0;
+      chat.print("§4[DEBUG]§1Reseted");
+      Reseter.set(false);
+    }
+    if(GamingText.get()) {//ehhhh i think this is not good for your PC?(im a not Computer Nerd)
+      GaTexTix+=1;ColourTixes+=1;//Counting Ticks
+      if(GaTexTix==TextDelay.get()) {
+        if(Rev) {GaTexTix=0;GaTexProgress-=1}else{GaTexTix=0;GaTexProgress+=1}
+      }
+      if(ColourTixes==ColourTix.get()) {
+        if(CRev) {ColourTixes=0;ColourProgress-=1}else{ColourTixes=0;ColourProgress+=1}
+        //i think this is stup1d making code. hmm.. sadly.
+      }
+      switch (TextAnimationMode.get()) {
+        case "RegisterString":
+          switch (GaTexProgress) {
+            case 0:
+              GaTT ='L';Rev=false;break;
+            case 1:
+              GaTT ='Li';break;
+            case 2:
+              GaTT ='Liq';break;
+            case 3:
+              GaTT ='Liqu';break;
+            case 4:
+              GaTT ='Liqui';break;
+            case 5:
+              GaTT ='Liquid';break;
+            case 6:
+              GaTT ='LiquidB';break;
+            case 7:
+              GaTT ='LiquidBo';break;
+            case 8:
+              GaTT ='LiquidBou';break;
+            case 9:
+              GaTT ='LiquidBoun';break;
+            case 10:
+              GaTT ='LiquidBounc';break;
+            case 11:
+              GaTT ='LiquidBounce';Rev = true;break;
+          }
+          break;
+        case "UnderbarChange":
+          switch (GaTexProgress) {
+            case 0:
+              GaTT ='_iquidBounce';Rev=false;break;
+            case 1:
+              GaTT ='L_quidBounce';break;
+            case 2:
+              GaTT ='Li_uidBounce';break;
+            case 3:
+              GaTT ='Liq_idBounce';break;
+            case 4:
+              GaTT ='Liqu_dBounce';break;
+            case 5:
+              GaTT ='Liqui_Bounce';break;
+            case 6:
+              GaTT ='Liquid_ounce';break;
+            case 7:
+              GaTT ='LiquidB_unce';break;
+            case 8:
+              GaTT ='LiquidBo_nce';break;
+            case 9:
+              GaTT ='LiquidBou_ce';break;
+            case 10:
+              GaTT ='LiquidBoun_e';break;
+            case 11:
+              GaTT ='LiquidBounc_';Rev = true;break;
+          }
+          break;
+        case "Obfus":
+          switch (GaTexProgress) {
+            case 0:
+              GaTT ='§kLiquidBounce';Rev=false;break;
+            case 1:
+              GaTT ='L§kiquidBounce';break;
+            case 2:
+              GaTT ='Li§kquidBounce';break;
+            case 3:
+              GaTT ='Liq§kuidBounce';break;
+            case 4:
+              GaTT ='Liqu§kidBounce';break;
+            case 5:
+              GaTT ='Liqui§kDBounce';break;
+            case 6:
+              GaTT ='Liquid§kBounce';break;
+            case 7:
+              GaTT ='LiquidB§kounce';break;
+            case 8:
+              GaTT ='LiquidBo§kunce';break;
+            case 9:
+              GaTT ='LiquidBou§knce';break;
+            case 10:
+              GaTT ='LiquidBoun§kce';break;
+            case 11:
+              GaTT ='LiquidBounc§ke';break;
+            case 12:
+              GaTT ='LiquidBounce';Rev = true;break;
+          }
+        }
+      switch (GTMode.get()) {
+        case "Rainbow":
+            switch (ColourProgress) {
+              case 0:
+                Colour = "§4";CRev=false;break;
+              case 1:
+                Colour = "§c";break;
+              case 2:
+                Colour = "§d";break;
+              case 3:
+                Colour = "§5";break;
+              case 4:
+                Colour = "§4";break;
+              case 5:
+                Colour = "§5";break;
+              case 6:
+                Colour = "§1";break;
+              case 7:
+                Colour = "§9";break;
+              case 8:
+                Colour = "§b";break;
+              case 9:
+                Colour = "§5";CRev=true;break;
+            }
+            break;
+        case "Gradation":
+          switch (GraColor.get()) {
+            case "Sakura/CherryBlossom": //hm its not working now. better to Adding Customized Color(Hex)
+              if(ColourTixes==ColourTix.get()) {if(CCQ) {Colour="§5"; CCQ=false}else{Colour="§7";CCQ=true}}
+              break;
+            case "Light": //this toooooooooooo
+              switch (ColourProgress) {
+                case 0:
+                  Colour = "§f";CRev=false;break;
+                case 1:
+                  Colour = "§7";break;
+                case 2:
+                  Colour = "§8";CRev=true;break;
+              }
+              break;
+            case "Gold": //Gold! Gold! Gold! 金!金!金!
+              if(ColourTixes==ColourTix.get()) {if(CCQ) {Colour="§2"; CCQ=false}else{Colour="§a";CCQ=true}}
+              break;
+            case "Green":
+              if(ColourTixes==ColourTix.get()) {if(CCQ) {Colour="§2"; CCQ=false}else{Colour="§a";CCQ=true}}
+              break;
+            case "Blue":
+              switch (ColourProgress) {
+                case 0:
+                  Colour = "§1";CRev=false;break;
+                case 1:
+                  Colour = "§9";break;
+                case 3:
+                  Colour = "§3";break;
+                case 4:
+                  Colour = "§b";CRev=true;break;
+              }
+            }
+            break;
+      }
+      // Set GaTex.
+      GaTex = Colour + GaTT;
     }
     //Manage SpeedJump /Fix Jump Boosting
       if(SpeedJump.get()) {
@@ -265,7 +465,7 @@ function ModuleManager() {
     };
     //AntiNoCritical
     if(AntiNoCritical.get()) {
-      if(!NoFallModule.getState() && mc.thePlayer.fallDistance >= 3.1){NoFallModule.setState(true)}
+      if(!NoFallModule.getState() && mc.thePlayer.fallDistance >= 2.6){NoFallModule.setState(true)}
     }
     //AutoKAJump
     if(AutoKAJump.get() && KAModule.getState() && !mc.gameSettings.keyBindJump.pressed) {mc.gameSettings.keyBindJump.pressed = true};
@@ -296,7 +496,7 @@ function ModuleManager() {
           if(InvModule.getValue("invOpen").get() == true) {InvModule.getValue("invOpen").set(false)}; if(InvModule.getValue("SimulateInventory").get()==false) {InvModule.getValue("SimulateInventory").set(true)}
           if(InvAAModule.getValue("invOpen").get() == true) {InvAAModule.getValue("invOpen").set(false)}; if(InvAAModule.getValue("SimulateInventory").get()==false) {InvAAModule.getValue("SimulateInventory").set(true)}
           break;
-          case "Both":
+        case "Both":
           if(InvModule.getValue("invOpen").get() == false) {InvModule.getValue("invOpen").set(true)}; if(InvModule.getValue("SimulateInventory").get()==false) {InvModule.getValue("SimulateInventory").set(true)}
           if(InvAAModule.getValue("invOpen").get() == false) {InvAAModule.getValue("invOpen").set(true)}; if(InvAAModule.getValue("SimulateInventory").get()==false) {InvAAModule.getValue("SimulateInventory").set(true)}
           break;
@@ -353,9 +553,17 @@ function ModuleManager() {
     }
     //AntiNoCritical
     if(AntiNoCritical.get()) {
-      if(NoFallModule.getState() && !mc.thePlayer.fallDistance <= 3) {NoFallModule.setState(false)}
+      NoFallModule.getState() && NoFallModule.setState(false);
       }
   };
+
+  this.onRender2D = function() {
+    if(GamingText.get()) {mc.ingameGUI.drawCenteredString(mc.fontRendererObj, GaTex, mc.displayWidth / Width.get(), (mc.displayHeight / height.get()) + 8, -1)}
+  }
+  this.onMotion = function () {
+    if(AntiVoid.get()) {
+    }
+  }
 
   this.onWorld = function () {
     //This is not Module, But i think this is useful (Ex:Mineplex) :)
@@ -365,10 +573,10 @@ function ModuleManager() {
     //Used for ConfigSaver
     var serverip = mc.getCurrentServerData().serverIP;
       switch (serverip) {
-        case ".ccbluex.net": servername = 'testccbluex'; break;
-        case ".hypixel.net" || "hypixel.net": servername = 'hypixel'; break;
-        case ".cubecraft.net" || "cubeaft.net": servername = 'cubecraft'; break;
-        case ".mineplex.com": servername = 'mineplex'; break;
+        case "*.ccbluex.net": servername = 'testccbluex'; break;
+        case "*.hypixel.net" || "hypixel.net": servername = 'hypixel'; break;
+        case "*.cubecraft.net" || "cubeaft.net": servername = 'cubecraft'; break;
+        case "*.mineplex.com": servername = 'mineplex'; break;
       }
     // EXPEPIMENTAL //
     SavingName.set(servername);
@@ -389,8 +597,9 @@ function ModuleManager() {
 /* TIP: if ScaffoldJump is set Off, you can Sprint ScaffoldingJump. like shitgma(Jello? XD). */
 
  function TSMM() {
-   var i=0;
-   var r=0;
+  var TSMMchat = "§5[§dTSMM§5] ";
+  var i=0;
+  var r=0;
   
   var TSCC = value.createText("TSMMCustomColor", "a");
   var TSMMDebugChat = value.createBoolean("TSMMDebugChat", false);
@@ -453,7 +662,7 @@ function ModuleManager() {
     i=0;
     r=0;
     delay = DelayCal(MaxDelay.get(),MinDelay.get()); RDelay = DelayCal(MaxDelay.get(),MinDelay.get())
-    BR.get() && mc.thePlayer.rotationYaw + 180;
+    if(BR.get()) {mc.thePlayer.rotationYaw += 180}
     ScaffoldModule.setState(true);
     TowerModule.setState(false);
     if(JumpScaffolding.get()) {TSMMMode.set("Off"); if(!ScaffoldModule.getValue("SameY").get()) {ScaffoldModule.getValue("SameY").set(true)}}
@@ -545,7 +754,7 @@ function ModuleManager() {
       }
     }
   this.onDisable = function() {
-    BR.get() && mc.thePlayer.rotationYaw + 180; /*Fix Head Rotation. only this code...*/ 
+    if(BR.get()) {mc.thePlayer.rotationYaw += 180} /*Fix Head Rotation. only this code...*/ 
     ScaffoldModule.setState(false); TowerModule.setState(false);
     if(MLGSprint.get()) {SprintModule.setState(true)}else{SprintModule.setState(false)}
     WithBlinkAPI.get() && BlinkModule.setState(false);
@@ -608,18 +817,16 @@ function HypixelGameChange() {
   }
 }
 
-function randomString(length) {
-  var text = "";
-  var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 " + jps;
-
-  for (var i = 0; i < length; i++) {
-      text += possible.charAt(Math.floor(Math.random() * possible.length));
-  }
-  return text;
-}
-
 //Add Hypixel Bypasser later and AutoReplay? xd
 function ChatManager() {
+  var jps = ""
+  var br = ""
+  var ar = ""
+  ContJP = ["あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをんアイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン　"]
+  clientnameEN = ["LiqBounce", "Bounce of Liquidz", "LaquidBounce", "LiquidBounce", "Bounce of liquid", "LIQUIDBOUNCE"]
+  insultEN = ["Fools", "Foolishes", "Dumbs", "Idiots", "GAYMER", "Loser", "GarbageHuman"]
+  insultJA = ["馬鹿","間抜け","愚者","クソ雑魚","阿呆","あほ","馬鹿者","キチガイ","穀潰し","クソニート","無能","ボケナス","ゴミ","カス","役立たず","愚か者","社会の癌","社会不適合者","染色体x3マン","短小"]
+  ClientNameJA = ["リキッドバウンス", "リキッドバウンス。net","りきっどばうんす♡","リクィッドバウンス","リキッドバウンス"]
   var i = 0;
   var delay = 0;
 
@@ -689,14 +896,17 @@ function tk400sAdditonalModule() {
   var Timer = value.createFloat("Timer", 0.1, 0, 10);
   var TP = value.createFloat("TP", 0.05, 0, 1);
   var Motion = value.createFloat("Motion", 0.1, 0, 1);
-  var Criticals = value.createList("Criticals", ["Off", "Jump", "SpeedModule", "TP", "Motion"], "Off");
+  var Criticals = value.createList("Criticals", ["Off", "Jump", "SpeedModule", "TP", "Motion", "FastJump/Motion", "FastJump/TP","FastJump/Timer"], "Off");
   var ClimbSpeed = value.createList("ClimbSpeed", ["Off", "TP", "Motion", ""], "Off");
   var BlockAnimation = value.createBoolean("BlockAnimation", false);
+//var SWH = value.createBoolean("SingleWorldHack", false); //Just Modify
   var animation = value.createFloat("Animation", 0.75, 0, 1);
   var animation2 = value.createFloat("Animation2", 0.75, 0, 1);
   var AutoLeaver = value.createBoolean("AutoLeave", false);
-  var ALMode = value.createList("ALMode", ["NextGame", "Lobby"],"");
+  var WhenHealth = value.createFloat("Health", 5,0,20);
+  var ALMode = value.createList("ALMode", ["Custom", "Lobby"],"Custom");
   var ReJoinServer = value.createList("ALServer", ["Hypixel", "Cubecraft","?"],"");
+  var LMethod = value.createList("LeaveMethod", ["Command", "ConsoleSpammer/Payload","ConsoleSpammer/MineSecure", "RandomizedPos", "RandomizedMotion","CommandSpamKick","KickModuleAPI"],"Command");
   //var AntiTypo = value.createBoolean("AntiTypo", true);
 
     this.addValues = function(v) {
@@ -708,10 +918,14 @@ function tk400sAdditonalModule() {
       v.add(Criticals);
       v.add(ClimbSpeed);
       v.add(BlockAnimation);
+    //v.add(SWH);
       v.add(animation);
       v.add(animation2);
+      v.add(AutoLeaver);
+      v.add(WhenHealth);
       v.add(ALMode);
       v.add(ReJoinServer);
+      v.add(LMethod)
     //v.add(AntiTypo);
     }
 
@@ -737,17 +951,56 @@ function tk400sAdditonalModule() {
           mc.thePlayer.motionY + Motion.get();break;
       }
     }
+    //if(SWH.get()) {
+    //}
     if(AutoLeaver.get()) {
-      switch (ALMode.get()) {
-        case "ReJoin":
-          mc.thePlayer.sendChatMessage("/")
-          break;
+      if(mc.thePlayer.getHealth() <= WhenHealth.get()) {
+        switch (LMethod.get()) {
+          case "Command":
+            switch (ALMode.get()) {
+              case "ReJoin":
+                mc.thePlayer.sendChatMessage("/")
+                break;
+              case "Hub":
+                mc.thePlayer.sendChatMessage("/Hub")
+                break;
+            }
+            break;
+          case "ConsoleSpammer/Payload":
+            ConSpamModule.getValue("Mode").set("Payload");
+            ConSpamModule.getValue("Delay").set(0);
+            ConSpamModule.setState(true);
+            break;
+          case "ConsoleSpammer/MineSecure":
+            ConSpamModule.getValue("Mode").set("MineSecure");
+            ConSpamModule.getValue("Delay").set(0);
+            ConSpamModule.setState(true);
+            break;
+          case "RandomizedPos":
+            mc.thePlayer.posX = DelayCal(0, 255);
+            mc.thePlayer.posY = DelayCal(0, 255);
+            mc.thePlayer.posZ = DelayCal(0, 255);
+            break;
+          case "RandomizedMotion":
+            mc.thePlayer.motionX = DelayCal(0, 255);
+            mc.thePlayer.motionY = DelayCal(0, 255);
+            mc.thePlayer.motionZ = DelayCal(0, 255);
+            break;
+          case "CommandSpamKick":
+            mc.thePlayer.sendChatMessage("/" + randomString(Math.floor(Math.random() * ((50-1)+1) + 1)))
+            break;
+          case "KickModuleAPI":
+            KickModule.setState(true);
+            break;
+        }
       }
     }
   }
-  this.onMotion = function () {
-    if(animation.get()){
-      LiquidBounce.getModule(KillAura).blockingStatus && (mc.thePlayer.swingProgress = animation.get());
+  this.onMotion = function (event) {
+    if(BlockAnimation.get()){
+      //if(mc.currentScreen instanceof GuiInventory || mc.currentScreen instanceof GuiIChest) {}else{
+         //Fix? canceling Opening Inv.
+        LiquidBounce.getModule(KillAura).blockingStatus && (mc.thePlayer.swingProgress = animation.get());
     }
   }
   this.onAttack = function () {
@@ -755,18 +1008,26 @@ function tk400sAdditonalModule() {
       switch (Criticals.get()) {
         case "Jump":
           SpeedModule.setState(false);
-          mc.gameSettings.keyBindJump.pressed = true;
+          mc.thePlayer.jump();
         break;
         case "SpeedModule":
           if(mc.gameSettings.keyBindForward.pressed || mc.gameSettings.keyBindRight.pressed || mc.gameSettings.keyBindLeft.pressed) {
-            if(!mc.gameSettings.keyBindBack.pressed && KAModule.getState() && !SpeedModule.getState() && !LJModule.getState() && !ScaffoldModule.getState() && !TowerModule.getState()) {SpeedModule.setState(true); if(DebugChat.get()) {chat.print(MMDchat + "§" + CC.get() + "Enabled Speed!")}}};
+            if(!mc.gameSettings.keyBindBack.pressed && KAModule.getState() && !SpeedModule.getState() && !LJModule.getState() && !ScaffoldModule.getState() && !TowerModule.getState()) {SpeedModule.setState(true); if(DebugChat.get()) {chat.print(MMDchat + "§" + CC.get() + "Enabled Speed.")}}};
         break;
         case "TP":
-          mc.thePlayer.setPosition(mc.thePlayer.posX, mc.thePlayer.posY + TP.get(), mc.thePlayer.posZ);
+          mc.thePlayer.setPosition(mc.thePlayer.posX, mc.thePlayer.posY += TP.get(), mc.thePlayer.posZ);
         break;
         case "Motion":
-          mc.thePlayer.motionY + Motion.get();
+          mc.thePlayer.motionY += Motion.get();
         break;
+        case "FastJump/Motion":
+          mc.thePlayer.jump();
+          if(!mc.thePlayer.fallDistance >= 0.1) {mc.thePlayer.motionY += Motion.get()};
+          break;
+        case "FastJump/TP":
+          mc.thePlayer.jump();
+          if(!mc.thePlayer.fallDistance >= 0.1) {mc.thePlayer.posY += TP.get()};
+          break;
       }};
   }
   /*this.onPacket = function (eventData) {
@@ -796,7 +1057,7 @@ function MCMusicPlayer() {
   var PlayingMusic = value.createList("Music", ["Roup", "Soviet", ""], "SovietMusic"); //i want create another template. but...hm
   var Volume = value.createFloat("Volume", 10, 0, 255);
 
-    this.addvalues = function(v) {
+    this.addValues = function(v) {
       v.add(PlayingMusic);
       v.add(Volume);
     }
@@ -922,7 +1183,8 @@ function playSound (name,a,b) {
 function messageCont (spamlist, urname,randomish, BeforeR, AfterR, IncJP, AllowBet, RandomBet, RBA, BetStB, BetStA) {
   var insultworda = "";
   var clientnames = "";
-  if(IncJP) {insultworda = insultJA; clientnames = ClientNameJA}else{insultworda = insultEN; clientnames = clientnameEN}
+  var Texts = Text1.concat(Text2, Text3);
+  if(IncJP) {insultworda = insultEN.concat(insultJA); clientnames = clientnameEN.concat(ClientNameJA)}else{insultworda = insultEN; clientnames = clientnameEN}
   Mineplex = [
     "Don't Worry Mineplex! You've server is rly not popular. Alts are Almost all unbanned! xd!!",
     "Hello mineplex, you've BAN is doesn't have much of an effect at all. why? A is Simple you've server is not popular. ",
@@ -932,7 +1194,6 @@ function messageCont (spamlist, urname,randomish, BeforeR, AfterR, IncJP, AllowB
     "hey guys im back! ;) don't worry guys!",
     "Good News! you've server is rly not popular! well, We Can't Never Banned! ;)",
     "Mineplex AC, Staff, System is sucks go to Hypixel Now.",
-    "I Dont Want Recommanding for Friends. Why? this server is too many"
   ]
   GameEnd = [
     "EZist haxied by " + urname + ", And " + rt(clientnames) + " Client. Download Now.",
@@ -970,15 +1231,18 @@ function messageCont (spamlist, urname,randomish, BeforeR, AfterR, IncJP, AllowB
     "sorry guys im using gaming weired cable. improve network speed.",
     "sorry guys im fucking gaming girl at always time.",
     "sorry guys im fucking gaming girl at night.",
-    "sorry guys, im not haxin, you guys are sucks",
-    "sorry guys, im not haxin, you guys are noob",
-    "sorry guys, im not haxin, you guys are stup1d xd",
+    "sorry guys, im not haxin, you guys are just sucks",
+    "sorry guys, im not haxin, you guys are just noob",
+    "sorry guys, im not haxin, you guys are just stup1d xd",
     "hahaha guys you are totaly noob. im just pro",
     "im just pro, but guys. wth!? i dont saw Beginners like you. xd!",
     "im not using killaura, im just pro aiming, and sencivity is Maximum. plz understand.",
     "Im not Scaffolding, it just NoShift. huh but noobs can't understand? xd!",
     "im not using BHop, it just lagging sorry my internet is slower...",
     "im not used hax, idk how to install Hax, i know they are scam and Malware.",
+    "Sorry Guys you are Vaccines are Fake. i'm Taken Gaming Vaccine. Sorry! im Elite Group.",
+    "Im Just Injected Gaming Vaccine.",
+    //"Woops! i forgot Infected GamingVirus." /???
   ]
 if(IncJP) {jps = ContJP}else{jps = ""}
   if(randomish) {
@@ -1007,9 +1271,9 @@ if(IncJP) {jps = ContJP}else{jps = ""}
     case "Gaming":
       message = gaming;break;
     case "All": //Not working ?
-      message = (Mineplex+HackedBy+LiquidAd+TrulySpeach);break;
+      message = 'you need? hm this is intersting for me.';break;
     default:
-      message = "please select Profile.";break;
+      message = "please select Profile. and i think this is Error. idk how to excute this error.";break;
   }
   MSG = br + message[parseInt(Math.random()*message.length)] + ar;
   mc.thePlayer.sendChatMessage(MSG);
@@ -1017,6 +1281,15 @@ if(IncJP) {jps = ContJP}else{jps = ""}
   chat.print(rtt);
 }//used only for CM.
 
+function randomString(length) {
+  var text = "";
+  var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 " + jps;
+
+  for (var i = 0; i < length; i++) {
+      text += possible.charAt(Math.floor(Math.random() * possible.length));
+  }
+  return text;
+}
 
 function vClip(offset) {
   mc.thePlayer.setPosition(mc.thePlayer.posX, mc.thePlayer.posY + offset, mc.thePlayer.posZ);
