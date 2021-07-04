@@ -42,6 +42,7 @@ var ESPModule = moduleManager.getModule("ESP");
 //Java
 LiquidBounce = Java.type("net.ccbluex.liquidbounce.LiquidBounce").moduleManager;
 KillAura = Java.type("net.ccbluex.liquidbounce.features.module.modules.combat.KillAura").class;
+Color = Java.type('java.awt.Color');
 
 var servername = '';
 
@@ -52,7 +53,7 @@ var LAB=01
 //var clientchat = Java.type("net.minecraft.network.play.client.C01PacketChatMessage");
 
 //Player | Mob States
-var Potion = Java.type('net.minecraft.potion.Potion');
+Potion = Java.type('net.minecraft.potion.Potion');
 GuiInventory = Java.type("net.minecraft.client.gui.inventory.GuiInventory");
 GuiIChest = Java.type("net.minecraft.client.gui.inventory.GuiChest");
 
@@ -63,7 +64,6 @@ AirBlock = Java.type('net.minecraft.block.BlockAir')
 AntiSlab = Java.type('net.minecraft.block.BlockSlab')
 
 function ModuleManager() {
-  var MMDchat = "§5[§dModuleManager§5] ";
   //var WasFallen = false;
   var GaTex = 'LiquidBounce';
   var GaTT = '';
@@ -74,7 +74,7 @@ function ModuleManager() {
   var Rev = false;
   var CRev = false;
   var CCQ = false;
-  var Colour="§1";
+  var Colour="§0";
   var saveconfigname = 'default';
   var MoveDir = 'A';
 
@@ -92,8 +92,8 @@ function ModuleManager() {
   var Profile = value.createList("MMMode", ["Lite", "", "All", ""],"");
   var Text1 = value.createText(">MMSettings", "");
   var SLT = value.createText("CustomTag", "SuperMechaMechaSugooooiModule!");
-  var CC = value.createText("CustomColor", "a"); //https://minecraft.gamepedia.com/Formatting_codes
-  var DebugChat = value.createBoolean("DebugChat", false);
+  var Color2 = value.createText("CustomColor", "a"); //https://minecraft.gamepedia.com/Formatting_codes
+  var DCV = value.createBoolean("DebugChat", false);
 //var test = value.createBoolean("test", true); //Using on Develop, tset.
   var SpeedJump = value.createBoolean("Speed", true);
   var WASDSpeed = value.createBoolean("AntiHorizontalSpeedStrafing", false);
@@ -104,7 +104,7 @@ function ModuleManager() {
   var ReverseStepFix = value.createBoolean("ReverseStepFix", true);
   var AntiNoCritical = value.createBoolean("AntiNoCritical", false); //Fixes? Not Criticalizing Bug. when you using Critical and NoFall. but idk...
   var AutoFClear = value.createBoolean("AutoFClear", true);
-  var Text2 = value.createText(">InvModeManager", "");
+  var Text2 = value.createText("§l>InvModeManager", "");
   var Inv = value.createBoolean("Inv", true);
   var InvList = value.createList("Mode", ["None", "Open", "Simulate", "Both"], "None");
   var Text3 = value.createText(">BlockRenderManager", "");
@@ -146,9 +146,9 @@ function ModuleManager() {
       v.add(Profile);
       v.add(Text1);
       v.add(SLT);
-      v.add(CC);
+      v.add(Color2);
     //v.add(test);
-      v.add(DebugChat);
+      v.add(DCV);
       v.add(SpeedsDisabler);
       v.add(ChangeMode)
       v.add(VelLJManage);
@@ -386,14 +386,11 @@ function ModuleManager() {
         if(SpeedModule.getState() && mc.thePlayer.onGround) {
           if(mc.gameSettings.keyBindJump.pressed) {
             if(mc.gameSettings.keyBindForward.pressed || mc.gameSettings.keyBindRight.pressed || mc.gameSettings.keyBindLeft.pressed || mc.gameSettings.keyBindBack.pressed) {
-              mc.gameSettings.keyBindJump.pressed = false;
-              rn = Math.floor(Math.random() * 11);
-              rc = " [" + rn + "]"
-              DebugChat.get() && chat.print(MMDchat + "§" + CC.get() + "Disabled Jump." + rc)};
-        }}};
+              mc.gameSettings.keyBindJump.pressed = false; DC(DCV.get(),"MM",Color2.get(),"Disabled Jump.", true);
+            }}}};
     //WASDSpeed 
     if(WASDSpeed.get()) { //==> this code is working, but i think Inefficient. good for Detecting Faster Strafing Cheat <==//
-      DebugChat.get() && chat.print(MoveDir)
+      DCV.get() && chat.print(MoveDir)
       if(SpeedModule.getState()) {
         switch (MoveDir) {
           case 'F':
@@ -451,7 +448,7 @@ function ModuleManager() {
       }
     }
     //SpeedDisabler
-    if(SpeedsDisabler.get() && SpeedModule.getState() || LJModule.getState()) {if(FlyModule.getState() || FreeCamModule.getState() || ScaffoldModule.getState()) {SpeedModule.setState(false) || LJModule.setState(false); DebugChat.get() && chat.print(MMDchat + "§" + CC.get() + "Disabled Speed or LongJump.")}};
+    if(SpeedsDisabler.get() && SpeedModule.getState() || LJModule.getState()) {if(FlyModule.getState() || FreeCamModule.getState() || ScaffoldModule.getState()) {SpeedModule.setState(false) || LJModule.setState(false); DC(DCV.get(),"MM",Color2.get(),"Disabled Speed or LongJump.",false)}};
     //VelLJ /Hypixel Fix?
     if(VelLJManage.get()) {
       if(VelocityModule.getState()) {
@@ -506,6 +503,7 @@ function ModuleManager() {
     if(Selection.get()) {
       id = [26,92,122,9,116,58,customid.get()][["Bed", "Cake", "Dragon_Egg", "Obsidian","Enchanting_Table","Crafting_Table","Custom"].indexOf(mode.get())];
     if(DSBlock.get()) {
+      chat.print("[DEBUG] Detected :"+serverip)
       switch (serverip) {
         case ".hypixel.net" || "hypixel.cn":
           FuckerModule.getValue("Block").set(26);
@@ -577,6 +575,7 @@ function ModuleManager() {
         case "*.hypixel.net" || "hypixel.net": servername = 'hypixel'; break;
         case "*.cubecraft.net" || "cubeaft.net": servername = 'cubecraft'; break;
         case "*.mineplex.com": servername = 'mineplex'; break;
+        default: servername = 'undetected';break;
       }
     // EXPEPIMENTAL //
     SavingName.set(servername);
@@ -597,16 +596,21 @@ function ModuleManager() {
 /* TIP: if ScaffoldJump is set Off, you can Sprint ScaffoldingJump. like shitgma(Jello? XD). */
 
  function TSMM() {
-  var TSMMchat = "§5[§dTSMM§5] ";
   var i=0;
   var r=0;
+  var z=0;
+  var CoolTime=0;
+  var CoolTimeB=false;
   
-  var TSCC = value.createText("TSMMCustomColor", "a");
-  var TSMMDebugChat = value.createBoolean("TSMMDebugChat", false);
+  var Color = value.createText("TSMMCustomColor", "a");
+  var DCV = value.createBoolean("TSMMDebugChat", false);
   var BR = value.createBoolean("BodyReverser", false);
   var TSMMMode = value.createList("ScaffoldJump", ["Off", "Sprint", "XZR", "VClip"], "Off");
   var PotionTower = value.createBoolean("PotionTower", false);
   var SCATower = value.createBoolean("UseScaffoldsLegitTower", false);
+  var TowerDelayer = value.createBoolean("TowerDelayer", false);
+  var TDDelay = value.createInteger("Delay", 15, 0, 100);
+  var CT = value.createInteger("CoolTime", 10, 0, 20);
   var ForceSprint = value.createBoolean("ForceSprint", true);
   var JumpScaffolding = value.createBoolean("JumpScaffolding", true); //Beta
   var JSMode = value.createList("Type", ["SimplyJump", "Motion", "TP"], "SimplyJump");
@@ -624,12 +628,15 @@ function ModuleManager() {
   var NoXZMotion = value.createList("NoXZMotion", ["Off", "MotionZero", "NoKeyBoard", "BothAlgorism"], "Off");
 
   this.addValues = function(v) {
-    v.add(TSCC);
-    v.add(TSMMDebugChat);
+    v.add(Color);
+    v.add(DCV);
     v.add(BR);
     v.add(TSMMMode);
     v.add(PotionTower);
     v.add(SCATower);
+    v.add(TowerDelayer);
+    v.add(TDDelay);
+    v.add(CT);
     v.add(ForceSprint);
     v.add(JumpScaffolding);
     v.add(JSMode);
@@ -661,6 +668,9 @@ function ModuleManager() {
   this.onEnable = function() {
     i=0;
     r=0;
+    z=0;
+    CoolTime=0;
+    CoolTimeB=false;
     delay = DelayCal(MaxDelay.get(),MinDelay.get()); RDelay = DelayCal(MaxDelay.get(),MinDelay.get())
     if(BR.get()) {mc.thePlayer.rotationYaw += 180}
     ScaffoldModule.setState(true);
@@ -668,11 +678,24 @@ function ModuleManager() {
     if(JumpScaffolding.get()) {TSMMMode.set("Off"); if(!ScaffoldModule.getValue("SameY").get()) {ScaffoldModule.getValue("SameY").set(true)}}
     // //
     WithBlinkAPI.get() && BlinkModule.setState(true);
-    TSMMDebugChat.get() && chat.print(TSMMchat + "§a+Enabled TSMM and Scaffold and Tower");
+    DC(DCV.get(),"TS",Color.get(),"§a+Enabled TSMM and Scaffold and Tower",false)
   };
   this.onUpdate = function () {
+    if(TowerDelayer.get()) {
+      if(CoolTimeB) {CoolTime+=1;
+        if(CT.get()==CoolTime) {CoolTime=0;CoolTimeB=false}else{mc.gameSettings.keyBindJump.pressed = false;DCV.get() && chat.print("you are now in CoolTime")}
+      }
+      if(TowerModule.getState()) {
+        if(TDDelay.get()==z) {
+          z=0;
+          CoolTimeB = true; CoolTime=0;
+          TowerModule.setState(false);
+          DCV.get() && chat.print("test");
+        }else{z+=1}
+      }
+    }
     if(!ScaffoldModule.getState()) {
-      if(!mc.gameSettings.keyBindJump.pressed) {ScaffoldModule.setState(true); TowerModule.setState(false); TSMMDebugChat.get() && chat.print(TSMMchat + "§" + TSCC.get() + "Enabled Scaffold, Disabled Tower")}
+      if(!mc.gameSettings.keyBindJump.pressed) {ScaffoldModule.setState(true); TowerModule.setState(false);DC(DCV.get(),"TS",Color.get(),"Enabled Scaffold, Disabled Tower",false)}
     }else if(!TowerModule.getState()) {
       if(!mc.gameSettings.keyBindJump.pressed) {
         if(TSMMMode.get() == "Sprint") {ScaffoldModule.getValue("Sprint").set(true)}
@@ -694,8 +717,8 @@ function ModuleManager() {
     if(!SCATower.get()) {
   if(!TowerModule.getState() && mc.thePlayer.onGround && mc.gameSettings.keyBindJump.pressed && !mc.gameSettings.keyBindForward.pressed) {
       if(PotionTower.get()) {
-        if(!mc.thePlayer.isPotionActive(Potion.jump)) {ScaffoldModule.setState(false); TowerModule.setState(true); TSMMDebugChat.get() && chat.print(TSMMchat + "§" + TSCC.get() + "Enabled Tower, Disabled Scaffold")}}else if(!TowerModule.getState() && mc.thePlayer.onGround && mc.gameSettings.keyBindJump.pressed && !mc.gameSettings.keyBindForward.pressed)
-          {ScaffoldModule.setState(false); TowerModule.setState(true); TSMMDebugChat.get() && chat.print(TSMMchat + "§" + TSCC.get() + "Enabled Tower, Disabled Scaffold")};
+        if(!mc.thePlayer.isPotionActive(Potion.jump)) {ScaffoldModule.setState(false); TowerModule.setState(true); DC(DCV.get(),"TS",Color.get(),"Enabled Speed.",true)}}else if(!TowerModule.getState() && mc.thePlayer.onGround && mc.gameSettings.keyBindJump.pressed && !mc.gameSettings.keyBindForward.pressed)
+          {ScaffoldModule.setState(false); TowerModule.setState(true);DC(DCV.get(),"TS",Color.get(),"Enabled Tower, Disabled Scaffold")};
   }}
     if(TowerModule.getState()) {
       switch (NoXZMotion.get()) {
@@ -754,6 +777,7 @@ function ModuleManager() {
       }
     }
   this.onDisable = function() {
+    DC(DCV.get(),"TSMM",Color.get(),"Disabled TSMM.",false)
     if(BR.get()) {mc.thePlayer.rotationYaw += 180} /*Fix Head Rotation. only this code...*/ 
     ScaffoldModule.setState(false); TowerModule.setState(false);
     if(MLGSprint.get()) {SprintModule.setState(true)}else{SprintModule.setState(false)}
@@ -890,13 +914,17 @@ function ChatManager() {
 }
 
 function tk400sAdditonalModule() {
+  var ResetTimer = false;
 
+  var DCV = value.createBoolean("DebugChat", false);
+  var Color = value.createText("Color", "6");
   var values = value.createText("values", "");
   var DelayTick = value.createInteger("DelayTicks", 1, 0, 30);
   var Timer = value.createFloat("Timer", 0.1, 0, 10);
   var TP = value.createFloat("TP", 0.05, 0, 1);
   var Motion = value.createFloat("Motion", 0.1, 0, 1);
   var Criticals = value.createList("Criticals", ["Off", "Jump", "SpeedModule", "TP", "Motion", "FastJump/Motion", "FastJump/TP","FastJump/Timer"], "Off");
+  var WithJump = value.createBoolean("WithJump", false);
   var ClimbSpeed = value.createList("ClimbSpeed", ["Off", "TP", "Motion", ""], "Off");
   var BlockAnimation = value.createBoolean("BlockAnimation", false);
 //var SWH = value.createBoolean("SingleWorldHack", false); //Just Modify
@@ -910,12 +938,15 @@ function tk400sAdditonalModule() {
   //var AntiTypo = value.createBoolean("AntiTypo", true);
 
     this.addValues = function(v) {
+      v.add(DCV);
+      v.add(Color);
       v.add(values);
       v.add(DelayTick);
       v.add(Timer);
       v.add(TP);
       v.add(Motion);
       v.add(Criticals);
+      v.add(WithJump);
       v.add(ClimbSpeed);
       v.add(BlockAnimation);
     //v.add(SWH);
@@ -943,6 +974,8 @@ function tk400sAdditonalModule() {
   }
 
 	this.onUpdate = function () {
+    //moment Restener
+    if(Criticals.get() == "FastJump/Timer") {if(ResetTimer) {if(mc.thePlayer.fallDistance || mc.thePlayer.onGround) {{mc.timer.timerSpeed = 1;ResetTimer=false; chat.print("Timer has reset")}}}}
     if(mc.thePlayer.isOnLadder()) {
       switch (ClimbSpeed.get()) {
         case "TP":
@@ -996,7 +1029,7 @@ function tk400sAdditonalModule() {
       }
     }
   }
-  this.onMotion = function (event) {
+  this.onMotion = function () {
     if(BlockAnimation.get()){
       //if(mc.currentScreen instanceof GuiInventory || mc.currentScreen instanceof GuiIChest) {}else{
          //Fix? canceling Opening Inv.
@@ -1009,26 +1042,34 @@ function tk400sAdditonalModule() {
         case "Jump":
           SpeedModule.setState(false);
           mc.thePlayer.jump();
-        break;
+          break;
         case "SpeedModule":
           if(mc.gameSettings.keyBindForward.pressed || mc.gameSettings.keyBindRight.pressed || mc.gameSettings.keyBindLeft.pressed) {
-            if(!mc.gameSettings.keyBindBack.pressed && KAModule.getState() && !SpeedModule.getState() && !LJModule.getState() && !ScaffoldModule.getState() && !TowerModule.getState()) {SpeedModule.setState(true); if(DebugChat.get()) {chat.print(MMDchat + "§" + CC.get() + "Enabled Speed.")}}};
-        break;
+            if(!mc.gameSettings.keyBindBack.pressed && KAModule.getState() && !SpeedModule.getState() && !LJModule.getState() && !ScaffoldModule.getState() && !TowerModule.getState()) {SpeedModule.setState(true); DC(DCV.get(),"AD",Color.get(),"Enabled Speed.",true)}}else{
+          WithJump.get() && mc.thePlayer.jump();
+            };
+          break;
         case "TP":
           mc.thePlayer.setPosition(mc.thePlayer.posX, mc.thePlayer.posY += TP.get(), mc.thePlayer.posZ);
-        break;
+          break;
         case "Motion":
           mc.thePlayer.motionY += Motion.get();
-        break;
+          break;
         case "FastJump/Motion":
           mc.thePlayer.jump();
-          if(!mc.thePlayer.fallDistance >= 0.1) {mc.thePlayer.motionY += Motion.get()};
+          if(!mc.thePlayer.fallDistance) {mc.thePlayer.motionY += Motion.get()};
           break;
         case "FastJump/TP":
           mc.thePlayer.jump();
-          if(!mc.thePlayer.fallDistance >= 0.1) {mc.thePlayer.posY += TP.get()};
+          if(!mc.thePlayer.fallDistance) {mc.thePlayer.posY += TP.get()};
           break;
       }};
+      if(Criticals.get() == "FastJump/Timer") {
+        if(!mc.gameSettings.keyBindSneak.pressed && mc.thePlayer.ticksExisted % DelayTick.get() == 0 && !mc.thePlayer.isOnLadder() && !mc.thePlayer.isInWeb && !mc.thePlayer.isInWater() && !mc.thePlayer.isInLava()) {
+          mc.thePlayer.onGround && mc.thePlayer.jump();
+          if(!mc.thePlayer.fallDistance && !mc.thePlayer.onGround) {mc.timer.timerSpeed=Timer.get();ResetTimer=true;chat.print("DEBUG|TIMERED")};
+        }
+      }
   }
   /*this.onPacket = function (eventData) {
     if(AntiTypo.get()) {
@@ -1165,6 +1206,29 @@ function onDisable() {
 **/
 
 /* function utils */
+
+function DC (isEnabled, Module, Color, Reason, withrandom) {
+  var Mo = '';
+  var C = "§0";
+  var other = '';
+  if(isEnabled) {
+    switch (Module) {
+      case "TS":
+        Mo = "§5[§dTSMM§5] ";
+        break;
+      case "MM":
+        Mo = "§5[§dModuleManager§5] ";
+        break;
+      case "AD":
+        Mo = "§k[§cAdditionalModule§r§k]§2|";
+        break;
+    }
+    C = "§" + Color;
+    if(withrandom) {rn = " [" + Math.floor(Math.random()*11) + "]"}
+    Message = Mo + C + Reason + rn;
+    chat.print(Message);
+  }
+}
 
 function DelayCal (MaxDelay, MinDelay) {
   delayed = Math.floor(Math.random() * ((MaxDelay-MinDelay)+1) + MinDelay);
