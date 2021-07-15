@@ -3,7 +3,7 @@
  * Script of tk400's
  * this script contains ModuleManager, TowerScaffoldzzzz, HypixelGameChanger, Quitter(new) ChatManager(New!).
  * 
- * script for Latest build. (tested on 401b3c5)
+ * script for Latest(1.8.9) build. (tested on 401b3c5)
  * https://dl.ccbluex.net/skip/lgJeAGuKh9
  * 
  */
@@ -39,7 +39,7 @@ var FreeCamModule = moduleManager.getModule("FreeCam");
 var StoESPModule = moduleManager.getModule("StorageESP");
 var ESPModule = moduleManager.getModule("ESP");
 
-//Java
+//Java. or unique code.
 LiquidBounce = Java.type("net.ccbluex.liquidbounce.LiquidBounce").moduleManager;
 KillAura = Java.type("net.ccbluex.liquidbounce.features.module.modules.combat.KillAura").class;
 Color = Java.type('java.awt.Color');
@@ -394,7 +394,7 @@ function ModuleManager() {
               mc.gameSettings.keyBindJump.pressed = false; DC(DCV.get(),"MM",Color2.get(),"Disabled Jump.", true);
             }}}};
     //WASDSpeed 
-    if(WASDSpeed.get()) { //==> this code is working, but i think Inefficient. good for Detecting Faster Strafing Cheat <==//
+    if(WASDSpeed.get()) { //==> this code is working, but i think Inefficient. well good for Detecting Faster Strafing Cheat <==//
       DCV.get() && chat.print(MoveDir)
       if(SpeedModule.getState()) {
        if(WithSC.get()) {mc.gameSettings.smoothCamera = true; teex=true}
@@ -460,7 +460,7 @@ function ModuleManager() {
       if(VelocityModule.getState()) {
         if(LJModule.getState()) {VelocityModule.setState(false)}
       }else if(!LJModule.getState()){VelocityModule.setState(true)}
-    };// ???
+    };// ??? sigh.
     //ReverseStepFix
     if(ReverseStepFix.get()) {
      if(FlyModule.getState() && RSModule.getState()) {RSModule.setState(false)}
@@ -576,7 +576,7 @@ function ModuleManager() {
     if(AutoLeave.get()) {if(!AutoLeaveModule.getState()) {AutoLeaveModule.setState(true)}}
     //Used for ConfigSaver
     var serverip = mc.getCurrentServerData().serverIP;
-      switch (serverip) {
+      switch (serverip) { //huh
         case "*.ccbluex.net": servername = 'testccbluex'; break;
         case "*.hypixel.net" || "hypixel.net": servername = 'hypixel'; break;
         case "*.cubecraft.net" || "cubeaft.net": servername = 'cubecraft'; break;
@@ -1121,8 +1121,8 @@ function PacketManager() {
         switch (Mode.get()) {
           case "MineplexCombat": //https://forums.ccbluex.net/topic/318/is-there-a-mineplex-reach-bypass-scipt/6
             if(SpamTiming.get("Update")) {
-            sendPacket(new C00PacketKeepAlive);//mc.thePlayer.sendQueue.addToSendQueue(new (C00PacketKeepAlive));
-            sendPacket(new C0CPacketInput); //?    //mc.thePlayer.sendQueue.addToSendQueue(new (C0CPacketInput));
+            mc.thePlayer.sendQueue.addToSendQueue(new C00PacketKeepAlive);
+            mc.thePlayer.sendQueue.addToSendQueue(new C0CPacketInput);
             }
             break;
           case "OnlyMC":
@@ -1169,8 +1169,8 @@ function PacketManager() {
         switch (Mode.get()) {
           case "MineplexCombat": //https://forums.ccbluex.net/topic/318/is-there-a-mineplex-reach-bypass-scipt/6
           if(SpamTiming.get("Attack")) {
-          sendPacket(new C00PacketKeepAlive());//mc.thePlayer.sendQueue.addToSendQueue(new (C00PacketKeepAlive));
-          sendPacket(new C0CPacketInput()); //?    //mc.thePlayer.sendQueue.addToSendQueue(new (C0CPacketInput));
+          mc.thePlayer.sendQueue.addToSendQueue(new C00PacketKeepAlive);
+          mc.thePlayer.sendQueue.addToSendQueue(new C0CPacketInput);
           break;
           }
         }
@@ -1333,13 +1333,21 @@ function onDisable() {
 
 /**
  * thank you for
- * AutoL Script(Used MessageRandomizer System, for ChatManager)
- * FileSpammer Script(Senk Ju) (Used RandomStringer, for ChatManager)
- * AutoBot Script(soulplexis) used Command System, used for AntiTypo.
- * Scriptolotl (Scorpion) Used from FileSpammer.
- * AutoBot used for MCMusicPlayer.
- * CzechHek's BlockAnimation and BlockSelector.
- * etc...!
+ * ->CzechHek
+ * BlockAnimation, BlockSelector Script and Core.lib. and TowerScaffoldz's Idea ;)
+ * 
+ * ->Scorpion
+ * Scriptolotl Script.
+ * 
+ * ->soulplexis
+ * i think used his Script. but i forgot.. sorry.
+ * 
+ * ->Senk Ju
+ * FileSpammer Script.
+ * 
+ * ->AutoL Script
+ * 
+ * ->and some people
  */
 
 /* function utils */
@@ -1455,7 +1463,7 @@ function messageCont (spamlist, urname,randomish, BeforeR, AfterR, IncJP, AllowB
     "sorry, i was forgoten you guys are just Asperger's Syndromers. sadly...",
     "Oh Comeon plz fucking dumbers. Don't sabotage Pro Gaymers.",
     "Oh Comeon plz fucking Fools. Don't sabotage Pro Gaymers.",
-    "",
+    "fuck fuck fuckkkk Go die! fucking noobs!",
   ]
 if(IncJP) {jps = ContJP}else{jps = ""}
   if(randomish) {
@@ -1557,4 +1565,7 @@ function HMotion(offset) {
   var sin = Math.sin(mc.thePlayer.rotationYaw / 180.0 * 3.1415927)*offset;
   var cos = Math.cos(mc.thePlayer.rotationYaw / 180.0 * 3.1415927)*offset;
   mc.thePlayer.motionX -= sin; mc.thePlayer.motionZ += cos;
+}
+function VMotion(offset) {
+  mc.thePlayer.motionY += offset;
 }
