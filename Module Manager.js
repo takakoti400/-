@@ -51,6 +51,8 @@ var LAB=01
 //Packets
 //var S12PacketEntityVelocity = Java.type('net.minecraft.network.play.server.S12PacketEntityVelocity');
 //var clientchat = Java.type("net.minecraft.network.play.client.C01PacketChatMessage");
+var C0CPacketInput = Java.type('net.minecraft.network.play.client.C0CPacketInput');
+var C00PacketKeepAlive = Java.type('net.minecraft.network.play.client.C00PacketKeepAlive');
 
 //Player | Mob States
 Potion = Java.type('net.minecraft.potion.Potion');
@@ -77,6 +79,7 @@ function ModuleManager() {
   var Colour="§0";
   var saveconfigname = 'default';
   var MoveDir = 'A';
+  var teex = false;
 
   var ReadMe = value.createBoolean("ReadMe.js", false);
   var GamingText = value.createBoolean("GamingText", false);
@@ -97,6 +100,7 @@ function ModuleManager() {
 //var test = value.createBoolean("test", true); //Using on Develop, tset.
   var SpeedJump = value.createBoolean("Speed", true);
   var WASDSpeed = value.createBoolean("AntiHorizontalSpeedStrafing", false);
+  var WithSC = value.createBoolean("WithSmoothCamera", false);
   var SpeedsDisabler = value.createBoolean("SpeedsDisabler", true);
   var ChangeMode = value.createText("ChangingMode", "Custom");
   var VelLJManage = value.createBoolean("VelLongJump", true);
@@ -157,6 +161,7 @@ function ModuleManager() {
       v.add(AntiNoCritical);
       v.add(SpeedJump);
       v.add(WASDSpeed)
+      v.add(WithSC);
       v.add(AutoFClear);
       v.add(Text2);
       v.add(Inv);
@@ -201,7 +206,7 @@ function ModuleManager() {
   }
 	this.onUpdate = function () {
     if(ReadMe.get()) {
-      chat.print("//==> Module manager<==//\n> this Script was coded By tk400.\n互 hm..")
+      chat.print("//==> Module manager<==//\n> this Script was coded By tk400.\n> hm..")
       ReadMe.set(false);
     }
     if(!Profile.get() == "") {
@@ -392,6 +397,7 @@ function ModuleManager() {
     if(WASDSpeed.get()) { //==> this code is working, but i think Inefficient. good for Detecting Faster Strafing Cheat <==//
       DCV.get() && chat.print(MoveDir)
       if(SpeedModule.getState()) {
+       if(WithSC.get()) {mc.gameSettings.smoothCamera = true; teex=true}
         switch (MoveDir) {
           case 'F':
             if(mc.gameSettings.keyBindBack.pressed || mc.gameSettings.keyBindRight.pressed || mc.gameSettings.keyBindLeft.pressed) {
@@ -445,7 +451,7 @@ function ModuleManager() {
           if(mc.gameSettings.keyBindBack.pressed && mc.gameSettings.keyBindRight.pressed) {MoveDir = 'BR'}
         }
         if(mc.thePlayer.onGround) {MoveDir = 'A'}
-      }
+      }else if(WithSC.get() && teex){mc.gameSettings.smoothCamera = false;teex=false}
     }
     //SpeedDisabler
     if(SpeedsDisabler.get() && SpeedModule.getState() || LJModule.getState()) {if(FlyModule.getState() || FreeCamModule.getState() || ScaffoldModule.getState()) {SpeedModule.setState(false) || LJModule.setState(false); DC(DCV.get(),"MM",Color2.get(),"Disabled Speed or LongJump.",false)}};
@@ -465,7 +471,7 @@ function ModuleManager() {
       if(!NoFallModule.getState() && mc.thePlayer.fallDistance >= 2.6){NoFallModule.setState(true)}
     }
     //AutoKAJump
-    if(AutoKAJump.get() && KAModule.getState() && !mc.gameSettings.keyBindJump.pressed) {mc.gameSettings.keyBindJump.pressed = true};
+    if(AutoKAJump.get() && KAModule.getState()) {mc.gameSettings.keyBindJump.pressed = true};
 
   /* Manage Modules Setting */
 
@@ -595,7 +601,7 @@ function ModuleManager() {
 
 /* TIP: if ScaffoldJump is set Off, you can Sprint ScaffoldingJump. like shitgma(Jello? XD). */
 
- function TSMM() {
+function TSMM() {
   var i=0;
   var r=0;
   var z=0;
@@ -657,7 +663,7 @@ function ModuleManager() {
 		return "TSMM";
 	}
 	this.getDescription = function () {
-		return "ModuleManager's Module, Manage Tower & Scaffold. A SimpleScript";
+		return "ModuleManager's Module, Manages Tower & Scaffold. A SimpleScript, Better Than tOwERsCaFFoldZ.";
 	}
 	this.getCategory = function () {
 		return "Player";
@@ -855,7 +861,7 @@ function ChatManager() {
   var delay = 0;
 
   var SpamMode = value.createList("Mode", ["onEnabled", "ValueChanged", "AutoSpam", "test.ccbluex.netBlockGiver"], "ValueChanged");
-  var spamlist = value.createList("SpamProfile", ["Mineplex", "GameEnd", "Thx4Server", "LiquidAd", "Gaming", "DefaultLiquidSpammer", "All", "Custom//", ""], "");
+  var spamlist = value.createList("SpamProfile", ["Mineplex", "GameEnd", "Thx4Server", "LiquidAd", "Gaming", "DefaultLiquidSpammer", "NoobInsult", "All", "Custom//", ""], "");
   var yourname = value.createText("hackedBy", "[EnterNameHere]");
   var MaxDelay = value.createInteger("MaxDelay", 400,0,5000); // 10 = 1s.
   var MinDelay = value.createInteger("MinDelay", 100,0,5000);
@@ -915,6 +921,7 @@ function ChatManager() {
 
 function tk400sAdditonalModule() {
   var ResetTimer = false;
+  var On2d = false;
 
   var DCV = value.createBoolean("DebugChat", false);
   var Color = value.createText("Color", "6");
@@ -926,7 +933,7 @@ function tk400sAdditonalModule() {
   var Criticals = value.createList("Criticals", ["Off", "Jump", "SpeedModule", "TP", "Motion", "FastJump/Motion", "FastJump/TP","FastJump/Timer"], "Off");
   var WithJump = value.createBoolean("WithJump", false);
   var ClimbSpeed = value.createList("ClimbSpeed", ["Off", "TP", "Motion", ""], "Off");
-  var BlockAnimation = value.createBoolean("BlockAnimation", false);
+  var BlockAnimation = value.createList("BlockAnimation", ["SwingProgressAbort","BlockBlock","Off"],"Off");
 //var SWH = value.createBoolean("SingleWorldHack", false); //Just Modify
   var animation = value.createFloat("Animation", 0.75, 0, 1);
   var animation2 = value.createFloat("Animation2", 0.75, 0, 1);
@@ -957,7 +964,7 @@ function tk400sAdditonalModule() {
       v.add(ALMode);
       v.add(ReJoinServer);
       v.add(LMethod)
-    //v.add(AntiTypo);
+      //v.add(AntiTypo);
     }
 
 	this.getName = function () {
@@ -1030,11 +1037,19 @@ function tk400sAdditonalModule() {
     }
   }
   this.onMotion = function () {
-    if(BlockAnimation.get()){
+    switch (BlockAnimation.get()) {
+      case "SwingProgressAbort":
       //if(mc.currentScreen instanceof GuiInventory || mc.currentScreen instanceof GuiIChest) {}else{
          //Fix? canceling Opening Inv.
         LiquidBounce.getModule(KillAura).blockingStatus && (mc.thePlayer.swingProgress = animation.get());
+        break;
+      case "BlockBlock":
+        if(LiquidBounce.getModule(KillAura).blockingStatus){LiquidBounce.getModule(KillAura).blockingStatus = false;On2d = true}else{On2d=false}
+        break;
     }
+  }
+  this.onRender2D = function() {
+    if(On2d && DCV.get()) {mc.ingameGUI.drawCenteredString(mc.fontRendererObj, "§k|§cDon't Worry! NotBlocking is Fake! You've Blocking in ServerSided!§k|", mc.displayWidth / 4, (mc.displayHeight / 2.5) + 8, -1)}
   }
   this.onAttack = function () {
     if(mc.thePlayer.onGround && !mc.gameSettings.keyBindSneak.pressed && mc.thePlayer.ticksExisted % DelayTick.get() == 0 && !mc.thePlayer.isOnLadder() && !mc.thePlayer.isInWeb && !mc.thePlayer.isInWater() && !mc.thePlayer.isInLava()) {
@@ -1071,23 +1086,106 @@ function tk400sAdditonalModule() {
         }
       }
   }
-  /*this.onPacket = function (eventData) {
-    if(AntiTypo.get()) {
-      if (packet instanceof clientchat) {
-      var packet = eventData.getPacket();
-      if (packet.message.match("autOL" || "autol" || "utoL" || "utOL")) {
-        eventData.cancelEvent();
-        chat.print("§c[Debug] §7 Event(Chatpacket) was canceled");
-      }
-      if (packet.message.contains("antitypo")) {
-        eventData.cancelEvent();
-        chat.print("a")
-      }
-      }
-    }
-  }*/
 
   this.onDisable = function() {
+  }
+}
+
+function PacketManager() {
+  var KeepAlives = new (Java.type("java.util.ArrayList"))();
+  var Transactions = new (Java.type("java.util.ArrayList"))();
+  var currentTrans = 0;
+
+  var Disabler = value.createBoolean("Disable", true);
+  var Mode = value.createList("Mode", ["MineplexCombat", "Lunar", "Kauri", "OnlyMC", "HazelMC", "Verus Combat"], "MineplexCombat");
+  var SpamTiming = value.createList("SpamTiming", ["Update", "Attack"], "Update");
+
+  this.addValues = function(values) {
+    values.add(Disabler);
+    values.add(Mode);
+    values.add(SpamTiming);
+  }
+
+  this.getName = function () {
+    return "Disabler"; //or PacketManger, but i dont have idea like Packets'Mamager'.
+  }
+  this.getDescription = function () {
+    return "Allow you to Forget AntiCheats.";
+  }
+  this.getCategory = function () {
+    return "Exploit";
+  }
+  this.onEnable = function () {
+  }
+  this.onUpdate = function () {
+    if(SpamTiming.get("Update")) {
+      if(Disabler.get()) {
+        switch (Mode.get()) {
+          case "MineplexCombat": //https://forums.ccbluex.net/topic/318/is-there-a-mineplex-reach-bypass-scipt/6
+          sendPacket(new C00PacketKeepAlive());//mc.thePlayer.sendQueue.addToSendQueue(new (C00PacketKeepAlive));
+          sendPacket(new C0CPacketInput()); //?    //mc.thePlayer.sendQueue.addToSendQueue(new (C0CPacketInput));
+          break;
+        }
+      }
+    }
+  }
+  this.onAttack = function() {
+    if(SpamTiming.get("Attack")) {
+      if(Disabler.get()) {
+        switch (Mode.get()) {
+          case "MineplexCombat": //https://forums.ccbluex.net/topic/318/is-there-a-mineplex-reach-bypass-scipt/6
+          sendPacket(new C00PacketKeepAlive());//mc.thePlayer.sendQueue.addToSendQueue(new (C00PacketKeepAlive));
+          sendPacket(new C0CPacketInput()); //?    //mc.thePlayer.sendQueue.addToSendQueue(new (C0CPacketInput));
+          break;
+        }
+      }
+    }
+  }
+  this.onPacket = function (e) {
+    if(Disabler.get()) {
+    switch (Mode.get()) {
+      //They Script/Mode are stolen from Rilshrink?'s Script. thankyou..? and idk they working.
+      case "Kauri":
+          if(e.getPacket() instanceof C0FPacketConfirmTransaction) {
+              e.cancelEvent();
+          }
+          break;
+      case "Verus Combat":
+          if (e.getPacket() instanceof C0FPacketConfirmTransaction) {
+              if(currentTrans++>0) e.cancelEvent();
+          } else if(e.getPacket() instanceof C0BPacketEntityAction) {
+              e.cancelEvent();
+          } 
+          break;
+      case "OnlyMC":
+          if(e.getPacket() instanceof C0FPacketConfirmTransaction) {
+              Transactions.add(e.getPacket());
+              e.cancelEvent();
+          }
+          if(e.getPacket() instanceof C00PacketKeepAlive) {
+              //Temporary until I can figure out how to e.getPacket().key -= 1337;
+              KeepAlives.add(e.getPacket());
+              e.cancelEvent();
+          }
+          if(e.getPacket() instanceof C03PacketPlayer) {
+              sendPacket(new C0CPacketInput());
+          }
+          break;
+      case "HazelMC":
+          if(e.getPacket() instanceof C0FPacketConfirmTransaction) {
+              Transactions.add(e.getPacket());
+              e.cancelEvent();
+          }
+          if(e.getPacket() instanceof C00PacketKeepAlive) {
+              KeepAlives.add(e.getPacket());
+              e.cancelEvent();
+          }
+          if(e.getPacket() instanceof C03PacketPlayer) {
+              sendPacket(new C0CPacketInput());
+          }
+          break;
+        }
+      }
   }
 }
 
@@ -1172,6 +1270,7 @@ var HypixelGameChange = moduleManager.registerModule(new HypixelGameChange);
 var ChatManager = moduleManager.registerModule(new ChatManager)
 //var Quiter = moduleManager.registerModule(new Quiter)
 var tk400sAdditonalModule = moduleManager.registerModule(new tk400sAdditonalModule)
+var PacketManager = moduleManager.registerModule(new PacketManager)
 var MCMusicPlayer = moduleManager.registerModule(new MCMusicPlayer)
 
 function onEnable() {
@@ -1181,6 +1280,7 @@ function onEnable() {
   ChatManager;
   //Quiter;
   tk400sAdditonalModule;
+  PacketManager;
   MCMusicPlayer;
 };
 
@@ -1191,6 +1291,7 @@ function onDisable() {
   moduleManager.unregisterModule(ChatManager);
   //moduleManager.unregisterModule(Quiter);
   moduleManager.unregisterModule(tk400sAdditonalModule);
+  moduleManager.unregisterModule(PacketManager);
   moduleManager.unregisterModule(MCMusicPlayer);
 };
 
@@ -1203,14 +1304,13 @@ function onDisable() {
  * AutoBot used for MCMusicPlayer.
  * CzechHek's BlockAnimation and BlockSelector.
  * etc...!
-**/
+ */
 
 /* function utils */
 
 function DC (isEnabled, Module, Color, Reason, withrandom) {
   var Mo = '';
   var C = "§0";
-  var other = '';
   if(isEnabled) {
     switch (Module) {
       case "TS":
@@ -1308,6 +1408,19 @@ function messageCont (spamlist, urname,randomish, BeforeR, AfterR, IncJP, AllowB
     "Im Just Injected Gaming Vaccine.",
     //"Woops! i forgot Infected GamingVirus." /???
   ]
+  NoobInsult = [
+    "Fuck you Noobs",
+    "Hey fucking teams! GO to HELL Dumbers!",
+    "Hey fucking teams! GO DIE! Dumbers!",
+    "I can't Understand you've so dumb.",
+    "please suicide now. you are not needed on this Socical, world.",
+    "please use your fucked brain.",
+    "sorry, i was forgoten you guys are just Down's Syndromers. sadly..",
+    "sorry, i was forgoten you guys are just Asperger's Syndromers. sadly...",
+    "Oh Comeon plz fucking dumbers. Don't sabotage Pro Gaymers.",
+    "Oh Comeon plz fucking Fools. Don't sabotage Pro Gaymers.",
+    "",
+  ]
 if(IncJP) {jps = ContJP}else{jps = ""}
   if(randomish) {
     if(AllowBet) {
@@ -1334,10 +1447,10 @@ if(IncJP) {jps = ContJP}else{jps = ""}
       message = LiquidAd;break;
     case "Gaming":
       message = gaming;break;
+    case "NoobInsult":
+      message = NoobInsult;break;
     case "All": //Not working ?
       message = 'you need? hm this is intersting for me.';break;
-    default:
-      message = "please select Profile. and i think this is Error. idk how to excute this error.";break;
   }
   MSG = br + message[parseInt(Math.random()*message.length)] + ar;
   mc.thePlayer.sendChatMessage(MSG);
@@ -1353,6 +1466,30 @@ function randomString(length) {
       text += possible.charAt(Math.floor(Math.random() * possible.length));
   }
   return text;
+}
+
+function sendPacket(packet, triggerEvent) { //Stolen from Core.lib
+  _networkManager = mc.getNetHandler().getNetworkManager();
+  if (triggerEvent) _networkManager.sendPacket(packet);
+  else if (_networkManager.isChannelOpen()) {
+      _flushOutboundQueueMethod.invoke(_networkManager);
+      _dispatchPacketMethod.invoke(_networkManager, packet, null);
+  } else {
+      _readWriteLockField.get(_networkManager).writeLock().lock();
+      try {
+          _outboundPackets = _outboundPacketsQueueField.get(_networkManager);
+          _outboundPackets.add(new NetworkManager.InboundHandlerTuplePacketListener(packet, null));
+          _outboundPacketsQueueField.set(_networkManager, _outboundPackets);
+      } finally {
+          _readWriteLockField.get(_networkManager).writeLock().unlock();
+      }
+  }
+}
+
+function reset() {
+  currentTrans = 0;
+  KeepAlives.clear();
+  Transactions.clear();
 }
 
 function vClip(offset) {
