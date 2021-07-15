@@ -581,7 +581,6 @@ function ModuleManager() {
         case "*.hypixel.net" || "hypixel.net": servername = 'hypixel'; break;
         case "*.cubecraft.net" || "cubeaft.net": servername = 'cubecraft'; break;
         case "*.mineplex.com": servername = 'mineplex'; break;
-        default: servername = 'undetected';break;
       }
     // EXPEPIMENTAL //
     SavingName.set(servername);
@@ -1118,28 +1117,64 @@ function PacketManager() {
   this.onEnable = function () {
   }
   this.onUpdate = function () {
-    if(SpamTiming.get("Update")) {
       if(Disabler.get()) {
         switch (Mode.get()) {
           case "MineplexCombat": //https://forums.ccbluex.net/topic/318/is-there-a-mineplex-reach-bypass-scipt/6
-          sendPacket(new C00PacketKeepAlive());//mc.thePlayer.sendQueue.addToSendQueue(new (C00PacketKeepAlive));
-          sendPacket(new C0CPacketInput()); //?    //mc.thePlayer.sendQueue.addToSendQueue(new (C0CPacketInput));
-          break;
+            if(SpamTiming.get("Update")) {
+            sendPacket(new C00PacketKeepAlive);//mc.thePlayer.sendQueue.addToSendQueue(new (C00PacketKeepAlive));
+            sendPacket(new C0CPacketInput); //?    //mc.thePlayer.sendQueue.addToSendQueue(new (C0CPacketInput));
+            }
+            break;
+          case "OnlyMC":
+          case "Lunar":
+              if(mc.thePlayer.ticksExisted % 20 == 0 && Transactions.size() > currentTrans) {
+                  sendPacket(Transactions.get[currentTrans++]);
+              }
+              if(mc.thePlayer.ticksExisted % 20 == 0) {
+                  for(var i = 0; i < KeepAlives.size(); i++) {
+                      var packet = KeepAlives.get(i);
+                      if(packet != null) {
+                          sendPacket(packet);
+                      }
+                  }
+                  KeepAlives.clear();
+              }
+              if(mc.thePlayer.ticksExisted % 5 == 0) {
+                  sendPacket(new C06PacketPlayerPosLook(mc.thePlayer.posX, mc.thePlayer.posY + 21, mc.thePlayer.posZ, mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch, true));
+              }
+              if(mc.thePlayer.ticksExisted % 30 == 0) {
+                  reset();
+              }
+              break;
+          case "HazelMC":
+              sendPacket(new C00PacketKeepAlive(0));
+              if(Transactions.size() > currentTrans) {
+                  sendPacket(Transactions.get[currentTrans++]);
+              }
+              if(mc.thePlayer.ticksExisted % 100 == 0) {
+                  for(var i = 0; i < KeepAlives.size(); i++) {
+                      var packet = KeepAlives.get(i);
+                      if(packet != null) {
+                          sendPacket(packet);
+                      }
+                  }
+                  KeepAlives.clear();
+              }
+              break;
         }
       }
-    }
   }
   this.onAttack = function() {
-    if(SpamTiming.get("Attack")) {
-      if(Disabler.get()) {
+    if(Disabler.get()) {
         switch (Mode.get()) {
           case "MineplexCombat": //https://forums.ccbluex.net/topic/318/is-there-a-mineplex-reach-bypass-scipt/6
+          if(SpamTiming.get("Attack")) {
           sendPacket(new C00PacketKeepAlive());//mc.thePlayer.sendQueue.addToSendQueue(new (C00PacketKeepAlive));
           sendPacket(new C0CPacketInput()); //?    //mc.thePlayer.sendQueue.addToSendQueue(new (C0CPacketInput));
           break;
+          }
         }
       }
-    }
   }
   this.onPacket = function (e) {
     if(Disabler.get()) {
@@ -1157,6 +1192,7 @@ function PacketManager() {
               e.cancelEvent();
           } 
           break;
+      case "Lunar":
       case "OnlyMC":
           if(e.getPacket() instanceof C0FPacketConfirmTransaction) {
               Transactions.add(e.getPacket());
@@ -1468,8 +1504,13 @@ function randomString(length) {
   return text;
 }
 
+//Core.lib Injection
 function sendPacket(packet, triggerEvent) { //Stolen from Core.lib
   _networkManager = mc.getNetHandler().getNetworkManager();
+  _flushOutboundQueueMethod = getMethod(NetworkManager, "func_150733_h");
+  _readWriteLockField = getField(NetworkManager, "field_181680_j");
+  _outboundPacketsQueueField = getField(NetworkManager, "field_150745_j");
+  
   if (triggerEvent) _networkManager.sendPacket(packet);
   else if (_networkManager.isChannelOpen()) {
       _flushOutboundQueueMethod.invoke(_networkManager);
@@ -1484,6 +1525,18 @@ function sendPacket(packet, triggerEvent) { //Stolen from Core.lib
           _readWriteLockField.get(_networkManager).writeLock().unlock();
       }
   }
+}
+
+function getField(clazz, fieldName) {
+  ((_field = getFields(clazz instanceof Class ? clazz : clazz.class).find(function (f) {f.getName() == fieldName})) && _field.setAccessible(true), _field);
+}
+function getMethod(clazz, methodName) {
+   ((_method = Java.from((clazz instanceof Class ? clazz : clazz.class).getDeclaredMethods()).find(function (m){ m.getName() == methodName})) && _method.setAccessible(true), _method);
+}
+function getMethods(clazz) {
+  _methods = Java.from((clazz = clazz instanceof Class ? clazz : clazz.class).getDeclaredMethods());
+  while (clazz = clazz.superclass) _methods = _methods.concat(Java.from(clazz.getDeclaredMethods()));
+  return _methods;
 }
 
 function reset() {
