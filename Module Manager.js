@@ -57,7 +57,7 @@ var C00PacketKeepAlive = Java.type('net.minecraft.network.play.client.C00PacketK
 //Player | Mob States
 Potion = Java.type('net.minecraft.potion.Potion');
 GuiInventory = Java.type("net.minecraft.client.gui.inventory.GuiInventory");
-GuiIChest = Java.type("net.minecraft.client.gui.inventory.GuiChest");
+GuiChest = Java.type("net.minecraft.client.gui.inventory.GuiChest");
 
 //Blocks
 BlockPos = Java.type('net.minecraft.util.BlockPos')
@@ -100,6 +100,7 @@ function ModuleManager() {
 //var test = value.createBoolean("test", true); //Using on Develop, tset.
   var SpeedJump = value.createBoolean("Speed", true);
   var WASDSpeed = value.createBoolean("AntiHorizontalSpeedStrafing", false);
+  var AHSSD = value.createBoolean("AHSSDebug", false);
   var WithSC = value.createBoolean("WithSmoothCamera", false);
   var SpeedsDisabler = value.createBoolean("SpeedsDisabler", true);
   var ChangeMode = value.createText("ChangingMode", "Custom");
@@ -160,7 +161,8 @@ function ModuleManager() {
       v.add(ReverseStepFix);
       v.add(AntiNoCritical);
       v.add(SpeedJump);
-      v.add(WASDSpeed)
+      v.add(WASDSpeed);
+      v.add(AHSSD);
       v.add(WithSC);
       v.add(AutoFClear);
       v.add(Text2);
@@ -395,7 +397,7 @@ function ModuleManager() {
             }}}};
     //WASDSpeed 
     if(WASDSpeed.get()) { //==> this code is working, but i think Inefficient. well good for Detecting Faster Strafing Cheat <==//
-      DCV.get() && chat.print(MoveDir)
+      if(AHSSD.get()) DC(DCV.get(),"MM",Color2.get(),MoveDir, true)
       if(SpeedModule.getState()) {
        if(WithSC.get()) {mc.gameSettings.smoothCamera = true; teex=true}
         switch (MoveDir) {
@@ -454,7 +456,13 @@ function ModuleManager() {
       }else if(WithSC.get() && teex){mc.gameSettings.smoothCamera = false;teex=false}
     }
     //SpeedDisabler
-    if(SpeedsDisabler.get() && SpeedModule.getState() || LJModule.getState()) {if(FlyModule.getState() || FreeCamModule.getState() || ScaffoldModule.getState()) {SpeedModule.setState(false) || LJModule.setState(false); DC(DCV.get(),"MM",Color2.get(),"Disabled Speed or LongJump.",false)}};
+    if(SpeedsDisabler.get()) {
+      if(SpeedModule.getState() || LJModule.getState()) {
+        if(FlyModule.getState() || FreeCamModule.getState() || ScaffoldModule.getState() || TowerModule.getState()) {
+            SpeedModule.setState(false) || LJModule.setState(false);DC(DCV.get(),"MM",Color2.get(),"Disabled Speed or LongJump.",false);
+        }
+      }
+    };
     //VelLJ /Hypixel Fix?
     if(VelLJManage.get()) {
       if(VelocityModule.getState()) {
@@ -462,9 +470,9 @@ function ModuleManager() {
       }else if(!LJModule.getState()){VelocityModule.setState(true)}
     };// ??? sigh.
     //ReverseStepFix
-    if(ReverseStepFix.get()) {
-     if(FlyModule.getState() && RSModule.getState()) {RSModule.setState(false)}
-      if(mc.theWorld.getBlockState(new BlockPos(mc.thePlayer.posX, mc.thePlayer.posY - 1, mc.thePlayer.posZ)).getBlock() instanceof SlimeBlock) {RSModule.setState(false)}else{RSModule.setState(true)}
+    if(ReverseStepFix.get()) {var RSEnable = true;
+     if(RSModule.getState() &&FlyModule.getState()) {RSModule.setState(false); RSEnable = false}
+      if(mc.theWorld.getBlockState(new BlockPos(mc.thePlayer.posX, mc.thePlayer.posY - 1, mc.thePlayer.posZ)).getBlock() instanceof SlimeBlock) {RSModule.setState(false);RSEnable=true}else if(RSEnable){RSModule.setState(true)}
     };
     //AntiNoCritical
     if(AntiNoCritical.get()) {
@@ -477,7 +485,6 @@ function ModuleManager() {
 
       //RenderSetter /fix Replaced by other user's Setting
     if(RenderSetting.get()) {
-      //Counter
       if(RSCounter.get()) {if(!ScaffoldModule.getValue("Counter").get()) {ScaffoldModule.getValue("Counter").set(true)};if(!TowerModule.getValue("Counter").get()) {TowerModule.getValue("Counter").set(true)}
     }else{
       if(ScaffoldModule.getValue("Counter").get()) {ScaffoldModule.getValue("Counter").set(false)}; if(TowerModule.getValue("Counter").get()) {TowerModule.getValue("Counter").set(false)}}
@@ -606,6 +613,7 @@ function TSMM() {
   var z=0;
   var CoolTime=0;
   var CoolTimeB=false;
+  var hideScaffold; var hideTower;
   
   var Color = value.createText("TSMMCustomColor", "a");
   var DCV = value.createBoolean("TSMMDebugChat", false);
@@ -671,11 +679,10 @@ function TSMM() {
     return TSMMMode.get();
   }
   this.onEnable = function() {
-    i=0;
-    r=0;
-    z=0;
-    CoolTime=0;
-    CoolTimeB=false;
+    //Array Remover
+    //hideScaffold = ScaffoldModule.array; hideTower = TowerModule.array;
+    //ScaffoldModule.array = TowerModule.array = TowerModule.state = !(ScaffoldModule.state = true); i want know that Mechanism.
+    i=0;r=0;z=0;CoolTime=0;CoolTimeB=false;
     delay = DelayCal(MaxDelay.get(),MinDelay.get()); RDelay = DelayCal(MaxDelay.get(),MinDelay.get())
     if(BR.get()) {mc.thePlayer.rotationYaw += 180}
     ScaffoldModule.setState(true);
@@ -782,6 +789,8 @@ function TSMM() {
       }
     }
   this.onDisable = function() {
+    ScaffoldModule.state = TowerModule.state = false;
+    //ScaffoldModule.array = hideScaffold; TowerModule.array = hideTower;
     DC(DCV.get(),"TSMM",Color.get(),"Disabled TSMM.",false)
     if(BR.get()) {mc.thePlayer.rotationYaw += 180} /*Fix Head Rotation. only this code...*/ 
     ScaffoldModule.setState(false); TowerModule.setState(false);
@@ -976,9 +985,6 @@ function tk400sAdditonalModule() {
 		return "Player";
 	}
 
-  this.onEnable = function() {
-  }
-
 	this.onUpdate = function () {
     //moment Restener
     if(Criticals.get() == "FastJump/Timer") {if(ResetTimer) {if(mc.thePlayer.fallDistance || mc.thePlayer.onGround) {{mc.timer.timerSpeed = 1;ResetTimer=false; chat.print("Timer has reset")}}}}
@@ -1038,7 +1044,7 @@ function tk400sAdditonalModule() {
   this.onMotion = function () {
     switch (BlockAnimation.get()) {
       case "SwingProgressAbort":
-      //if(mc.currentScreen instanceof GuiInventory || mc.currentScreen instanceof GuiIChest) {}else{
+      //if(mc.currentScreen instanceof GuiInventory || mc.currentScreen instanceof GuiChest) {}else{
          //Fix? canceling Opening Inv.
         LiquidBounce.getModule(KillAura).blockingStatus && (mc.thePlayer.swingProgress = animation.get());
         break;
@@ -1190,7 +1196,7 @@ function PacketManager() {
               if(currentTrans++>0) e.cancelEvent();
           } else if(e.getPacket() instanceof C0BPacketEntityAction) {
               e.cancelEvent();
-          } 
+          }
           break;
       case "Lunar":
       case "OnlyMC":
@@ -1391,7 +1397,6 @@ function playSound (name,a,b) {
 function messageCont (spamlist, urname,randomish, BeforeR, AfterR, IncJP, AllowBet, RandomBet, RBA, BetStB, BetStA) {
   var insultworda = "";
   var clientnames = "";
-  var Texts = Text1.concat(Text2, Text3);
   if(IncJP) {insultworda = insultEN.concat(insultJA); clientnames = clientnameEN.concat(ClientNameJA)}else{insultworda = insultEN; clientnames = clientnameEN}
   Mineplex = [
     "Don't Worry Mineplex! You've server is rly not popular. Alts are Almost all unbanned! xd!!",
@@ -1402,6 +1407,17 @@ function messageCont (spamlist, urname,randomish, BeforeR, AfterR, IncJP, AllowB
     "hey guys im back! ;) don't worry guys!",
     "Good News! you've server is rly not popular! well, We Can't Never Banned! ;)",
     "Mineplex AC, Staff, System is sucks go to Hypixel Now.",
+    "hacker are wanted playing your fucking shit server. don't ban us.",
+    "sigh dont ban us, your works are shit.",
+    "OMGGGGG! freealts pw is working on this shit server!! OMGGGGG!!!!!",
+    "wow! free alts gen is worked! thx!!! lagplex staffs!!!!!",
+    "we need thank to this idiot staffs. thx dumbers.",
+    "i love mp, why? free cheating, ez bypass, only this reason. LOL! hypixel is better server.",
+    "hypixel is good for everyone. but mp is good for ... ?",
+    "holy shit! free alt is working this server! OMGGGGGGGG!!!!",
+    "dont worry this server working free alt. we can never banned.",
+    "mineplex, give me Op. i can ban you'ves you've never needed on this server",
+    "please install Exrief. this is good AntiAnticheat.",
   ]
   GameEnd = [
     "EZist haxied by " + urname + ", And " + rt(clientnames) + " Client. Download Now.",
