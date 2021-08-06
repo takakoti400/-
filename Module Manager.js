@@ -3,6 +3,11 @@
  * Script of tk400's
  * this script contains ModuleManager, TowerScaffoldzzzz, HypixelGameChanger, Quitter(new) ChatManager(New!).
  * 
+ * *                                  * * /
+ * Enchancing LiquidBounce Hacked Client.
+ * (code description later)
+ * 
+ * 
  * script for Latest(1.8.9) build. (tested on 401b3c5)
  * https://dl.ccbluex.net/skip/lgJeAGuKh9
  * 
@@ -97,12 +102,13 @@ function ModuleManager() {
   var SLT = value.createText("CustomTag", "SuperMechaMechaSugooooiModule!");
   var Color2 = value.createText("CustomColor", "a"); //https://minecraft.gamepedia.com/Formatting_codes
   var DCV = value.createBoolean("DebugChat", false);
-//var test = value.createBoolean("test", true); //Using on Develop, tset.
+  //var test = value.createBoolean("test", true); //Using on Develop, tset.
   var SpeedJump = value.createBoolean("Speed", true);
   var WASDSpeed = value.createBoolean("AntiHorizontalSpeedStrafing", false);
   var AHSSD = value.createBoolean("AHSSDebug", false);
   var WithSC = value.createBoolean("WithSmoothCamera", false);
   var SpeedsDisabler = value.createBoolean("SpeedsDisabler", true);
+  //var SDlist = value.createBoolean("DisableWhen", ["Scaffolding","MovementModule"],""); //idea = Czhechek's CC?
   var ChangeMode = value.createText("ChangingMode", "Custom");
   var VelLJManage = value.createBoolean("VelLongJump", true);
   var AutoKAJump = value.createBoolean("AutoKAJump", false);
@@ -454,8 +460,7 @@ function ModuleManager() {
         }
         if(mc.thePlayer.onGround) {MoveDir = 'A'}
       }else if(WithSC.get() && teex){mc.gameSettings.smoothCamera = false;teex=false}
-    }
-    //SpeedDisabler
+    }   //SpeedDisabler
     if(SpeedsDisabler.get()) {
       if(SpeedModule.getState() || LJModule.getState()) {
         if(FlyModule.getState() || FreeCamModule.getState() || ScaffoldModule.getState() || TowerModule.getState()) {
@@ -471,8 +476,13 @@ function ModuleManager() {
     };// ??? sigh.
     //ReverseStepFix
     if(ReverseStepFix.get()) {var RSEnable = true;
-     if(RSModule.getState() &&FlyModule.getState()) {RSModule.setState(false); RSEnable = false}
-      if(mc.theWorld.getBlockState(new BlockPos(mc.thePlayer.posX, mc.thePlayer.posY - 1, mc.thePlayer.posZ)).getBlock() instanceof SlimeBlock) {RSModule.setState(false);RSEnable=true}else if(RSEnable){RSModule.setState(true)}
+     if(RSModule.getState() &&FlyModule.getState()) {//case of Fly Module enabled.
+        RSModule.state = false; RSEnable=true;
+     }else if(RSEnable) {RSModule.state = true;RSEnable=false} //Enable only once
+     //case of when you on the Slime(Block).
+      if(mc.theWorld.getBlockState(new BlockPos(mc.thePlayer.posX, mc.thePlayer.posY - 1, mc.thePlayer.posZ)).getBlock() instanceof SlimeBlock) {
+        RSModule.state = false; RSEnable=true;
+      }else if(RSEnable) {RSModule.state = true;RSEnable=false} //Enable only once
     };
     //AntiNoCritical
     if(AntiNoCritical.get()) {
@@ -604,7 +614,6 @@ function ModuleManager() {
  * Forgot add Sneak Option, Remove BackWard option.
 */
 
-
 /* TIP: if ScaffoldJump is set Off, you can Sprint ScaffoldingJump. like shitgma(Jello? XD). */
 
 function TSMM() {
@@ -613,7 +622,7 @@ function TSMM() {
   var z=0;
   var CoolTime=0;
   var CoolTimeB=false;
-  var hideScaffold; var hideTower;
+  //var hideScaffold; var hideTower;
   
   var Color = value.createText("TSMMCustomColor", "a");
   var DCV = value.createBoolean("TSMMDebugChat", false);
@@ -629,6 +638,7 @@ function TSMM() {
   var JSMode = value.createList("Type", ["SimplyJump", "Motion", "TP"], "SimplyJump");
   var JSV = value.createFloat("Value", 0.42, -1, 2);
   var AntiHalf = value.createBoolean("AntiHalf", false);
+  var DownWards = value.createBoolean("2ndDownward", false); //experimentalishation
   var WithBlinkAPI = value.createBoolean("WithLB'sBlink", false);
   var AutoSneak = value.createBoolean("AutoSneak", false);
   var MinDelay = value.createFloat("MinDelay", 5, 0, 30);
@@ -655,6 +665,7 @@ function TSMM() {
     v.add(JSMode);
     v.add(JSV);
     v.add(AntiHalf);
+    v.add(DownWards);
     v.add(WithBlinkAPI);
     v.add(AutoSneak);
     v.add(MinDelay)
@@ -685,8 +696,7 @@ function TSMM() {
     i=0;r=0;z=0;CoolTime=0;CoolTimeB=false;
     delay = DelayCal(MaxDelay.get(),MinDelay.get()); RDelay = DelayCal(MaxDelay.get(),MinDelay.get())
     if(BR.get()) {mc.thePlayer.rotationYaw += 180}
-    ScaffoldModule.setState(true);
-    TowerModule.setState(false);
+    ScaffoldModule.setState(true); TowerModule.setState(false);
     if(JumpScaffolding.get()) {TSMMMode.set("Off"); if(!ScaffoldModule.getValue("SameY").get()) {ScaffoldModule.getValue("SameY").set(true)}}
     // //
     WithBlinkAPI.get() && BlinkModule.setState(true);
@@ -710,7 +720,7 @@ function TSMM() {
       if(!mc.gameSettings.keyBindJump.pressed) {ScaffoldModule.setState(true); TowerModule.setState(false);DC(DCV.get(),"TS",Color.get(),"Enabled Scaffold, Disabled Tower",false)}
     }else if(!TowerModule.getState()) {
       if(!mc.gameSettings.keyBindJump.pressed) {
-        if(TSMMMode.get() == "Sprint") {ScaffoldModule.getValue("Sprint").set(true)}
+        if(TSMMMode == "Sprint") {ScaffoldModule.getValue("Sprint").set(true)}
       }else if(mc.thePlayer.onGround) {
           switch (TSMMMode.get()) {
             case "Sprint":
@@ -727,11 +737,11 @@ function TSMM() {
     }
     //if press mc.gameSettings.keyBindJump.pressed = enable Tower, and Managing
     if(!SCATower.get()) {
-  if(!TowerModule.getState() && mc.thePlayer.onGround && mc.gameSettings.keyBindJump.pressed && !mc.gameSettings.keyBindForward.pressed) {
-      if(PotionTower.get()) {
-        if(!mc.thePlayer.isPotionActive(Potion.jump)) {ScaffoldModule.setState(false); TowerModule.setState(true); DC(DCV.get(),"TS",Color.get(),"Enabled Speed.",true)}}else if(!TowerModule.getState() && mc.thePlayer.onGround && mc.gameSettings.keyBindJump.pressed && !mc.gameSettings.keyBindForward.pressed)
-          {ScaffoldModule.setState(false); TowerModule.setState(true);DC(DCV.get(),"TS",Color.get(),"Enabled Tower, Disabled Scaffold")};
-  }}
+      if(!TowerModule.getState() && mc.thePlayer.onGround && mc.gameSettings.keyBindJump.pressed && !mc.gameSettings.keyBindForward.pressed) {
+          if(PotionTower.get()) {
+            if(!mc.thePlayer.isPotionActive(Potion.jump)) {ScaffoldModule.setState(false); TowerModule.setState(true); DC(DCV.get(),"TS",Color.get(),"Enabled Speed.",true)}}else if(!TowerModule.getState() && mc.thePlayer.onGround && mc.gameSettings.keyBindJump.pressed && !mc.gameSettings.keyBindForward.pressed)
+              {ScaffoldModule.setState(false); TowerModule.setState(true);DC(DCV.get(),"TS",Color.get(),"Enabled Tower, Disabled Scaffold")};
+      }}
     if(TowerModule.getState()) {
       switch (NoXZMotion.get()) {
         case "MotionZero":
@@ -751,6 +761,13 @@ function TSMM() {
   //AntiSlab
     if(AntiHalf.get()) {
     if(mc.thePlayer.onGround && mc.theWorld.getBlockState(new BlockPos(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ)).getBlock() instanceof AntiSlab) {mc.thePlayer.jump()}};
+  //DownWards
+    if(DownWards.get()) {
+      if(mc.gameSettings.keyBindSneak.isKeyDown()) {
+        mc.thePlayer.sneak(false);
+        //ScaffoldModule.getValue("SafeWalk").set(false);ScaffoldModule.getValue("Air").set(false); //uhe! dari
+      }
+    }
   //Jump Scaffolding
     if(JumpScaffolding.get()) {
         if(ScaffoldModule.getState() && mc.thePlayer.onGround && !mc.thePlayer.isOnLadder() && !mc.thePlayer.isInWeb && !mc.thePlayer.isInWater() && !mc.thePlayer.isInLava() && !mc.gameSettings.keyBindSneak.pressed) {if(mc.gameSettings.keyBindForward.pressed || mc.gameSettings.keyBindRight.pressed || mc.gameSettings.keyBindLeft.pressed) {mc.gameSettings.keyBindJump.pressed = false;
@@ -780,9 +797,10 @@ function TSMM() {
               case "Instant":
                 mc.gameSettings.keyBindSneak.pressed = false;break;
               case "Delay":
-                r+=0;
+                r+=1;
                 RDelay =DelayCal(RMaxDelay.get(), RMinDelay.get());
-                if(r==RDelay) {mc.gameSettings.keyBindSneak.pressed = false}break;
+                if(r==RDelay) {mc.gameSettings.keyBindSneak.pressed = false}
+                break;
             }i+=1}
           }
         }
@@ -793,7 +811,6 @@ function TSMM() {
     //ScaffoldModule.array = hideScaffold; TowerModule.array = hideTower;
     DC(DCV.get(),"TSMM",Color.get(),"Disabled TSMM.",false)
     if(BR.get()) {mc.thePlayer.rotationYaw += 180} /*Fix Head Rotation. only this code...*/ 
-    ScaffoldModule.setState(false); TowerModule.setState(false);
     if(MLGSprint.get()) {SprintModule.setState(true)}else{SprintModule.setState(false)}
     WithBlinkAPI.get() && BlinkModule.setState(false);
   }
@@ -941,7 +958,7 @@ function tk400sAdditonalModule() {
   var Criticals = value.createList("Criticals", ["Off", "Jump", "SpeedModule", "TP", "Motion", "FastJump/Motion", "FastJump/TP","FastJump/Timer"], "Off");
   var WithJump = value.createBoolean("WithJump", false);
   var ClimbSpeed = value.createList("ClimbSpeed", ["Off", "TP", "Motion", ""], "Off");
-  var BlockAnimation = value.createList("BlockAnimation", ["SwingProgressAbort","BlockBlock","Off"],"Off");
+  var BlockAnimation = value.createList("BlockAnimation", ["RandomizedProgress","SwingProgressAbort","BlockBlock","Off"],"Off");
 //var SWH = value.createBoolean("SingleWorldHack", false); //Just Modify
   var animation = value.createFloat("Animation", 0.75, 0, 1);
   var animation2 = value.createFloat("Animation2", 0.75, 0, 1);
@@ -1043,6 +1060,9 @@ function tk400sAdditonalModule() {
   }
   this.onMotion = function () {
     switch (BlockAnimation.get()) {
+      case "RandomizedProgress":
+        LiquidBounce.getModule(KillAura).blockingStatus && (mc.thePlayer.swingProgress = Math.random() * 1);
+        break;
       case "SwingProgressAbort":
       //if(mc.currentScreen instanceof GuiInventory || mc.currentScreen instanceof GuiChest) {}else{
          //Fix? canceling Opening Inv.
@@ -1126,7 +1146,7 @@ function PacketManager() {
       if(Disabler.get()) {
         switch (Mode.get()) {
           case "MineplexCombat": //https://forums.ccbluex.net/topic/318/is-there-a-mineplex-reach-bypass-scipt/6
-            if(SpamTiming.get("Update")) {
+            if(SpamTiming.get() == "Update") {
             mc.thePlayer.sendQueue.addToSendQueue(new C00PacketKeepAlive);
             mc.thePlayer.sendQueue.addToSendQueue(new C0CPacketInput);
             }
@@ -1173,12 +1193,12 @@ function PacketManager() {
   this.onAttack = function() {
     if(Disabler.get()) {
         switch (Mode.get()) {
-          case "MineplexCombat": //https://forums.ccbluex.net/topic/318/is-there-a-mineplex-reach-bypass-scipt/6
-          if(SpamTiming.get("Attack")) {
-          mc.thePlayer.sendQueue.addToSendQueue(new C00PacketKeepAlive);
-          mc.thePlayer.sendQueue.addToSendQueue(new C0CPacketInput);
+          case "MineplexCombat": //https://forums.ccbluex.net/topic/318/is-there-a-mineplex-reach-bypass-scipt/6 /i think this is not working...
+            if(SpamTiming.get() == "Attack") {
+              mc.thePlayer.sendQueue.addToSendQueue(new C00PacketKeepAlive);
+              mc.thePlayer.sendQueue.addToSendQueue(new C0CPacketInput);
+            }
           break;
-          }
         }
       }
   }
@@ -1230,7 +1250,6 @@ function PacketManager() {
       }
   }
 }
-
 
 function MCMusicPlayer() {
   var soviets =0;
@@ -1340,7 +1359,7 @@ function onDisable() {
 /**
  * thank you for
  * ->CzechHek
- * BlockAnimation, BlockSelector Script and Core.lib. and TowerScaffoldz's Idea ;)
+ * BlockAnimation, BlockSelector Script, Core.lib. and TowerScaffoldz's Idea ;)
  * 
  * ->Scorpion
  * Scriptolotl Script.
@@ -1357,6 +1376,9 @@ function onDisable() {
  */
 
 /* function utils */
+function D(Desc) {
+  chat.print(Desc)
+}
 
 function DC (isEnabled, Module, Color, Reason, withrandom) {
   var Mo = '';
@@ -1585,3 +1607,16 @@ function HMotion(offset) {
 function VMotion(offset) {
   mc.thePlayer.motionY += offset;
 }
+/*
+function Sleep (delay) {
+  var passed =false, i=0;
+  i+=1;
+  if(delay ==i) {passed = true}else{passed=false}
+  return passed;
+}
+function RSleep (max, min) {
+  var passed =false, i=0;
+  i+=1;
+  if(delay ==i) {passed = true; i=0;delay = Math.floor(Math.random() * ((max-min)+1) + min);}else{passed=false}
+  return passed;
+}*/
