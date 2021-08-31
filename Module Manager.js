@@ -66,9 +66,12 @@ GuiChest = Java.type("net.minecraft.client.gui.inventory.GuiChest");
 
 //Blocks
 BlockPos = Java.type('net.minecraft.util.BlockPos')
+SlabBlock = Java.type('net.minecraft.block.BlockSlab')
 SlimeBlock = Java.type('net.minecraft.block.BlockSlime')
 AirBlock = Java.type('net.minecraft.block.BlockAir')
-AntiSlab = Java.type('net.minecraft.block.BlockSlab')
+Workbench = Java.type('net.minecraft.block.BlockWorkbench')
+Chest = Java.type('net.minecraft.block.BlockChest')
+Furnace = Java.type('net.minecraft.block.BlockFurnace')
 
 function ModuleManager() {
   //var WasFallen = false;
@@ -85,6 +88,7 @@ function ModuleManager() {
   var saveconfigname = 'default';
   var MoveDir = 'A';
   var teex = false;
+  var WasFallen=false;
 
   var ReadMe = value.createBoolean("ReadMe.js", false);
   var GamingText = value.createBoolean("GamingText", false);
@@ -103,8 +107,10 @@ function ModuleManager() {
   var Color2 = value.createText("CustomColor", "a"); //https://minecraft.gamepedia.com/Formatting_codes
   var DCV = value.createBoolean("DebugChat", false);
   //var test = value.createBoolean("test", true); //Using on Develop, tset.
+  var Crandom = value.createBoolean("ConfigRandomizer", false);
   var SpeedJump = value.createBoolean("Speed", true);
   var WASDSpeed = value.createBoolean("AntiHorizontalSpeedStrafing", false);
+  var AHSSM = value.createList("AHSSMethod", ["FreeControl","ForcedDirection","ForcedDirection2"],"ForcedDirection");
   var AHSSD = value.createBoolean("AHSSDebug", false);
   var WithSC = value.createBoolean("WithSmoothCamera", false);
   var SpeedsDisabler = value.createBoolean("SpeedsDisabler", true);
@@ -158,7 +164,7 @@ function ModuleManager() {
       v.add(Text1);
       v.add(SLT);
       v.add(Color2);
-    //v.add(test);
+      //v.add(test);
       v.add(DCV);
       v.add(SpeedsDisabler);
       v.add(ChangeMode)
@@ -168,6 +174,7 @@ function ModuleManager() {
       v.add(AntiNoCritical);
       v.add(SpeedJump);
       v.add(WASDSpeed);
+      v.add(AHSSM);
       v.add(AHSSD);
       v.add(WithSC);
       v.add(AutoFClear);
@@ -196,6 +203,7 @@ function ModuleManager() {
       v.add(AntiESP);
       v.add(NoMouse);
       v.add(AntiVoid)
+      v.add(MinFallDis);
     };
 
 	this.getName = function () {
@@ -395,60 +403,19 @@ function ModuleManager() {
       GaTex = Colour + GaTT;
     }
     //Manage SpeedJump /Fix Jump Boosting
-      if(SpeedJump.get()) {
-        if(SpeedModule.getState() && mc.thePlayer.onGround) {
-          if(mc.gameSettings.keyBindJump.pressed) {
-            if(mc.gameSettings.keyBindForward.pressed || mc.gameSettings.keyBindRight.pressed || mc.gameSettings.keyBindLeft.pressed || mc.gameSettings.keyBindBack.pressed) {
-              mc.gameSettings.keyBindJump.pressed = false; DC(DCV.get(),"MM",Color2.get(),"Disabled Jump.", true);
-            }}}};
+    if(SpeedJump.get()) {
+      if(SpeedModule.getState() && mc.thePlayer.onGround) {
+        if(mc.gameSettings.keyBindJump.pressed) {
+          if(mc.gameSettings.keyBindForward.pressed || mc.gameSettings.keyBindRight.pressed || mc.gameSettings.keyBindLeft.pressed || mc.gameSettings.keyBindBack.pressed) {
+            mc.gameSettings.keyBindJump.pressed = false; DC(DCV.get(),"MM",Color2.get(),"Disabled Jump.", true);
+          }}}};
     //WASDSpeed 
-    if(WASDSpeed.get()) { //==> this code is working, but i think Inefficient. well good for Detecting Faster Strafing Cheat <==//
-      if(AHSSD.get()) DC(DCV.get(),"MM",Color2.get(),MoveDir, true)
+    if(WASDSpeed.get()) {//==> this code is working, but i think Inefficient. well good for Detecting Faster Strafing Cheat <==//
+      if(AHSSD.get()) DC(DCV.get(),"MM",Color2.get(),MoveDir, true) 
       if(SpeedModule.getState()) {
        if(WithSC.get()) {mc.gameSettings.smoothCamera = true; teex=true}
-        switch (MoveDir) {
-          case 'F':
-            if(mc.gameSettings.keyBindBack.pressed || mc.gameSettings.keyBindRight.pressed || mc.gameSettings.keyBindLeft.pressed) {
-              mc.gameSettings.keyBindBack.pressed=false;mc.gameSettings.keyBindRight.pressed=false;mc.gameSettings.keyBindLeft.pressed=false;mc.gameSettings.keyBindForward.pressed=false;
-            }
-            break;
-          case 'R':
-            if(mc.gameSettings.keyBindBack.pressed || mc.gameSettings.keyBindForward.pressed || mc.gameSettings.keyBindLeft.pressed) {
-              mc.gameSettings.keyBindBack.pressed=false;mc.gameSettings.keyBindRight.pressed=false;mc.gameSettings.keyBindLeft.pressed=false;mc.gameSettings.keyBindForward.pressed=false;
-            }
-            break;
-          case 'L':
-            if(mc.gameSettings.keyBindBack.pressed || mc.gameSettings.keyBindRight.pressed || mc.gameSettings.keyBindForward.pressed) {
-              mc.gameSettings.keyBindBack.pressed=false;mc.gameSettings.keyBindRight.pressed=false;mc.gameSettings.keyBindLeft.pressed=false;mc.gameSettings.keyBindForward.pressed=false;
-            }
-            break;
-          case 'B':
-            if(mc.gameSettings.keyBindForward.pressed || mc.gameSettings.keyBindRight.pressed || mc.gameSettings.keyBindLeft.pressed) {
-              mc.gameSettings.keyBindBack.pressed=false;mc.gameSettings.keyBindRight.pressed=false;mc.gameSettings.keyBindLeft.pressed=false;mc.gameSettings.keyBindForward.pressed=false;
-            }
-            break;
-          case 'FR':
-            if(mc.gameSettings.keyBindBack.pressed || mc.gameSettings.keyBindLeft.pressed) {
-              mc.gameSettings.keyBindBack.pressed=false;mc.gameSettings.keyBindRight.pressed=false;mc.gameSettings.keyBindLeft.pressed=false;mc.gameSettings.keyBindForward.pressed=false;
-            }
-            break;
-          case 'FL':
-            if(mc.gameSettings.keyBindBack.pressed || mc.gameSettings.keyBindRight.pressed) {
-              mc.gameSettings.keyBindBack.pressed=false;mc.gameSettings.keyBindRight.pressed=false;mc.gameSettings.keyBindLeft.pressed=false;mc.gameSettings.keyBindForward.pressed=false;
-            }
-            break;
-          case 'BL':
-            if(mc.gameSettings.keyBindForward.pressed || mc.gameSettings.keyBindRight.pressed) {
-              mc.gameSettings.keyBindBack.pressed=false;mc.gameSettings.keyBindRight.pressed=false;mc.gameSettings.keyBindLeft.pressed=false;mc.gameSettings.keyBindForward.pressed=false;
-            }
-            break;
-          case 'BR':
-            if(mc.gameSettings.keyBindLeft.pressed || mc.thePlayer.keyBindForward.pressed) {
-              mc.gameSettings.keyBindBack.pressed=false;mc.gameSettings.keyBindRight.pressed=false;mc.gameSettings.keyBindLeft.pressed=false;mc.gameSettings.keyBindForward.pressed=false;
-            }
-            break;
-        }
-        if(!mc.thePlayer.onGround) {
+        if(mc.thePlayer.onGround) {
+          if(!mc.gameSettings.keyBindForward.pressed && !mc.gameSettings.keyBindForward.pressed && !mc.gameSettings.keyBindForward.pressed && !mc.gameSettings.keyBindForward.pressed){MoveDir = 'A'}
           if(mc.gameSettings.keyBindForward.pressed) {MoveDir = 'F'}
           if(mc.gameSettings.keyBindRight.pressed) {MoveDir = 'R'}
           if(mc.gameSettings.keyBindLeft.pressed) {MoveDir = 'L'}
@@ -457,9 +424,103 @@ function ModuleManager() {
           if(mc.gameSettings.keyBindForward.pressed && mc.gameSettings.keyBindLeft.pressed) {MoveDir = 'FL'}
           if(mc.gameSettings.keyBindBack.pressed && mc.gameSettings.keyBindLeft.pressed) {MoveDir = 'BL'}
           if(mc.gameSettings.keyBindBack.pressed && mc.gameSettings.keyBindRight.pressed) {MoveDir = 'BR'}
+        }else{
+          if(WithSC.get() && teex){mc.gameSettings.smoothCamera = false;teex=false}
+          switch (AHSSM.get()) {
+            case "FreeControl":
+              switch (MoveDir) {
+               case 'F':
+                 mc.gameSettings.keyBindLeft.pressed = mc.gameSettings.keyBindBack.pressed = mc.gameSettings.keyBindRight.pressed = false;
+                 break;
+               case 'R':
+                 mc.gameSettings.keyBindLeft.pressed = mc.gameSettings.keyBindBack.pressed = mc.gameSettings.keyBindForward.pressed = false;
+                 break;
+               case 'L':
+                 mc.gameSettings.keyBindForward.pressed = mc.gameSettings.keyBindBack.pressed = mc.gameSettings.keyBindRight.pressed = false;
+                 break;
+               case 'B':
+                 mc.gameSettings.keyBindLeft.pressed = mc.gameSettings.keyBindForward.pressed = mc.gameSettings.keyBindRight.pressed = false;
+                 break;
+               case 'FR':
+                 mc.gameSettings.keyBindLeft.pressed = mc.gameSettings.keyBindBack.pressed = false;
+                 break;
+               case 'FL':
+                 mc.gameSettings.keyBindBack.pressed = mc.gameSettings.keyBindRight.pressed = false;
+                 break;
+               case 'BL':
+                 mc.gameSettings.keyBindRight.pressed = mc.gameSettings.keyBindRight.pressed = false;
+                 break;
+               case 'BR':
+                 mc.gameSettings.keyBindLeft.pressed = mc.gameSettings.keyBindLeft.pressed = false;
+                 break;
+                 }
+              break;
+            case "ForcedDirection":
+              switch (MoveDir) {
+              case 'F':
+                mc.gameSettings.keyBindLeft.pressed = mc.gameSettings.keyBindBack.pressed = mc.gameSettings.keyBindRight.pressed = false;
+                mc.gameSettings.keyBindForward.pressed = true;
+                break;
+              case 'R':
+                mc.gameSettings.keyBindLeft.pressed = mc.gameSettings.keyBindBack.pressed = mc.gameSettings.keyBindForward.pressed = false;
+                mc.gameSettings.keyBindRight.pressed = true;
+                break;
+              case 'L':
+                mc.gameSettings.keyBindForward.pressed = mc.gameSettings.keyBindBack.pressed = mc.gameSettings.keyBindRight.pressed = false;
+                mc.gameSettings.keyBindLeft.pressed = true;
+                break;
+              case 'B':
+                mc.gameSettings.keyBindLeft.pressed = mc.gameSettings.keyBindForward.pressed = mc.gameSettings.keyBindRight.pressed = false;
+                mc.gameSettings.keyBindBack.pressed = true
+                break;
+              case 'FR':
+                mc.gameSettings.keyBindLeft.pressed = mc.gameSettings.keyBindBack.pressed = false;
+                mc.gameSettings.keyBindForward.pressed = mc.gameSettings.keyBindRight.pressed = true;
+                break;
+              case 'FL':
+                mc.gameSettings.keyBindBack.pressed = mc.gameSettings.keyBindRight.pressed = false;
+                mc.gameSettings.keyBindForward.pressed = mc.gameSettings.keyBindLeft.pressed = true;
+                break;
+              case 'BL':
+                mc.gameSettings.keyBindRight.pressed = mc.gameSettings.keyBindForward.pressed = false;
+                mc.gameSettings.keyBindBack.pressed = mc.gameSettings.keyBindLeft.pressed = true;
+                break;
+              case 'BR':
+                mc.gameSettings.keyBindForward.pressed = mc.gameSettings.keyBindLeft.pressed = false;
+                mc.gameSettings.keyBindBack.pressed = mc.gameSettings.keyBindRight.pressed = true;
+                break;
+              }
+              break;
+            case "ForcedDirection2":
+              switch (MoveDir) {
+              case 'F':
+                mc.gameSettings.keyBindLeft.pressed = mc.gameSettings.keyBindBack.pressed = mc.gameSettings.keyBindRight.pressed = false;
+                break;
+              case 'R':
+                mc.gameSettings.keyBindLeft.pressed = mc.gameSettings.keyBindBack.pressed = mc.gameSettings.keyBindForward.pressed = false;
+                break;
+              case 'L':
+                mc.gameSettings.keyBindForward.pressed = mc.gameSettings.keyBindBack.pressed = mc.gameSettings.keyBindRight.pressed = false;
+                break;
+              case 'B':
+                mc.gameSettings.keyBindLeft.pressed = mc.gameSettings.keyBindForward.pressed = mc.gameSettings.keyBindRight.pressed = false;
+                break;
+              case 'FR':
+                mc.gameSettings.keyBindLeft.pressed = mc.gameSettings.keyBindBack.pressed = false;
+                break;
+              case 'FL':
+                mc.gameSettings.keyBindBack.pressed = mc.gameSettings.keyBindRight.pressed = false;
+                break;
+              case 'BL':
+                mc.gameSettings.keyBindRight.pressed = mc.gameSettings.keyBindForward.pressed = false;
+                break;
+              case 'BR':
+                mc.gameSettings.keyBindForward.pressed = mc.gameSettings.keyBindLeft.pressed = false;
+                break;
+              }
+          }
         }
-        if(mc.thePlayer.onGround) {MoveDir = 'A'}
-      }else if(WithSC.get() && teex){mc.gameSettings.smoothCamera = false;teex=false}
+      }
     }   //SpeedDisabler
     if(SpeedsDisabler.get()) {
       if(SpeedModule.getState() || LJModule.getState()) {
@@ -470,23 +531,33 @@ function ModuleManager() {
     };
     //VelLJ /Hypixel Fix?
     if(VelLJManage.get()) {
-      if(VelocityModule.getState()) {
-        if(LJModule.getState()) {VelocityModule.setState(false)}
-      }else if(!LJModule.getState()){VelocityModule.setState(true)}
-    };// ??? sigh.
+      if(VelocityModule.getState() && LJModule.getState()) {
+        VelocityModule.setState(false)
+      }else if(!LJModule.getState()) {
+        VelocityModule.setState(true);
+      }
+    };
     //ReverseStepFix
-    if(ReverseStepFix.get()) {var RSEnable = true;
-     if(RSModule.getState() &&FlyModule.getState()) {//case of Fly Module enabled.
-        RSModule.state = false; RSEnable=true;
-     }else if(RSEnable) {RSModule.state = true;RSEnable=false} //Enable only once
-     //case of when you on the Slime(Block).
-      if(mc.theWorld.getBlockState(new BlockPos(mc.thePlayer.posX, mc.thePlayer.posY - 1, mc.thePlayer.posZ)).getBlock() instanceof SlimeBlock) {
-        RSModule.state = false; RSEnable=true;
-      }else if(RSEnable) {RSModule.state = true;RSEnable=false} //Enable only once
+    if(ReverseStepFix.get()) {
+      var RE=false;
+      if(RSModule.getState()) {
+        if(FlyModule.getState() || mc.theWorld.getBlockState(new BlockPos(mc.thePlayer.posX, mc.thePlayer.posY - 1, mc.thePlayer.posZ)).getBlock() instanceof SlimeBlock) {
+          RSModule.setState(false);RE=true;
+        }
+      }else
+      if(!FlyModule.getState()) {
+        if(mc.theWorld.getBlockState(new BlockPos(mc.thePlayer.posX, mc.thePlayer.posY - 1, mc.thePlayer.posZ)).getBlock() instanceof SlimeBlock) 
+        {}else{
+          if(RE) {RSModule.setState(true);RE=false}
+        }
+      }
     };
     //AntiNoCritical
     if(AntiNoCritical.get()) {
-      if(!NoFallModule.getState() && mc.thePlayer.fallDistance >= 2.6){NoFallModule.setState(true)}
+      if(!mc.thePlayer.onGround) {
+        if(!NoFallModule.getState()){if(mc.thePlayer.fallDistance >= 2.6) {NoFallModule.setState(true)}
+        }else if(mc.thePlayer.fallDistance >= 2.6)  {mc.thePlayer.fallDistance=0; D("Reset FallDistance") /*test code*/}
+      }
     }
     //AutoKAJump
     if(AutoKAJump.get() && KAModule.getState()) {mc.gameSettings.keyBindJump.pressed = true};
@@ -567,15 +638,19 @@ function ModuleManager() {
       if(StoESPModule.getValue("Mode").get() =="ShaderOutline" || StoESPModule.getValue("Mode").get() =="ShaderGlow") {StoESPModule.getValue("Mode").set("2D");chat.print("detected")}
     }
   }
-
+  this.onMove = function () {
+    if(AntiVoid.get()) {
+      if(!mc.thePlayer.onGround && mc.thePlayer.fallDistance >= MinFallDis.get()) {
+        ScaffoldModule.state=true; WasFallen=true;
+      }else if(WasFallen) {chat.print("Catch detected. Disabling ScaffoldModule."); ScaffoldModule.state = false;WasFallen=false}
+    }
+  }
   this.onAttack = function () {
     if(NoMouse.get()) {
       mc.gameSettings.keyBindUseItem.pressed = mc.gameSettings.keyBindAttack.pressed = false;
     }
     //AntiNoCritical
-    if(AntiNoCritical.get()) {
-      NoFallModule.getState() && NoFallModule.setState(false);
-      }
+    if(AntiNoCritical.get() && NoFallModule.getState()) {NoFallModule.setState(false)}
   };
 
   this.onRender2D = function() {
@@ -604,15 +679,133 @@ function ModuleManager() {
   }
 }
 
-/* TSMM v:1.65, by tk400
- * 
- * [1.65]
- * ReCoded(?) JumpScaffolding but it sh1t xd.
- * Added EnableBlink Option, it may helps Bypassing.
- * 
- * [1.66]
- * Forgot add Sneak Option, Remove BackWard option.
-*/
+function ModuleRandomizer() { //Beta Module
+  var a=b=xCPS=nCPS=r=h=htime=htiming=Subtraced=0;
+
+  var KAMR = value.createBoolean("KillAura", false);
+  var UseHT = value.createBoolean("UseHurtTime", false);
+  var Method = value.createList("ChangeMethod", ["UseDifference", "FullyRandom", "MinChanger"], "");
+  var tHT = value.createInteger("ToHurtTime", 40,0,70);
+  var HT = value.createInteger("HurtingTime", 10,0,20);
+  var CM = value.createInteger("ChangingMoment", ["Always", "ChargeOnAttack"],"ChangeOnAttack");
+  var KAMRS = value.createInteger("ChangingSpeed", 40,0,100);
+  var text1 = value.createText("Value of UseDifference", "");
+  var max = value.createInteger("Max", 0,0,20);// Min-Min<Min<Max-Min<Max
+  var maxn = value.createInteger("Max-Min", 0,0,20);
+  var min = value.createInteger("Min", 0,0,20);
+  var minn = value.createInteger("Min-Min", 0,0,20);
+  var C = value.createBoolean("ChangeNow", false);
+  var RVel = value.createBoolean("RandomVelocity", false);
+  var RVel = value.createBoolean("RandomVelocity", false);
+  var RVelMin = value.createBoolean("MinChance", 0,0,100);
+  var RVelMax = value.createBoolean("MaxChance", 100,0,100);
+  
+  this.addValues = function(v) {
+    v.add(KAMR)
+    v.add(UseHT)
+    v.add(Method)
+    v.add(tHT)
+    v.add(HT)
+    v.add(CM)
+    v.add(KAMRS)
+    v.add(text1)
+    v.add(max)
+    v.add(maxn)
+    v.add(min)
+    v.add(minn)
+    v.add(C)
+    v.add(RVel)
+    v.add(RVelMin)
+    v.add(RVelMax)
+  }
+	this.getName = function() {
+		return "ImJustProGaymer" //aka AntiBAN/BANPreventor
+	}
+
+	this.getDescription = function() {
+		return "ModuleRandomizer"
+	}
+
+	this.getCategory = function() {
+		return "Exploit"
+	}
+	
+	this.onEnable = function() {
+    xCPS=KAModule.getValue("MaxCPS").get()
+    nCPS=KAModule.getValue("MinCPS").get()
+
+    VH=VelocityModule.getValue("Horizontal").get()
+    VV=VelocityModule.getValue("Vertical").get()
+    VelocityModule.getValue("Horizontal").get()
+  }
+	this.onUpdate = function() {
+    if(Method.get() == "MinChanger" && !KAModule.getValue("MaxCPS").get(20)) {KAModule.getValue("MaxCPS").set(20)}
+    if(C.get()) {r=KAMRS.get();C.set(false)}
+    if(KAMR.get()) {
+    if(htime==tHT.get()) {
+      if(UseHT.get()) {//Make Stronger your KillAura Settings. if Charged
+        chat.print("Now HurtTime")
+        htiming+=1;
+        KAModule.getValue("MaxCPS").set(DelayCal(max.get(),maxn.get()))
+        KAModule.getValue("MinCPS").set(DelayCal(min.get(),minn.get()))
+        if(htiming==HT.get()) {//Reset CPS on HurtTime was ended.
+          htiming=htime=0;chat.print("reset HurtTime")
+          KAModule.getValue("MaxCPS").set(xCPS)
+          KAModule.getValue("MinCPS").set(nCPS)
+        }
+      }
+    }else {if(CM.get() === "Always") {r+=1}
+        if(r==KAMRS.get()) {
+          r=0;
+          D("Value has Changed")
+          switch (Method.get()) {
+            case "UseDifference":
+              a = DelayCal(max.get(),min.get())
+              KAModule.getValue("MaxCPS").set(a)
+              KAModule.getValue("MinCPS").set((a-Subtraced))
+              break;
+            case "FullyRandom":
+              a =DelayCal(max.get(),min.get())
+              b =DelayCal(a,min.get())
+              KAModule.getValue("MaxCPS").set(a)
+              KAModule.getValue("MinCPS").set(b)
+              break;
+            case "MinChanger": //test
+              KAModule.getValue("MinCPS").set(DelayCal(max.get(),min.get()))
+              break;
+          }
+        }
+      }
+    }
+    if(RVel.get()) {
+      switch (RVMode.get()) {
+        case "Simple":
+          VelocityModule.getValue("").set()
+          break;
+        case "Reverse1":
+          VelocityModule.getValue("").set()
+          break;
+        case "Reverse2":
+          VelocityModule.getValue("").set()
+          break;
+      }
+    }
+  }
+	this.onAttack = function() {
+    if(UseHT.get() && htime<tHT.get()) {htime+=1}
+    if(CM.get() === "Attack") {r+=1}
+  }
+	this.onRender2D = function() {
+    mc.ingameGUI.drawCenteredString(mc.fontRendererObj,"a="+a+", b="+b+", xCPS="+xCPS+", nCPS="+nCPS+", r="+r+", htime="+htime+", htiming="+htiming+", Subtracted="+Subtraced, mc.displayWidth / 4, (mc.displayHeight / 2.5) + 8, -1)
+  }
+	this.onDisable = function() {
+    a=r=htime=htiming=0;
+    KAModule.getValue("MaxCPS").set(xCPS)
+    KAModule.getValue("MinCPS").set(nCPS)
+  }
+}
+// TSMM by tk400 //
+
 
 /* TIP: if ScaffoldJump is set Off, you can Sprint ScaffoldingJump. like shitgma(Jello? XD). */
 
@@ -638,6 +831,7 @@ function TSMM() {
   var JSMode = value.createList("Type", ["SimplyJump", "Motion", "TP"], "SimplyJump");
   var JSV = value.createFloat("Value", 0.42, -1, 2);
   var AntiHalf = value.createBoolean("AntiHalf", false);
+  var invBlock = value.createBoolean("InvBlockFixes", false); //experimentalishation
   var DownWards = value.createBoolean("2ndDownward", false); //experimentalishation
   var WithBlinkAPI = value.createBoolean("WithLB'sBlink", false);
   var AutoSneak = value.createBoolean("AutoSneak", false);
@@ -648,7 +842,7 @@ function TSMM() {
   var RMaxDelay = value.createFloat("ReleaseMaxDelay", 1, 0, 3);
   var MLGScaffold = value.createBoolean("MLGSCaffold", false);
   var MLGSprint = value.createBoolean("AfterSprint", true);
-  var NoXZMotion = value.createList("NoXZMotion", ["Off", "MotionZero", "NoKeyBoard", "BothAlgorism"], "Off");
+  var NoXZMotion = value.createList("NoXZMotion", ["Off", "MotionZero", "NoKeyBoard", "BothAlgorism", "ZeroXZEvent", "EventCanceler"], "Off");
 
   this.addValues = function(v) {
     v.add(Color);
@@ -665,6 +859,7 @@ function TSMM() {
     v.add(JSMode);
     v.add(JSV);
     v.add(AntiHalf);
+    v.add(invBlock);
     v.add(DownWards);
     v.add(WithBlinkAPI);
     v.add(AutoSneak);
@@ -691,7 +886,7 @@ function TSMM() {
   }
   this.onEnable = function() {
     //Array Remover
-    //hideScaffold = ScaffoldModule.array; hideTower = TowerModule.array;
+    ScaffoldModule.array = TowerModule.array = false;
     //ScaffoldModule.array = TowerModule.array = TowerModule.state = !(ScaffoldModule.state = true); i want know that Mechanism.
     i=0;r=0;z=0;CoolTime=0;CoolTimeB=false;
     delay = DelayCal(MaxDelay.get(),MinDelay.get()); RDelay = DelayCal(MaxDelay.get(),MinDelay.get())
@@ -760,7 +955,7 @@ function TSMM() {
     if(ForceSprint.get() && ScaffoldModule.getState()) {mc.thePlayer.setSprinting(true)}
   //AntiSlab
     if(AntiHalf.get()) {
-    if(mc.thePlayer.onGround && mc.theWorld.getBlockState(new BlockPos(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ)).getBlock() instanceof AntiSlab) {mc.thePlayer.jump()}};
+    if(mc.thePlayer.onGround && mc.theWorld.getBlockState(new BlockPos(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ)).getBlock() instanceof SlabBlock) {mc.thePlayer.jump()}};
   //DownWards
     if(DownWards.get()) {
       if(mc.gameSettings.keyBindSneak.isKeyDown()) {
@@ -780,14 +975,41 @@ function TSMM() {
   //MLGScaffold
     if(MLGScaffold.get()) {mc.gameSettings.keyBindSneak.pressed = true; mc.gameSettings.keyBindJump.pressed = false; ScaffoldModule.getValue("Sprint").set(false); SprintModule.setState(false); if(mc.thePlayer.onGround) {mc.thePlayer.jump()}; if(SprintModule.getState()) {SprintModule.setState(false)}}
   };
-  this.onMove = function () {
+  this.onclickBlock = function (e) {
+    if(invBlock.get()) {
+      if(enventcanceler) {
+        e.cancelEvent(); enventcanceler=false;
+      }
+    }
+  }
+  this.onMove = function (e) {
+    if(TowerModule.getState()) {
+      switch (NoXZMotion.get()) {
+        case "ZeroXZEvent":
+          e.zeroXZ();
+          break;
+        case "EventCanceler":
+          if(e.getX() || e.getZ()) {
+            e.cancelEvent();
+          }
+          break;
+      }
+    }
+    if(invBlock.get()) {
+      var enventcanceler= false;
+      if(mc.theWorld.getBlockState(new BlockPos(mc.thePlayer.posX, mc.thePlayer.posY - 1, mc.thePlayer.posZ)).getBlock() instanceof Furnace) {
+        chat.print("Detected you on Furnace or Workbench or Chest");
+        mc.gameSettings.keyBindSneak.pressed = true; //mc.thePlayer.sneak is not working.. :(
+        enventcanceler= true;
+      }
+    }
     if (mc.gameSettings.keyBindForward.isKeyDown() || mc.gameSettings.keyBindLeft.isKeyDown() || mc.gameSettings.keyBindRight.isKeyDown() || mc.gameSettings.keyBindBack.isKeyDown()) {
     if(BR.get()) {//Reverse Forward to BackWard
       if(mc.gameSettings.keyBindForward.pressed) {
          mc.gameSettings.keyBindBack.pressed = true;
          mc.gameSettings.keyBindForward.pressed = false;
-          }
-        }
+      }
+    }
     //AutoSneaker
       if(AutoSneak.get()) {
         if(!mc.gameSettings.keyBindJump.isKeyDown()) {
@@ -872,11 +1094,10 @@ function HypixelGameChange() {
   }
 }
 
+
 //Add Hypixel Bypasser later and AutoReplay? xd
 function ChatManager() {
-  var jps = ""
-  var br = ""
-  var ar = ""
+  var jps = "", br = "",ar = "";
   ContJP = ["あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをんアイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン　"]
   clientnameEN = ["LiqBounce", "Bounce of Liquidz", "LaquidBounce", "LiquidBounce", "Bounce of liquid", "LIQUIDBOUNCE"]
   insultEN = ["Fools", "Foolishes", "Dumbs", "Idiots", "GAYMER", "Loser", "GarbageHuman"]
@@ -963,10 +1184,11 @@ function tk400sAdditonalModule() {
   var animation = value.createFloat("Animation", 0.75, 0, 1);
   var animation2 = value.createFloat("Animation2", 0.75, 0, 1);
   var AutoLeaver = value.createBoolean("AutoLeave", false);
-  var WhenHealth = value.createFloat("Health", 5,0,20);
+  var ForceKick = value.createBoolean("ForceKick", false);
+  var WhenHealth = value.createFloat("Health", 5,0,19);
   var ALMode = value.createList("ALMode", ["Custom", "Lobby"],"Custom");
   var ReJoinServer = value.createList("ALServer", ["Hypixel", "Cubecraft","?"],"");
-  var LMethod = value.createList("LeaveMethod", ["Command", "ConsoleSpammer/Payload","ConsoleSpammer/MineSecure", "RandomizedPos", "RandomizedMotion","CommandSpamKick","KickModuleAPI"],"Command");
+  var LMethod = value.createList("LeaveMethod", ["Command", "ConsoleSpammer/Payload","ConsoleSpammer/MineSecure", "RandomizedPos", "ExtremeRandomizedPos", "RandomizedPacketPos", "ExtremeRandomizedPacketPos", "RandomizedMotion", "CommandSpamKick","KickModuleAPI"],"Command");
   //var AntiTypo = value.createBoolean("AntiTypo", true);
 
     this.addValues = function(v) {
@@ -985,6 +1207,7 @@ function tk400sAdditonalModule() {
       v.add(animation);
       v.add(animation2);
       v.add(AutoLeaver);
+      v.add(ForceKick);
       v.add(WhenHealth);
       v.add(ALMode);
       v.add(ReJoinServer);
@@ -1001,7 +1224,6 @@ function tk400sAdditonalModule() {
 	this.getCategory = function () {
 		return "Player";
 	}
-
 	this.onUpdate = function () {
     //moment Restener
     if(Criticals.get() == "FastJump/Timer") {if(ResetTimer) {if(mc.thePlayer.fallDistance || mc.thePlayer.onGround) {{mc.timer.timerSpeed = 1;ResetTimer=false; chat.print("Timer has reset")}}}}
@@ -1016,7 +1238,8 @@ function tk400sAdditonalModule() {
     //if(SWH.get()) {
     //}
     if(AutoLeaver.get()) {
-      if(mc.thePlayer.getHealth() <= WhenHealth.get()) {
+      if(mc.thePlayer.getHealth() <= WhenHealth.get() || ForceKick.get()) {
+        ForceKick.set(false); //Optionaly you can set to true, false. or Remove this line
         switch (LMethod.get()) {
           case "Command":
             switch (ALMode.get()) {
@@ -1039,14 +1262,25 @@ function tk400sAdditonalModule() {
             ConSpamModule.setState(true);
             break;
           case "RandomizedPos":
-            mc.thePlayer.posX = DelayCal(0, 255);
-            mc.thePlayer.posY = DelayCal(0, 255);
-            mc.thePlayer.posZ = DelayCal(0, 255);
+            mc.thePlayer.posX = DelayCal(-255, 255);
+            mc.thePlayer.posY = DelayCal(-255, 255);
+            mc.thePlayer.posZ = DelayCal(-255, 255);
+            break;
+          case "ExtremeRandomizedPos": //Never Recommanded. i think allow you to crash your computer?
+            mc.thePlayer.posX = DelayCal(-30000000, 30000000)
+            mc.thePlayer.posY = DelayCal(-30000000, 30000000)
+            mc.thePlayer.posZ = DelayCal(-30000000, 30000000)
+            break;
+          case "RandomizedPacketPos":
+            mc.thePlayer.sendQueue.addToSendQueue(new C04PacketPlayerPosition(mc.thePlayer.posX += DelayCal(-255, 255), mc.thePlayer.posY += DelayCal(-255, 255), mc.thePlayer.posZ += DelayCal(-255, 255), true));
+            break;
+          case "ExtremeRandomizedPacketPos":
+            mc.thePlayer.sendQueue.addToSendQueue(new C04PacketPlayerPosition(mc.thePlayer.posX += DelayCal(-30000000, 30000000), mc.thePlayer.posY += DelayCal(-30000000, 30000000), mc.thePlayer.posZ += DelayCal(-30000000, 30000000), true));
             break;
           case "RandomizedMotion":
-            mc.thePlayer.motionX = DelayCal(0, 255);
-            mc.thePlayer.motionY = DelayCal(0, 255);
-            mc.thePlayer.motionZ = DelayCal(0, 255);
+            mc.thePlayer.motionX = DelayCal(-255, 255);
+            mc.thePlayer.motionY = DelayCal(-255, 255);
+            mc.thePlayer.motionZ = DelayCal(-255, 255);
             break;
           case "CommandSpamKick":
             mc.thePlayer.sendChatMessage("/" + randomString(Math.floor(Math.random() * ((50-1)+1) + 1)))
@@ -1061,16 +1295,16 @@ function tk400sAdditonalModule() {
   this.onMotion = function () {
     switch (BlockAnimation.get()) {
       case "RandomizedProgress":
-        LiquidBounce.getModule(KillAura).blockingStatus && (mc.thePlayer.swingProgress = Math.random() * 1);
+        LiquidBounce.getModule(KillAura).blockingStatus && (mc.thePlayer.swingProgress = Math.random());
         break;
       case "SwingProgressAbort":
       //if(mc.currentScreen instanceof GuiInventory || mc.currentScreen instanceof GuiChest) {}else{
          //Fix? canceling Opening Inv.
         LiquidBounce.getModule(KillAura).blockingStatus && (mc.thePlayer.swingProgress = animation.get());
         break;
-      case "BlockBlock":
+      /*case "BlockBlock":
         if(LiquidBounce.getModule(KillAura).blockingStatus){LiquidBounce.getModule(KillAura).blockingStatus = false;On2d = true}else{On2d=false}
-        break;
+        break;*/
     }
   }
   this.onRender2D = function() {
@@ -1125,14 +1359,14 @@ function PacketManager() {
   var Mode = value.createList("Mode", ["MineplexCombat", "Lunar", "Kauri", "OnlyMC", "HazelMC", "Verus Combat"], "MineplexCombat");
   var SpamTiming = value.createList("SpamTiming", ["Update", "Attack"], "Update");
 
-  this.addValues = function(values) {
-    values.add(Disabler);
-    values.add(Mode);
-    values.add(SpamTiming);
+ this.addValues = function(v) {
+    v.add(Disabler);
+    v.add(Mode);
+    v.add(SpamTiming);
   }
 
   this.getName = function () {
-    return "Disabler"; //or PacketManger, but i dont have idea like Packets'Mamager'.
+    return "PacketManager"; //or PacketManger, but i dont have idea like Packets'Mamager'.
   }
   this.getDescription = function () {
     return "Allow you to Forget AntiCheats.";
@@ -1325,6 +1559,7 @@ function MCMusicPlayer() {
 }
 
 
+
 var ModuleManager = moduleManager.registerModule(new ModuleManager)
 var TSMM = moduleManager.registerModule(new TSMM);
 var HypixelGameChange = moduleManager.registerModule(new HypixelGameChange);
@@ -1333,6 +1568,7 @@ var ChatManager = moduleManager.registerModule(new ChatManager)
 var tk400sAdditonalModule = moduleManager.registerModule(new tk400sAdditonalModule)
 var PacketManager = moduleManager.registerModule(new PacketManager)
 var MCMusicPlayer = moduleManager.registerModule(new MCMusicPlayer)
+var ModuleRandomizer = moduleManager.registerModule(new ModuleRandomizer)
 
 function onEnable() {
   ModuleManager;
@@ -1343,6 +1579,7 @@ function onEnable() {
   tk400sAdditonalModule;
   PacketManager;
   MCMusicPlayer;
+  ModuleRandomizer;
 };
 
 function onDisable() {
@@ -1354,6 +1591,7 @@ function onDisable() {
   moduleManager.unregisterModule(tk400sAdditonalModule);
   moduleManager.unregisterModule(PacketManager);
   moduleManager.unregisterModule(MCMusicPlayer);
+  moduleManager.unregisterModule(ModuleRandomizer);
 };
 
 /**
@@ -1487,8 +1725,7 @@ function messageCont (spamlist, urname,randomish, BeforeR, AfterR, IncJP, AllowB
     "im not using BHop, it just lagging sorry my internet is slower...",
     "im not used hax, idk how to install Hax, i know they are scam and Malware.",
     "Sorry Guys you are Vaccines are Fake. i'm Taken Gaming Vaccine. Sorry! im Elite Group.",
-    "Im Just Injected Gaming Vaccine.",
-    //"Woops! i forgot Infected GamingVirus." /???
+    "Im Just Injected Gaming Vaccine."
   ]
   NoobInsult = [
     "Fuck you Noobs",
