@@ -40,6 +40,7 @@ var TowerModule = moduleManager.getModule("Tower");
 var InvModule = moduleManager.getModule("InventoryCleaner");
 var InvAAModule = moduleManager.getModule("AutoArmor");
 var BlinkModule = moduleManager.getModule("Blink");
+var ClickGUIModule = moduleManager.getModule("ClickGUI");
 var FreeCamModule = moduleManager.getModule("FreeCam");
 var StoESPModule = moduleManager.getModule("StorageESP");
 var ESPModule = moduleManager.getModule("ESP");
@@ -89,6 +90,9 @@ function ModuleManager() {
   var MoveDir = 'A';
   var teex = false;
   var WasFallen=false;
+  var EnterConfirmCheck = false;
+  var servername = "";
+  var configmode = "";
 
   var ReadMe = value.createBoolean("ReadMe.js", false);
   var GamingText = value.createBoolean("GamingText", false);
@@ -597,24 +601,30 @@ function ModuleManager() {
     if(Selection.get()) {
       id = [26,92,122,9,116,58,customid.get()][["Bed", "Cake", "Dragon_Egg", "Obsidian","Enchanting_Table","Crafting_Table","Custom"].indexOf(mode.get())];
     if(DSBlock.get()) {
-      chat.print("[DEBUG] Detected :"+serverip)
-      switch (serverip) {
-        case ".hypixel.net" || "hypixel.cn":
+      chat.print("[DEBUG] Detected :"+servername)
+      switch (servername) {
+        case "Hypixel":
           FuckerModule.getValue("Block").set(26);
-          BlockESPModule.getValue("Block").set(26);break;
-        case ".mineplex.com":
+          BlockESPModule.getValue("Block").set(26)
+          break;
+        case "Mineplex":
           FuckerModule.getValue("Block").set(92);
-          BlockESPModule.getValue("Block").set(92);break;
-        case "hypixel.net" || "hypixel.cn":
-          FuckerModule.getValue("Block").set(26);
-          BlockESPModule.getValue("Block").set(26);break;
-        case ".cubecraft.net" || "cubecraft.net":
+          BlockESPModule.getValue("Block").set(92)
+          break;
+        case "Cubecraft":
           FuckerModule.getValue("Block").set(122);
-          BlockESPModule.getValue("Block").set(122);break;
-        case ".ccbluex.net":
+          BlockESPModule.getValue("Block").set(122)
+          break;
+        case "CCBlueX":
           chat.print("DEV | Checked!");
           FuckerModule.getValue("Block").set(1);
-          BlockESPModule.getValue("Block").set(1);break;
+          BlockESPModule.getValue("Block").set(1)
+          break;
+        default:
+          D("sorry, your server ip wasnt found. now setting to your config")
+          FuckerModule.getValue("Block").set(id);
+          BlockESPModule.getValue("Block").set(id);
+          break;
       }
     }else{
       FuckerModule.getValue("Block").set(id);
@@ -625,13 +635,18 @@ function ModuleManager() {
       Selection.set(false);
     }
     //Dev// //(Auto)Config Loader
-    if(LoadConfig.get()) {
-      LoadConfig.set(false);
-      if(DSConfig.get()) { //I cant Code using switch method..? iF Is bESt foR nEwbIe cODerS
-        commandManager.executeCommand(".localautosettings load "+ servererna + " all"); 
-      }else{chat.print("i have no 'Idea', sorry.")}
+    if(LoadConfig.get()) {LoadConfig.set(false);ClickGUIModule.setState(false)
+      if(DSConfig.get()) {
+        EnterConfirmCheck=true;
+        configmode = "Load";
+        chat.print("are you sure for loading config for <" +servername+ ">?\npress Enter key for confirm, press ESCKey to cancel.")
+      }else{chat.print("i have no 'Idea', sorry. hm Loading Basement config is gooder idea?")}
     }
-    if(SaveConfig.get()) {SaveConfig.set(false); commandManager.executeCommand(".localautosettings save " + servername + " all"); chat.print("§4Debug[SaveConfig]§f: Saved for §l" + servername)};
+    if(SaveConfig.get()) {SaveConfig.set(false);ClickGUIModule.setState(false)
+      configmode = "Save";
+      EnterConfirmCheck=true;
+      chat.print("are you sure for saving config for <" +servername+ ">?\npress Enter key for confirm, press ESCKey to cancel.")
+    };
     //AntiCESP
     if(AntiESP.get()) {
       if(ESPModule.getValue("Mode").get() == "ShaderOutline" || ESPModule.getValue("Mode").get() == "ShaderGlow") {ESPModule.getValue("Mode").set("2D");chat.print("Detected")}
@@ -643,6 +658,21 @@ function ModuleManager() {
       if(!mc.thePlayer.onGround && mc.thePlayer.fallDistance >= MinFallDis.get()) {
         ScaffoldModule.state=true; WasFallen=true;
       }else if(WasFallen) {chat.print("Catch detected. Disabling ScaffoldModule."); ScaffoldModule.state = false;WasFallen=false}
+    }
+  }
+  this.onKey = function (e) {
+    //manager of config MM function
+    if(EnterConfirmCheck) {
+      if(e.getKey() == 28) {
+        //e.cancelEvent();
+        D("Detected Enter has pressed. now "+configmode+" config...")
+        Config(configmode, servername)
+        EnterConfirmCheck=false;
+      }else if(e.getKey()==1){
+        //e.cancelEvent(); //eh this isn't working
+        D("config "+configmode+" has been canceled.")
+        EnterConfirmCheck=false;
+      }
     }
   }
   this.onAttack = function () {
@@ -667,12 +697,14 @@ function ModuleManager() {
     //Check AutoLeave was Disabled.
     if(AutoLeave.get()) {if(!AutoLeaveModule.getState()) {AutoLeaveModule.setState(true)}}
     //Used for ConfigSaver
-    var serverip = mc.getCurrentServerData().serverIP;
-      switch (serverip) { //huh
-        case "*.ccbluex.net": servername = 'testccbluex'; break;
-        case "*.hypixel.net" || "hypixel.net": servername = 'hypixel'; break;
-        case "*.cubecraft.net" || "cubeaft.net": servername = 'cubecraft'; break;
-        case "*.mineplex.com": servername = 'mineplex'; break;
+      if(mc.getCurrentServerData().serverIP.match(".hypixel.net" || "hypixel.cn" || "hypixel.net")) {
+        servername="Hypixel"
+      }else if(mc.getCurrentServerData().serverIP.match(".mineplex.com")) {
+        servername="Mineplex"
+      }else if(mc.getCurrentServerData().serverIP.match(".cubecraft.net" || "cubecraft.net")){
+        servername="Cubecraft"
+      }else if(mc.getCurrentServerData().serverIP.match(".ccbluex.net")) {
+        servername="CCBlueX"
       }
     // EXPEPIMENTAL //
     SavingName.set(servername);
@@ -696,7 +728,7 @@ function ModuleRandomizer() { //Beta Module
   var minn = value.createInteger("Min-Min", 0,0,20);
   var C = value.createBoolean("ChangeNow", false);
   var RVel = value.createBoolean("RandomVelocity", false);
-  var RVel = value.createBoolean("RandomVelocity", false);
+  var RVMode = value.createBoolean("VelMode", ["Simple","Reverse1", "Reverse2"],"Simple");
   var RVelMin = value.createBoolean("MinChance", 0,0,100);
   var RVelMax = value.createBoolean("MaxChance", 100,0,100);
   
@@ -1238,7 +1270,7 @@ function tk400sAdditonalModule() {
     //if(SWH.get()) {
     //}
     if(AutoLeaver.get()) {
-      if(mc.thePlayer.getHealth() <= WhenHealth.get() || ForceKick.get()) {
+      if((mc.thePlayer.getHealth() <= WhenHealth.get()) || (ForceKick.get())) {
         ForceKick.set(false); //Optionaly you can set to true, false. or Remove this line
         switch (LMethod.get()) {
           case "Command":
@@ -1271,11 +1303,11 @@ function tk400sAdditonalModule() {
             mc.thePlayer.posY = DelayCal(-30000000, 30000000)
             mc.thePlayer.posZ = DelayCal(-30000000, 30000000)
             break;
-          case "RandomizedPacketPos":
+          case "RandomizedPacketPos": //a.k.a OldAAC Crasher. (you can check at Original LiqBounce Repo.)
             mc.thePlayer.sendQueue.addToSendQueue(new C04PacketPlayerPosition(mc.thePlayer.posX += DelayCal(-255, 255), mc.thePlayer.posY += DelayCal(-255, 255), mc.thePlayer.posZ += DelayCal(-255, 255), true));
             break;
           case "ExtremeRandomizedPacketPos":
-            mc.thePlayer.sendQueue.addToSendQueue(new C04PacketPlayerPosition(mc.thePlayer.posX += DelayCal(-30000000, 30000000), mc.thePlayer.posY += DelayCal(-30000000, 30000000), mc.thePlayer.posZ += DelayCal(-30000000, 30000000), true));
+            mc.thePlayer.sendQueue.addToSendQueue(new C04PacketPlayerPosition(mc.thePlayer.posX = DelayCal(-30000000, 30000000), mc.thePlayer.posY = DelayCal(-30000000, 30000000), mc.thePlayer.posZ = DelayCal(-30000000, 30000000), true));
             break;
           case "RandomizedMotion":
             mc.thePlayer.motionX = DelayCal(-255, 255);
@@ -1777,6 +1809,16 @@ if(IncJP) {jps = ContJP}else{jps = ""}
   chat.print(rtt);
 }//used only for CM.
 
+function Config(Mode, server) {
+  if(Mode =="Save") {
+    commandManager.executeCommand(".localautosettings save "+ server + "all")
+    chat.print("§4Debug[SaveConfig]§f: Saved for §l" + server)
+  }else if(Mode == "Load") {
+    commandManager.executeCommand(".localautosettings load "+ server)
+    chat.print("§4Debug[LoadConfig]§f: Loaded for §l" + server)
+  }
+}
+
 function randomString(length) {
   var text = "";
   var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 " + jps;
@@ -1827,7 +1869,15 @@ function reset() {
   KeepAlives.clear();
   Transactions.clear();
 }
-
+function kick(mode) {
+  if(mode == "") {commandManager.executeCommand(".kick")}else{
+    switch (mode) {
+      case "toHub":
+        mc.thePlayer.sendChatMessage("/hub")
+        break;
+    }
+  }
+}
 function vClip(offset) {
   mc.thePlayer.setPosition(mc.thePlayer.posX, mc.thePlayer.posY + offset, mc.thePlayer.posZ);
 }
