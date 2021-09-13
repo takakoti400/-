@@ -78,20 +78,16 @@ function ModuleManager() {
   //var WasFallen = false;
   var GaTex = 'LiquidBounce';
   var GaTT = '';
-  var GaTexTix = 0;
-  var ColourTixes =0;
-  var GaTexProgress=0;
-  var ColourProgress=0;
+  var GaTexTix=ColourTixes=GaTexProgress=ColourProgress= 0;
   var Rev = false;
   var CRev = false;
   var CCQ = false;
   var Colour="§0";
-  var saveconfigname = 'default';
   var MoveDir = 'A';
   var teex = false;
   var WasFallen=false;
-  var EnterConfirmCheck = false;
-  var servername = "";
+  var EnterConfirmCheck = EnterConfirmCheckA = false;
+  var servername = ASServername = "";
   var configmode = "";
 
   var ReadMe = value.createBoolean("ReadMe.js", false);
@@ -111,7 +107,7 @@ function ModuleManager() {
   var Color2 = value.createText("CustomColor", "a"); //https://minecraft.gamepedia.com/Formatting_codes
   var DCV = value.createBoolean("DebugChat", false);
   //var test = value.createBoolean("test", true); //Using on Develop, tset.
-  var Crandom = value.createBoolean("ConfigRandomizer", false);
+  //var Crandom = value.createBoolean("ConfigRandomizer", false);
   var SpeedJump = value.createBoolean("Speed", true);
   var WASDSpeed = value.createBoolean("AntiHorizontalSpeedStrafing", false);
   var AHSSM = value.createList("AHSSMethod", ["FreeControl","ForcedDirection","ForcedDirection2"],"ForcedDirection");
@@ -123,7 +119,7 @@ function ModuleManager() {
   var VelLJManage = value.createBoolean("VelLongJump", true);
   var AutoKAJump = value.createBoolean("AutoKAJump", false);
   var ReverseStepFix = value.createBoolean("ReverseStepFix", true);
-  var AntiNoCritical = value.createBoolean("AntiNoCritical", false); //Fixes? Not Criticalizing Bug. when you using Critical and NoFall. but idk...
+  var AntiNoCritical = value.createBoolean("AntiNoCritical", false); //Fixes? Not Criticalizing Bug. when you using Critical and NoFall.
   var AutoFClear = value.createBoolean("AutoFClear", true);
   var Text2 = value.createText("§l>InvModeManager", "");
   var Inv = value.createBoolean("Inv", true);
@@ -143,7 +139,9 @@ function ModuleManager() {
   var EnableESP = value.createBoolean("EnableESP", true);
   var AutoLeave = value.createBoolean("AlwaysAutoLeave", false); //Always Enable LB's AutoLeave Module.
   var Text5 = value.createText(">ConfigManager", "");
+  var AutoLoad = value.createBoolean("AutoLoader", false);
   var LoadConfig = value.createBoolean("LoadConfig", false);
+  var AutoSave = value.createBoolean("AutoSaver", false);
   var SaveConfig = value.createBoolean("SaveConfig", false);
   var SavingName = value.createText("CurrentLoad/SaveFileName", "N/A");
   var DSConfig = value.createBoolean("ServerDetect", false);
@@ -200,7 +198,9 @@ function ModuleManager() {
       v.add(EnableESP);
       v.add(AutoLeave);
       v.add(Text5);
+      v.add(AutoLoad);
       v.add(LoadConfig);
+      v.add(AutoSave);
       v.add(SaveConfig);
       v.add(SavingName);
       v.add(DSConfig);
@@ -413,7 +413,7 @@ function ModuleManager() {
           if(mc.gameSettings.keyBindForward.pressed || mc.gameSettings.keyBindRight.pressed || mc.gameSettings.keyBindLeft.pressed || mc.gameSettings.keyBindBack.pressed) {
             mc.gameSettings.keyBindJump.pressed = false; DC(DCV.get(),"MM",Color2.get(),"Disabled Jump.", true);
           }}}};
-    //WASDSpeed 
+    //WASDSpeed
     if(WASDSpeed.get()) {//==> this code is working, but i think Inefficient. well good for Detecting Faster Strafing Cheat <==//
       if(AHSSD.get()) DC(DCV.get(),"MM",Color2.get(),MoveDir, true) 
       if(SpeedModule.getState()) {
@@ -558,9 +558,11 @@ function ModuleManager() {
     };
     //AntiNoCritical
     if(AntiNoCritical.get()) {
-      if(!mc.thePlayer.onGround) {
-        if(!NoFallModule.getState()){if(mc.thePlayer.fallDistance >= 2.6) {NoFallModule.setState(true)}
-        }else if(mc.thePlayer.fallDistance >= 2.6)  {mc.thePlayer.fallDistance=0; D("Reset FallDistance") /*test code*/}
+      if(mc.thePlayer.fallDistance >= 2.6) {
+        if(!mc.thePlayer.onGround) {
+          if(!NoFallModule.getState()) {NoFallModule.setState(true)
+          }else {mc.thePlayer.fallDistance=0; D("Reset FallDistance") /*test code*/}
+        }
       }
     }
     //AutoKAJump
@@ -602,7 +604,7 @@ function ModuleManager() {
       id = [26,92,122,9,116,58,customid.get()][["Bed", "Cake", "Dragon_Egg", "Obsidian","Enchanting_Table","Crafting_Table","Custom"].indexOf(mode.get())];
     if(DSBlock.get()) {
       chat.print("[DEBUG] Detected :"+servername)
-      switch (servername) {
+      switch (servername) {//next feature is for() config system? xd
         case "Hypixel":
           FuckerModule.getValue("Block").set(26);
           BlockESPModule.getValue("Block").set(26)
@@ -621,7 +623,7 @@ function ModuleManager() {
           BlockESPModule.getValue("Block").set(1)
           break;
         default:
-          D("sorry, your server ip wasnt found. now setting to your config")
+          D("sorry, your server ip wasnt found on the list. now setting to your config")
           FuckerModule.getValue("Block").set(id);
           BlockESPModule.getValue("Block").set(id);
           break;
@@ -662,13 +664,36 @@ function ModuleManager() {
   }
   this.onKey = function (e) {
     //manager of config MM function
-    if(EnterConfirmCheck) {
-      if(e.getKey() == 28) {
+    if(EnterConfirmCheckA) {
+      if(e.getKey() ==28) {
+        if(AutoSaver) {
+          AutoSaver = false;
+          !AutoLoader && (EnterConfirmCheckA = false)
+          D("Enter has pressed. Now saving "+servername)
+          Config("Save", ASServername)
+          AutoSave.get() && (ASServername = servername, D("EnterKey pressed."));
+        }else if(AutoLoader) {
+          AutoLoader = EnterConfirmCheckA = false;
+          D("Enter has pressed. Now loading "+servername)
+          Config("Load", servername)
+        }
+      }else if(e.getKey() == 1) {
+        if(AutoSaver) {
+          AutoSaver = false;
+          !AutoLoader && (EnterConfirmCheckA = false /*,D("detected AutoLoader has false. setting ECCA = false")*/)
+          AutoSave.get() && (ASServername = servername,D("ESCKey pressed."));
+        }else if(AutoLoader) {
+          AutoLoader = EnterConfirmCheckA = false;
+          //D("Line 685 has loaded.")
+        }
+      }
+    }else if(EnterConfirmCheck) {
+      if(e.getKey()==28) {
         //e.cancelEvent();
         D("Detected Enter has pressed. now "+configmode+" config...")
         Config(configmode, servername)
         EnterConfirmCheck=false;
-      }else if(e.getKey()==1){
+      }else if(e.getKey()==1) {
         //e.cancelEvent(); //eh this isn't working
         D("config "+configmode+" has been canceled.")
         EnterConfirmCheck=false;
@@ -676,19 +701,13 @@ function ModuleManager() {
     }
   }
   this.onAttack = function () {
-    if(NoMouse.get()) {
-      mc.gameSettings.keyBindUseItem.pressed = mc.gameSettings.keyBindAttack.pressed = false;
-    }
+    NoMouse.get() && (mc.gameSettings.keyBindUseItem.pressed = mc.gameSettings.keyBindAttack.pressed = false)
     //AntiNoCritical
-    if(AntiNoCritical.get() && NoFallModule.getState()) {NoFallModule.setState(false)}
+    AntiNoCritical.get() && NoFallModule.getState() && (NoFallModule.setState(false))
   };
 
   this.onRender2D = function() {
     if(GamingText.get()) {mc.ingameGUI.drawCenteredString(mc.fontRendererObj, GaTex, mc.displayWidth / Width.get(), (mc.displayHeight / height.get()) + 8, -1)}
-  }
-  this.onMotion = function () {
-    if(AntiVoid.get()) {
-    }
   }
 
   this.onWorld = function () {
@@ -705,9 +724,26 @@ function ModuleManager() {
         servername="Cubecraft"
       }else if(mc.getCurrentServerData().serverIP.match(".ccbluex.net")) {
         servername="CCBlueX"
+      }else if(mc.getCurrentServerData().serverIP.match("mccentral.org")) {
+        servername="MCCentral"
+      }else if(mc.getCurrentServerData().serverIP.match("redesky.com")) {
+        servername="Redesky"
+      }else if(mc.getCurrentServerData().serverIP.match("gommehd.net")) {
+        servername="GommeHD"
       }
     // EXPEPIMENTAL //
     SavingName.set(servername);
+    if(AutoSave.get() || AutoLoad.get()) {
+      if(AutoSave.get()) {
+        if(ASServername == "") {ASServername = servername; /*D("detected ASSN has Null. setting uped to | "+ASServername+" / "+servername)*/}
+        D("[§2AutoSave§r] Save config for<§b" + ASServername+ "§r>?\nPress Enter for confirm. press ESCKey to CancelSave.")
+        AutoSaver = EnterConfirmCheckA = true;
+      }
+      if(AutoLoad.get()) {
+        D("[§4AutoLoad§r] Load config for<§b" + servername+ "§r>?\nPress Enter for confirm. press ESCKey to CancelLoad.")
+        AutoLoader = EnterConfirmCheckA = true;
+      }
+    }
   }
 }
 
@@ -719,7 +755,7 @@ function ModuleRandomizer() { //Beta Module
   var Method = value.createList("ChangeMethod", ["UseDifference", "FullyRandom", "MinChanger"], "");
   var tHT = value.createInteger("ToHurtTime", 40,0,70);
   var HT = value.createInteger("HurtingTime", 10,0,20);
-  var CM = value.createInteger("ChangingMoment", ["Always", "ChargeOnAttack"],"ChangeOnAttack");
+  var CM = value.createList("ChangingMoment", ["Always", "ChargeOnAttack"],"ChangeOnAttack");
   var KAMRS = value.createInteger("ChangingSpeed", 40,0,100);
   var text1 = value.createText("Value of UseDifference", "");
   var max = value.createInteger("Max", 0,0,20);// Min-Min<Min<Max-Min<Max
@@ -728,9 +764,9 @@ function ModuleRandomizer() { //Beta Module
   var minn = value.createInteger("Min-Min", 0,0,20);
   var C = value.createBoolean("ChangeNow", false);
   var RVel = value.createBoolean("RandomVelocity", false);
-  var RVMode = value.createBoolean("VelMode", ["Simple","Reverse1", "Reverse2"],"Simple");
-  var RVelMin = value.createBoolean("MinChance", 0,0,100);
-  var RVelMax = value.createBoolean("MaxChance", 100,0,100);
+  var RVMode = value.createList("VelMode", ["Simple","Reverse1", "Reverse2"],"Simple");
+  var RVelMin = value.createInteger("MinChance", 0,0,100);
+  var RVelMax = value.createInteger("MaxChance", 100,0,100);
   
   this.addValues = function(v) {
     v.add(KAMR)
@@ -747,6 +783,7 @@ function ModuleRandomizer() { //Beta Module
     v.add(minn)
     v.add(C)
     v.add(RVel)
+    v.add(RVMode)
     v.add(RVelMin)
     v.add(RVelMax)
   }
@@ -842,11 +879,10 @@ function ModuleRandomizer() { //Beta Module
 /* TIP: if ScaffoldJump is set Off, you can Sprint ScaffoldingJump. like shitgma(Jello? XD). */
 
 function TSMM() {
-  var i=0;
-  var r=0;
-  var z=0;
+  var i=r=z=0;
   var CoolTime=0;
   var CoolTimeB=false;
+  var enventcanceler= false;
   //var hideScaffold; var hideTower;
   
   var Color = value.createText("TSMMCustomColor", "a");
@@ -1009,9 +1045,7 @@ function TSMM() {
   };
   this.onclickBlock = function (e) {
     if(invBlock.get()) {
-      if(enventcanceler) {
-        e.cancelEvent(); enventcanceler=false;
-      }
+      if(enventcanceler) {e.cancelEvent()}
     }
   }
   this.onMove = function (e) {
@@ -1028,12 +1062,11 @@ function TSMM() {
       }
     }
     if(invBlock.get()) {
-      var enventcanceler= false;
       if(mc.theWorld.getBlockState(new BlockPos(mc.thePlayer.posX, mc.thePlayer.posY - 1, mc.thePlayer.posZ)).getBlock() instanceof Furnace) {
         chat.print("Detected you on Furnace or Workbench or Chest");
         mc.gameSettings.keyBindSneak.pressed = true; //mc.thePlayer.sneak is not working.. :(
         enventcanceler= true;
-      }
+      }else{D("eventcanceler will be false to this moment.")}
     }
     if (mc.gameSettings.keyBindForward.isKeyDown() || mc.gameSettings.keyBindLeft.isKeyDown() || mc.gameSettings.keyBindRight.isKeyDown() || mc.gameSettings.keyBindBack.isKeyDown()) {
     if(BR.get()) {//Reverse Forward to BackWard
@@ -1591,7 +1624,6 @@ function MCMusicPlayer() {
 }
 
 
-
 var ModuleManager = moduleManager.registerModule(new ModuleManager)
 var TSMM = moduleManager.registerModule(new TSMM);
 var HypixelGameChange = moduleManager.registerModule(new HypixelGameChange);
@@ -1646,13 +1678,25 @@ function onDisable() {
  */
 
 /* function utils */
+
+function wtisit() {
+  var d = new Date();
+  var H = ('0' + d.getHours()).slice(-2);
+  var m = ('0' + d.getMinutes()).slice(-2);
+  var s = ('0' + d.getSeconds()).slice(-2);
+  var r =DelayCal(1, 9)
+  a = ("§7["+H+":"+m+":"+s+":"+r+"]§r");
+  return a
+}
+
 function D(Desc) {
-  chat.print(Desc)
+  chat.print(wtisit() + Desc)
 }
 
 function DC (isEnabled, Module, Color, Reason, withrandom) {
   var Mo = '';
   var C = "§0";
+  var rn = 0
   if(isEnabled) {
     switch (Module) {
       case "TS":
@@ -1666,9 +1710,9 @@ function DC (isEnabled, Module, Color, Reason, withrandom) {
         break;
     }
     C = "§" + Color;
-    if(withrandom) {rn = " [" + Math.floor(Math.random()*11) + "]"}
+    withrandom && (rn = " [" + Math.floor(Math.random()*11) + "]")
     Message = Mo + C + Reason + rn;
-    chat.print(Message);
+    chat.print(wtisit()+Message);
   }
 }
 
@@ -1811,7 +1855,7 @@ if(IncJP) {jps = ContJP}else{jps = ""}
 
 function Config(Mode, server) {
   if(Mode =="Save") {
-    commandManager.executeCommand(".localautosettings save "+ server + "all")
+    commandManager.executeCommand(".localautosettings save "+ server + " all")
     chat.print("§4Debug[SaveConfig]§f: Saved for §l" + server)
   }else if(Mode == "Load") {
     commandManager.executeCommand(".localautosettings load "+ server)
