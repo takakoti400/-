@@ -1,11 +1,10 @@
 /**
  * 
  * Script of tk400's
- * this script contains ModuleManager, TowerScaffoldzzzz, HypixelGameChanger, Quitter(new) ChatManager(New!).
+ * this script contains ModuleManager, TowerScaffoldzzzzszszszszszszs, HypixelGameChanger, Quitter(new) ChatManager(New!).
  * 
- * *                                  * * /
  * Enchancing LiquidBounce Hacked Client.
- * (code description later)
+ * (write description later)
  * 
  * 
  * script for Latest(1.8.9) build. (tested on 401b3c5)
@@ -61,6 +60,8 @@ var C0CPacketInput = Java.type('net.minecraft.network.play.client.C0CPacketInput
 var C00PacketKeepAlive = Java.type('net.minecraft.network.play.client.C00PacketKeepAlive');
 
 //Player | Mob States
+EntityLiving = Java.type('net.minecraft.entity.EntityLivingBase');
+EntityPlayer = Java.type('net.minecraft.entity.player.EntityPlayer');
 Potion = Java.type('net.minecraft.potion.Potion');
 GuiInventory = Java.type("net.minecraft.client.gui.inventory.GuiInventory");
 GuiChest = Java.type("net.minecraft.client.gui.inventory.GuiChest");
@@ -79,17 +80,18 @@ function ModuleManager() {
   var GaTex = 'LiquidBounce';
   var GaTT = '';
   var GaTexTix=ColourTixes=GaTexProgress=ColourProgress= 0;
-  var Rev = false;
-  var CRev = false;
-  var CCQ = false;
+  var Rev=CRev=CCQ=false;
   var Colour="§0";
   var MoveDir = 'A';
   var teex = false;
   var WasFallen=false;
+  var ANC = true;
   var EnterConfirmCheck = EnterConfirmCheckA = false;
   var servername = ASServername = "";
   var configmode = "";
+  var FPSLimited = false;
 
+  var test = value.createBoolean("test", false);
   var ReadMe = value.createBoolean("ReadMe.js", false);
   var GamingText = value.createBoolean("GamingText", false);
   var GTMode = value.createList("AnimationMode", ["Rainbow", "Gradation"],"Rainbow");
@@ -106,6 +108,7 @@ function ModuleManager() {
   var SLT = value.createText("CustomTag", "SuperMechaMechaSugooooiModule!");
   var Color2 = value.createText("CustomColor", "a"); //https://minecraft.gamepedia.com/Formatting_codes
   var DCV = value.createBoolean("DebugChat", false);
+  var DML = value.createList("DebugLevel", ["NormalInfo", ""], "");
   //var test = value.createBoolean("test", true); //Using on Develop, tset.
   //var Crandom = value.createBoolean("ConfigRandomizer", false);
   var SpeedJump = value.createBoolean("Speed", true);
@@ -120,7 +123,8 @@ function ModuleManager() {
   var AutoKAJump = value.createBoolean("AutoKAJump", false);
   var ReverseStepFix = value.createBoolean("ReverseStepFix", true);
   var AntiNoCritical = value.createBoolean("AntiNoCritical", false); //Fixes? Not Criticalizing Bug. when you using Critical and NoFall.
-  var AutoFClear = value.createBoolean("AutoFClear", true);
+  var AutoFClear = value.createBoolean("AutoFClear", false);
+  var NoCPBlink = value.createBoolean("ClonedPlayerRemover", false);
   var Text2 = value.createText("§l>InvModeManager", "");
   var Inv = value.createBoolean("Inv", true);
   var InvList = value.createList("Mode", ["None", "Open", "Simulate", "Both"], "None");
@@ -145,12 +149,14 @@ function ModuleManager() {
   var SaveConfig = value.createBoolean("SaveConfig", false);
   var SavingName = value.createText("CurrentLoad/SaveFileName", "N/A");
   var DSConfig = value.createBoolean("ServerDetect", false);
-  var AntiESP = value.createBoolean("AntiControlableESP", false);
+  var AntiESP = value.createBoolean("AntiNoControlableESP", false);
   var NoMouse = value.createBoolean("NoMouseWhenAttack", false);
   var AntiVoid = value.createBoolean("AntiVoidFallingViaScaffold", false);
   var MinFallDis = value.createFloat("MinFallDistance", 1.5, 0, 30);
+  var auto = value.createBoolean("AutoFPSLimit", true);
   
     this.addValues = function(v) {
+      v.add(test)
       v.add(ReadMe);
       v.add(GamingText);
       v.add(GTMode);
@@ -168,6 +174,7 @@ function ModuleManager() {
       v.add(Color2);
       //v.add(test);
       v.add(DCV);
+      v.add(DML);
       v.add(SpeedsDisabler);
       v.add(ChangeMode)
       v.add(VelLJManage);
@@ -180,6 +187,7 @@ function ModuleManager() {
       v.add(AHSSD);
       v.add(WithSC);
       v.add(AutoFClear);
+      v.add(NoCPBlink);
       v.add(Text2);
       v.add(Inv);
       v.add(InvList);
@@ -208,6 +216,7 @@ function ModuleManager() {
       v.add(NoMouse);
       v.add(AntiVoid)
       v.add(MinFallDis);
+      v.add(auto);
     };
 
 	this.getName = function () {
@@ -225,6 +234,9 @@ function ModuleManager() {
   this.onEnabled = function () {
   }
 	this.onUpdate = function () {
+    if(test.get()) {
+      hclip(3)
+    }
     if(ReadMe.get()) {
       chat.print("//==> Module manager<==//\n> this Script was coded By tk400.\n> hm..")
       ReadMe.set(false);
@@ -411,11 +423,11 @@ function ModuleManager() {
       if(SpeedModule.getState() && mc.thePlayer.onGround) {
         if(mc.gameSettings.keyBindJump.pressed) {
           if(mc.gameSettings.keyBindForward.pressed || mc.gameSettings.keyBindRight.pressed || mc.gameSettings.keyBindLeft.pressed || mc.gameSettings.keyBindBack.pressed) {
-            mc.gameSettings.keyBindJump.pressed = false; DC(DCV.get(),"MM",Color2.get(),"Disabled Jump.", true);
+            mc.gameSettings.keyBindJump.pressed = false; DC(DCV.get(),"MM",Color2.get(),"Disabled Jump.");
           }}}};
     //WASDSpeed
     if(WASDSpeed.get()) {//==> this code is working, but i think Inefficient. well good for Detecting Faster Strafing Cheat <==//
-      if(AHSSD.get()) DC(DCV.get(),"MM",Color2.get(),MoveDir, true) 
+      if(AHSSD.get()) {DC(DCV.get(),"MM",Color2.get(),"MoveDirection ="+MoveDir)}
       if(SpeedModule.getState()) {
        if(WithSC.get()) {mc.gameSettings.smoothCamera = true; teex=true}
         if(mc.thePlayer.onGround) {
@@ -529,7 +541,7 @@ function ModuleManager() {
     if(SpeedsDisabler.get()) {
       if(SpeedModule.getState() || LJModule.getState()) {
         if(FlyModule.getState() || FreeCamModule.getState() || ScaffoldModule.getState() || TowerModule.getState()) {
-            SpeedModule.setState(false) || LJModule.setState(false);DC(DCV.get(),"MM",Color2.get(),"Disabled Speed or LongJump.",false);
+            SpeedModule.setState(false) || LJModule.setState(false);DC(DCV.get(),"MM",Color2.get(),"Disabled Speed or LongJump.");
         }
       }
     };
@@ -561,12 +573,21 @@ function ModuleManager() {
       if(mc.thePlayer.fallDistance >= 2.6) {
         if(!mc.thePlayer.onGround) {
           if(!NoFallModule.getState()) {NoFallModule.setState(true)
-          }else {mc.thePlayer.fallDistance=0; D("Reset FallDistance") /*test code*/}
+          }else {mc.thePlayer.fallDistance=0; DC(DCV.get(),"MM",Color2.get(),"Reset FallDistance") /*test code*/}
         }
       }
     }
     //AutoKAJump
     if(AutoKAJump.get() && KAModule.getState()) {mc.gameSettings.keyBindJump.pressed = true};
+    //RemoveClonedPlayer
+    if(NoCPBlink.get()) {//cloned from TSMM's
+      if(BlinkModule.getState()) {
+        for (var x in mc.theWorld.loadedEntityList) {
+          var entities = mc.theWorld.loadedEntityList[x];//i think generate from Blink's Fakeplayer entityID is fixed for "-1337".
+            if((entities != mc.thePlayer) && (entities.getEntityId() == -1337)) {mc.theWorld.removeEntity(entities);DC(DCV.get(),"MM",Color2.get(),"Removed ClonedPlayer")}
+        }
+      }
+    }
 
   /* Manage Modules Setting */
 
@@ -603,7 +624,7 @@ function ModuleManager() {
     if(Selection.get()) {
       id = [26,92,122,9,116,58,customid.get()][["Bed", "Cake", "Dragon_Egg", "Obsidian","Enchanting_Table","Crafting_Table","Custom"].indexOf(mode.get())];
     if(DSBlock.get()) {
-      chat.print("[DEBUG] Detected :"+servername)
+      DC(DCV.get(),"MM",Color2.get(),"Detected :"+servername)
       switch (servername) {//next feature is for() config system? xd
         case "Hypixel":
           FuckerModule.getValue("Block").set(26);
@@ -641,25 +662,25 @@ function ModuleManager() {
       if(DSConfig.get()) {
         EnterConfirmCheck=true;
         configmode = "Load";
-        chat.print("are you sure for loading config for <" +servername+ ">?\npress Enter key for confirm, press ESCKey to cancel.")
-      }else{chat.print("i have no 'Idea', sorry. hm Loading Basement config is gooder idea?")}
+        D("are you sure for loading config for <" +servername+ ">?\npress Enter key for confirm, press ESCKey to cancel.")
+      }else{D("i have no 'Idea', sorry. hm Loading Basement config is gooder idea?")}
     }
     if(SaveConfig.get()) {SaveConfig.set(false);ClickGUIModule.setState(false)
       configmode = "Save";
       EnterConfirmCheck=true;
-      chat.print("are you sure for saving config for <" +servername+ ">?\npress Enter key for confirm, press ESCKey to cancel.")
+      D("are you sure for saving config for <" +servername+ ">?\npress Enter key for confirm, press ESCKey to cancel.")
     };
     //AntiCESP
     if(AntiESP.get()) {
-      if(ESPModule.getValue("Mode").get() == "ShaderOutline" || ESPModule.getValue("Mode").get() == "ShaderGlow") {ESPModule.getValue("Mode").set("2D");chat.print("Detected")}
-      if(StoESPModule.getValue("Mode").get() =="ShaderOutline" || StoESPModule.getValue("Mode").get() =="ShaderGlow") {StoESPModule.getValue("Mode").set("2D");chat.print("detected")}
+      if(ESPModule.getValue("Mode").get()=="ShaderOutline" || ESPModule.getValue("Mode").get("ShaderGlow")) {ESPModule.getValue("Mode").set("2D");chat.print("Detected")}
+      if(StoESPModule.getValue("Mode").get()=="ShaderOutline" || StoESPModule.getValue("Mode").get("ShaderGlow")) {StoESPModule.getValue("Mode").set("2D");chat.print("detected")}
     }
   }
   this.onMove = function () {
     if(AntiVoid.get()) {
       if(!mc.thePlayer.onGround && mc.thePlayer.fallDistance >= MinFallDis.get()) {
         ScaffoldModule.state=true; WasFallen=true;
-      }else if(WasFallen) {chat.print("Catch detected. Disabling ScaffoldModule."); ScaffoldModule.state = false;WasFallen=false}
+      }else if(WasFallen) {DC(DCV.get(),"MM",Color2.get(),"Catch detected. Disabling ScaffoldModule."); ScaffoldModule.state = false;WasFallen=false}
     }
   }
   this.onKey = function (e) {
@@ -703,7 +724,7 @@ function ModuleManager() {
   this.onAttack = function () {
     NoMouse.get() && (mc.gameSettings.keyBindUseItem.pressed = mc.gameSettings.keyBindAttack.pressed = false)
     //AntiNoCritical
-    AntiNoCritical.get() && NoFallModule.getState() && (NoFallModule.setState(false))
+    AntiNoCritical.get() && NoFallModule.getState() && (NoFallModule.setState(false));
   };
 
   this.onRender2D = function() {
@@ -711,6 +732,10 @@ function ModuleManager() {
   }
 
   this.onWorld = function () {
+    if(auto.get() && !FPSLimited) {//fixes fpslimiter has reseting for reboootowafawef
+      //mc.thePlayer.sendChatMessage("/fpslimit unlimited")
+      auto.set(false);FPSLimited=true;
+    }
     //This is not Module, But i think this is useful (Ex:Mineplex) :)
     if(AutoFClear.get()) {commandManager.executeCommand(".friends clear")}
     //Check AutoLeave was Disabled.
@@ -864,6 +889,9 @@ function ModuleRandomizer() { //Beta Module
     if(UseHT.get() && htime<tHT.get()) {htime+=1}
     if(CM.get() === "Attack") {r+=1}
   }
+  this.onPacket = function () {
+    //insert here Catch Velocity Packet Code.
+  }
 	this.onRender2D = function() {
     mc.ingameGUI.drawCenteredString(mc.fontRendererObj,"a="+a+", b="+b+", xCPS="+xCPS+", nCPS="+nCPS+", r="+r+", htime="+htime+", htiming="+htiming+", Subtracted="+Subtraced, mc.displayWidth / 4, (mc.displayHeight / 2.5) + 8, -1)
   }
@@ -883,6 +911,8 @@ function TSMM() {
   var CoolTime=0;
   var CoolTimeB=false;
   var enventcanceler= false;
+  var ghostremoved = false;
+  var SMN=SSW=SAi=false;
   //var hideScaffold; var hideTower;
   
   var Color = value.createText("TSMMCustomColor", "a");
@@ -902,6 +932,7 @@ function TSMM() {
   var invBlock = value.createBoolean("InvBlockFixes", false); //experimentalishation
   var DownWards = value.createBoolean("2ndDownward", false); //experimentalishation
   var WithBlinkAPI = value.createBoolean("WithLB'sBlink", false);
+  var RemoveGhost = value.createBoolean("RemoveYourGhost", false);
   var AutoSneak = value.createBoolean("AutoSneak", false);
   var MinDelay = value.createFloat("MinDelay", 5, 0, 30);
   var MaxDelay = value.createFloat("MaxDelay", 10, 0, 30);
@@ -930,6 +961,7 @@ function TSMM() {
     v.add(invBlock);
     v.add(DownWards);
     v.add(WithBlinkAPI);
+    v.add(RemoveGhost);
     v.add(AutoSneak);
     v.add(MinDelay)
     v.add(MaxDelay)
@@ -962,8 +994,16 @@ function TSMM() {
     ScaffoldModule.setState(true); TowerModule.setState(false);
     if(JumpScaffolding.get()) {TSMMMode.set("Off"); if(!ScaffoldModule.getValue("SameY").get()) {ScaffoldModule.getValue("SameY").set(true)}}
     // //
-    WithBlinkAPI.get() && BlinkModule.setState(true);
-    DC(DCV.get(),"TS",Color.get(),"§a+Enabled TSMM and Scaffold and Tower",false)
+    if(WithBlinkAPI.get()) {
+      BlinkModule.setState(true)
+      if(RemoveGhost.get()) {
+        for (var x in mc.theWorld.loadedEntityList) {
+          var entities = mc.theWorld.loadedEntityList[x];//i think generate from Blink's Fakeplayer entityID is fixed for "-1337".
+            if((entities != mc.thePlayer) && (entities.getEntityId() == -1337)) {mc.theWorld.removeEntity(entities)}
+        }
+      }
+    };
+    DC(DCV.get(),"TS",Color.get(),"§a+Enabled TSMM and Scaffold and Tower")
   };
   this.onUpdate = function () {
     if(TowerDelayer.get()) {
@@ -980,7 +1020,7 @@ function TSMM() {
       }
     }
     if(!ScaffoldModule.getState()) {
-      if(!mc.gameSettings.keyBindJump.pressed) {ScaffoldModule.setState(true); TowerModule.setState(false);DC(DCV.get(),"TS",Color.get(),"Enabled Scaffold, Disabled Tower",false)}
+      if(!mc.gameSettings.keyBindJump.pressed) {ScaffoldModule.setState(true); TowerModule.setState(false);DC(DCV.get(),"TS",Color.get(),"Enabled Scaffold, Disabled Tower")}
     }else if(!TowerModule.getState()) {
       if(!mc.gameSettings.keyBindJump.pressed) {
         if(TSMMMode == "Sprint") {ScaffoldModule.getValue("Sprint").set(true)}
@@ -990,7 +1030,7 @@ function TSMM() {
               ScaffoldModule.getValue("Sprint").set(false);
               break;
             case "XZR":
-              mc.thePlayer.motionX = 0; mc.thePlayer.motionZ = 0;
+              mc.thePlayer.motionX = mc.thePlayer.motionZ = 0;
               break;
             case "VClip":
               mc.thePlayer.jump(false); mc.thePlayer.setPosition(mc.thePlayer.posX, mc.thePlayer.posY + 1, mc.thePlayer.posZ);
@@ -1002,20 +1042,20 @@ function TSMM() {
     if(!SCATower.get()) {
       if(!TowerModule.getState() && mc.thePlayer.onGround && mc.gameSettings.keyBindJump.pressed && !mc.gameSettings.keyBindForward.pressed) {
           if(PotionTower.get()) {
-            if(!mc.thePlayer.isPotionActive(Potion.jump)) {ScaffoldModule.setState(false); TowerModule.setState(true); DC(DCV.get(),"TS",Color.get(),"Enabled Speed.",true)}}else if(!TowerModule.getState() && mc.thePlayer.onGround && mc.gameSettings.keyBindJump.pressed && !mc.gameSettings.keyBindForward.pressed)
+            if(!mc.thePlayer.isPotionActive(Potion.jump)) {ScaffoldModule.setState(false); TowerModule.setState(true); DC(DCV.get(),"TS",Color.get(),"Enabled Speed.")}}else if(!TowerModule.getState() && mc.thePlayer.onGround && mc.gameSettings.keyBindJump.pressed && !mc.gameSettings.keyBindForward.pressed)
               {ScaffoldModule.setState(false); TowerModule.setState(true);DC(DCV.get(),"TS",Color.get(),"Enabled Tower, Disabled Scaffold")};
       }}
     if(TowerModule.getState()) {
       switch (NoXZMotion.get()) {
         case "MotionZero":
-          mc.thePlayer.motionX = 0; mc.thePlayer.motionZ = 0;
+          mc.thePlayer.motionX = mc.thePlayer.motionZ = 0;
           break;
         case "NoKeyBoard":
           mc.gameSettings.keyBindForward.pressed = mc.gameSettings.keyBindLeft.pressed = mc.gameSettings.keyBindRight.pressed = mc.gameSettings.keyBindBack.pressed = false;
           break;
         case "BothAlgorism":
           mc.gameSettings.keyBindForward.pressed = mc.gameSettings.keyBindLeft.pressed = mc.gameSettings.keyBindRight.pressed = mc.gameSettings.keyBindBack.pressed = false;
-          mc.thePlayer.motionX = 0; mc.thePlayer.motionZ = 0;
+          mc.thePlayer.motionX = mc.thePlayer.motionZ = 0;
           break;
       }
     };
@@ -1028,7 +1068,14 @@ function TSMM() {
     if(DownWards.get()) {
       if(mc.gameSettings.keyBindSneak.isKeyDown()) {
         mc.thePlayer.sneak(false);
-        //ScaffoldModule.getValue("SafeWalk").set(false);ScaffoldModule.getValue("Air").set(false); //uhe! dari
+        //Detectors of Scaffold Values
+        ScaffoldModule.getValue("Mode").get("Expand") && (ScaffoldModule.getValue("Mode").set("Normal"), SMN=true)
+        ScaffoldModule.getValue("SafeWalk").get() && (ScaffoldModule.getValue("SafeWalk").set(false), SSW=true)
+        ScaffoldModule.getValue("Air").get() && (ScaffoldModule.getValue("Air").set(false), SAi =true)
+      }else {
+        SMN && (ScaffoldModule.getValue("Mode").set("Normal"), SMN=false)
+        SSW && (ScaffoldModule.getValue("SafeWalk").set(true), SSW=false)
+        SAi && (ScaffoldModule.getValue("Air").set(true), SAi=false)
       }
     }
   //Jump Scaffolding
@@ -1063,10 +1110,10 @@ function TSMM() {
     }
     if(invBlock.get()) {
       if(mc.theWorld.getBlockState(new BlockPos(mc.thePlayer.posX, mc.thePlayer.posY - 1, mc.thePlayer.posZ)).getBlock() instanceof Furnace) {
-        chat.print("Detected you on Furnace or Workbench or Chest");
+        //chat.print("Detected you on Furnace or Workbench or Chest");
         mc.gameSettings.keyBindSneak.pressed = true; //mc.thePlayer.sneak is not working.. :(
         enventcanceler= true;
-      }else{D("eventcanceler will be false to this moment.")}
+      }else{/*D("eventcanceler will be false to this moment.")*/}
     }
     if (mc.gameSettings.keyBindForward.isKeyDown() || mc.gameSettings.keyBindLeft.isKeyDown() || mc.gameSettings.keyBindRight.isKeyDown() || mc.gameSettings.keyBindBack.isKeyDown()) {
     if(BR.get()) {//Reverse Forward to BackWard
@@ -1096,7 +1143,7 @@ function TSMM() {
   this.onDisable = function() {
     ScaffoldModule.state = TowerModule.state = false;
     //ScaffoldModule.array = hideScaffold; TowerModule.array = hideTower;
-    DC(DCV.get(),"TSMM",Color.get(),"Disabled TSMM.",false)
+    DC(DCV.get(),"TS",Color.get(),"Disabled TSMM.")
     if(BR.get()) {mc.thePlayer.rotationYaw += 180} /*Fix Head Rotation. only this code...*/ 
     if(MLGSprint.get()) {SprintModule.setState(true)}else{SprintModule.setState(false)}
     WithBlinkAPI.get() && BlinkModule.setState(false);
@@ -1384,7 +1431,7 @@ function tk400sAdditonalModule() {
           break;
         case "SpeedModule":
           if(mc.gameSettings.keyBindForward.pressed || mc.gameSettings.keyBindRight.pressed || mc.gameSettings.keyBindLeft.pressed) {
-            if(!mc.gameSettings.keyBindBack.pressed && KAModule.getState() && !SpeedModule.getState() && !LJModule.getState() && !ScaffoldModule.getState() && !TowerModule.getState()) {SpeedModule.setState(true); DC(DCV.get(),"AD",Color.get(),"Enabled Speed.",true)}}else{
+            if(!mc.gameSettings.keyBindBack.pressed && KAModule.getState() && !SpeedModule.getState() && !LJModule.getState() && !ScaffoldModule.getState() && !TowerModule.getState()) {SpeedModule.setState(true); DC(DCV.get(),"AD",Color.get(),"Enabled Speed.")}}else{
           WithJump.get() && mc.thePlayer.jump();
             };
           break;
@@ -1680,12 +1727,15 @@ function onDisable() {
 /* function utils */
 
 function wtisit() {
+  var availableColors = ["§4", "§c", "§6", "§e", "§2", "§a", "§b", "§3", "§1", "§9", "§d", "§5"];
+  var color = rt(availableColors)
+
   var d = new Date();
   var H = ('0' + d.getHours()).slice(-2);
   var m = ('0' + d.getMinutes()).slice(-2);
   var s = ('0' + d.getSeconds()).slice(-2);
   var r =DelayCal(1, 9)
-  a = ("§7["+H+":"+m+":"+s+":"+r+"]§r");
+  a = ("§7["+H+":"+m+":"+s+":"+color+r+"§r]");
   return a
 }
 
@@ -1693,10 +1743,9 @@ function D(Desc) {
   chat.print(wtisit() + Desc)
 }
 
-function DC (isEnabled, Module, Color, Reason, withrandom) {
+function DC (isEnabled, Module, Color, Reason) {
   var Mo = '';
   var C = "§0";
-  var rn = 0
   if(isEnabled) {
     switch (Module) {
       case "TS":
@@ -1710,8 +1759,7 @@ function DC (isEnabled, Module, Color, Reason, withrandom) {
         break;
     }
     C = "§" + Color;
-    withrandom && (rn = " [" + Math.floor(Math.random()*11) + "]")
-    Message = Mo + C + Reason + rn;
+    Message = Mo + C + Reason;
     chat.print(wtisit()+Message);
   }
 }
@@ -1914,7 +1962,7 @@ function reset() {
   Transactions.clear();
 }
 function kick(mode) {
-  if(mode == "") {commandManager.executeCommand(".kick")}else{
+  if(mode == null) {commandManager.executeCommand(".kick")}else{
     switch (mode) {
       case "toHub":
         mc.thePlayer.sendChatMessage("/hub")
@@ -1926,26 +1974,31 @@ function vClip(offset) {
   mc.thePlayer.setPosition(mc.thePlayer.posX, mc.thePlayer.posY + offset, mc.thePlayer.posZ);
 }
 function hclip(offset) {
-  var sin = Math.sin(mc.thePlayer.rotationYaw / 180.0 * 3.1415927)*offset;
-  var cos = Math.cos(mc.thePlayer.rotationYaw / 180.0 * 3.1415927)*offset;
+  sin = Math.sin(mc.thePlayer.rotationYaw / 180 * Math.PI) * offset
+  cos = Math.cos(mc.thePlayer.rotationYaw / 180 * Math.PI) * offset
+  //D(sin + " / " + cos)
   mc.thePlayer.setPosition(mc.thePlayer.posX -=sin, mc.thePlayer.posY, mc.thePlayer.posZ+=cos);
 }
 function HMotion(offset) {
-  var sin = Math.sin(mc.thePlayer.rotationYaw / 180.0 * 3.1415927)*offset;
-  var cos = Math.cos(mc.thePlayer.rotationYaw / 180.0 * 3.1415927)*offset;
+  sin = Math.sin(mc.thePlayer.rotationYaw / 180 * Math.PI) * offset
+  cos = Math.cos(mc.thePlayer.rotationYaw / 180 * Math.PI) * offset
   mc.thePlayer.motionX -= sin; mc.thePlayer.motionZ += cos;
 }
 function VMotion(offset) {
   mc.thePlayer.motionY += offset;
 }
-/*
-function Sleep (delay) {
-  var passed =false, i=0;
+
+/*function Sleep (delay) {
   i+=1;
-  if(delay ==i) {passed = true}else{passed=false}
+  if(delay==i) {passed = true}else{passed=false}
   return passed;
 }
 function RSleep (max, min) {
+  var d = new Date();
+  var H = ('0' + d.getHours()).slice(-2);
+  var m = ('0' + d.getMinutes()).slice(-2);
+  var s = ('0' + d.getSeconds()).slice(-2);
+
   var passed =false, i=0;
   i+=1;
   if(delay ==i) {passed = true; i=0;delay = Math.floor(Math.random() * ((max-min)+1) + min);}else{passed=false}
