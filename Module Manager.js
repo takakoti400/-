@@ -658,14 +658,14 @@ function ModuleManager() {
       Selection.set(false);
     }
     //Dev// //(Auto)Config Loader
-    if(LoadConfig.get()) {LoadConfig.set(false);ClickGUIModule.setState(false)
+    if(LoadConfig.get()) {LoadConfig.set(false);mc.thePlayer.closeScreen()
       if(DSConfig.get()) {
         EnterConfirmCheck=true;
         configmode = "Load";
         D("are you sure for loading config for <" +servername+ ">?\npress Enter key for confirm, press ESCKey to cancel.")
       }else{D("i have no 'Idea', sorry. hm Loading Basement config is gooder idea?")}
     }
-    if(SaveConfig.get()) {SaveConfig.set(false);ClickGUIModule.setState(false)
+    if(SaveConfig.get()) {SaveConfig.set(false);mc.thePlayer.closeScreen()
       configmode = "Save";
       EnterConfirmCheck=true;
       D("are you sure for saving config for <" +servername+ ">?\npress Enter key for confirm, press ESCKey to cancel.")
@@ -906,7 +906,7 @@ function ModuleRandomizer() { //Beta Module
 
 /* TIP: if ScaffoldJump is set Off, you can Sprint ScaffoldingJump. like shitgma(Jello? XD). */
 
-function TSMM() {
+function TSMM () {
   var i=r=z=0;
   var CoolTime=0;
   var CoolTimeB=false;
@@ -1066,16 +1066,16 @@ function TSMM() {
     if(mc.thePlayer.onGround && mc.theWorld.getBlockState(new BlockPos(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ)).getBlock() instanceof SlabBlock) {mc.thePlayer.jump()}};
   //DownWards
     if(DownWards.get()) {
-      if(mc.gameSettings.keyBindSneak.isKeyDown()) {
-        mc.thePlayer.sneak(false);
+      if(mc.gameSettings.keyBindSneak.isKeyDown()) { 
+        //mc.thePlayer.setSneaking(false)
         //Detectors of Scaffold Values
-        ScaffoldModule.getValue("Mode").get("Expand") && (ScaffoldModule.getValue("Mode").set("Normal"), SMN=true)
-        ScaffoldModule.getValue("SafeWalk").get() && (ScaffoldModule.getValue("SafeWalk").set(false), SSW=true)
-        ScaffoldModule.getValue("Air").get() && (ScaffoldModule.getValue("Air").set(false), SAi =true)
+        (ScaffoldModule.getValue("Mode").get() == "Expand") && (ScaffoldModule.getValue("Mode").set("Normal"), SMN=true)
+        ScaffoldModule.getValue("SameY").get() && (ScaffoldModule.getValue("SameY").set(false), SSW=true)
+        ScaffoldModule.getValue("AirSafe").get() && (ScaffoldModule.getValue("Air").set(false), SAi =true)
       }else {
-        SMN && (ScaffoldModule.getValue("Mode").set("Normal"), SMN=false)
-        SSW && (ScaffoldModule.getValue("SafeWalk").set(true), SSW=false)
-        SAi && (ScaffoldModule.getValue("Air").set(true), SAi=false)
+        SMN && (ScaffoldModule.getValue("Mode").set("Expand"), SMN=false)
+        SSW && (ScaffoldModule.getValue("SameY").set(true), ScaffoldModule.state(false), SSW=false)
+        SAi && (ScaffoldModule.getValue("AirSafe").set(true), SAi=false)
       }
     }
   //Jump Scaffolding
