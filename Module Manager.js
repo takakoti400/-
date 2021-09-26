@@ -6,7 +6,6 @@
  * Enchancing LiquidBounce Hacked Client.
  * (write description later)
  * 
- * 
  * script for Latest(1.8.9) build. (tested on 401b3c5)
  * https://dl.ccbluex.net/skip/lgJeAGuKh9
  * 
@@ -77,11 +76,6 @@ Furnace = Java.type('net.minecraft.block.BlockFurnace')
 
 function ModuleManager() {
   //var WasFallen = false;
-  var GaTex = 'LiquidBounce';
-  var GaTT = '';
-  var GaTexTix=ColourTixes=GaTexProgress=ColourProgress= 0;
-  var Rev=CRev=CCQ=false;
-  var Colour="§0";
   var MoveDir = 'A';
   var teex = false;
   var WasFallen=false;
@@ -93,16 +87,6 @@ function ModuleManager() {
 
   var test = value.createBoolean("test", false);
   var ReadMe = value.createBoolean("ReadMe.js", false);
-  var GamingText = value.createBoolean("GamingText", false);
-  var GTMode = value.createList("AnimationMode", ["Rainbow", "Gradation"],"Rainbow");
-  var TextAnimationMode = value.createList("TextAnimationMode", ["RegisterString", "UnderbarChange","Obfus"],"RegisterString");
-  var GraColor = value.createList("GradationColorType", ["Sakura/CherryBlossom","Light","Gold","Green","Blue"],"Rainbow");
-  var ColourTix = value.createInteger("ColourTix", 10, 0, 50);
-  var TextDelay = value.createInteger("TextDelay", 10, 0, 30);
-  var GTDebug = value.createBoolean("DebugInfo", false);
-  var height = value.createFloat("Height", 2.5, 0, 50);
-  var Width = value.createFloat("Width", 4, 0, 50);
-  var Reseter = value.createBoolean("Reseter", false);
   var Profile = value.createList("MMMode", ["Lite", "", "All", ""],"");
   var Text1 = value.createText(">MMSettings", "");
   var SLT = value.createText("CustomTag", "SuperMechaMechaSugooooiModule!");
@@ -130,7 +114,7 @@ function ModuleManager() {
   var InvList = value.createList("Mode", ["None", "Open", "Simulate", "Both"], "None");
   var Text3 = value.createText(">BlockRenderManager", "");
   var RenderSetting = value.createBoolean("RenderSetting", true);
-  var RSCounter = value.createBoolean("Counter", false);
+  var RSCounter = value.createBoolean("Counter", ["false", "Off", "Simple", "Advanced", "Sigma", "Novoline"]);
   var RSMark = value.createBoolean("Mark", false);
   var Text4 = value.createText(">BlockSelection", "");
   var Selection = value.createBoolean("Selection", false);
@@ -151,23 +135,13 @@ function ModuleManager() {
   var DSConfig = value.createBoolean("ServerDetect", false);
   var AntiESP = value.createBoolean("AntiNoControlableESP", false);
   var NoMouse = value.createBoolean("NoMouseWhenAttack", false);
-  var AntiVoid = value.createBoolean("AntiVoidFallingViaScaffold", false);
+  //var AntiVoid = value.createBoolean("AntiVoidFallingViaScaffold", false); //exist on LiquidBouncePlus
   var MinFallDis = value.createFloat("MinFallDistance", 1.5, 0, 30);
   var auto = value.createBoolean("AutoFPSLimit", true);
   
     this.addValues = function(v) {
       v.add(test)
       v.add(ReadMe);
-      v.add(GamingText);
-      v.add(GTMode);
-      v.add(TextAnimationMode)
-      v.add(GraColor);
-      v.add(ColourTix);
-      v.add(TextDelay);
-      v.add(GTDebug);
-      v.add(height);
-      v.add(Width);
-      v.add(Reseter);
       v.add(Profile);
       v.add(Text1);
       v.add(SLT);
@@ -214,7 +188,7 @@ function ModuleManager() {
       v.add(DSConfig);
       v.add(AntiESP);
       v.add(NoMouse);
-      v.add(AntiVoid)
+      //v.add(AntiVoid) //exist on LiquidBouncePlus
       v.add(MinFallDis);
       v.add(auto);
     };
@@ -247,176 +221,6 @@ function ModuleManager() {
         case "All": break;
       }
       Profile.set("");
-    }
-    if(Reseter.get()) {
-      GaTexTix = 0;
-      Rev = false;
-      CRev = false;
-      GaTex = '';
-      ColourTixes =0;
-      GaTexProgress=0;
-      ColourProgress=0;
-      chat.print("§4[DEBUG]§1Reseted");
-      Reseter.set(false);
-    }
-    if(GamingText.get()) {//ehhhh i think this is not good for your PC?(im a not Computer Nerd)
-      GaTexTix+=1;ColourTixes+=1;//Counting Ticks
-      if(GaTexTix==TextDelay.get()) {
-        if(Rev) {GaTexTix=0;GaTexProgress-=1}else{GaTexTix=0;GaTexProgress+=1}
-      }
-      if(ColourTixes==ColourTix.get()) {
-        if(CRev) {ColourTixes=0;ColourProgress-=1}else{ColourTixes=0;ColourProgress+=1}
-        //i think this is stup1d making code. hmm.. sadly.
-      }
-      switch (TextAnimationMode.get()) {
-        case "RegisterString":
-          switch (GaTexProgress) {
-            case 0:
-              GaTT ='L';Rev=false;break;
-            case 1:
-              GaTT ='Li';break;
-            case 2:
-              GaTT ='Liq';break;
-            case 3:
-              GaTT ='Liqu';break;
-            case 4:
-              GaTT ='Liqui';break;
-            case 5:
-              GaTT ='Liquid';break;
-            case 6:
-              GaTT ='LiquidB';break;
-            case 7:
-              GaTT ='LiquidBo';break;
-            case 8:
-              GaTT ='LiquidBou';break;
-            case 9:
-              GaTT ='LiquidBoun';break;
-            case 10:
-              GaTT ='LiquidBounc';break;
-            case 11:
-              GaTT ='LiquidBounce';Rev = true;break;
-          }
-          break;
-        case "UnderbarChange":
-          switch (GaTexProgress) {
-            case 0:
-              GaTT ='_iquidBounce';Rev=false;break;
-            case 1:
-              GaTT ='L_quidBounce';break;
-            case 2:
-              GaTT ='Li_uidBounce';break;
-            case 3:
-              GaTT ='Liq_idBounce';break;
-            case 4:
-              GaTT ='Liqu_dBounce';break;
-            case 5:
-              GaTT ='Liqui_Bounce';break;
-            case 6:
-              GaTT ='Liquid_ounce';break;
-            case 7:
-              GaTT ='LiquidB_unce';break;
-            case 8:
-              GaTT ='LiquidBo_nce';break;
-            case 9:
-              GaTT ='LiquidBou_ce';break;
-            case 10:
-              GaTT ='LiquidBoun_e';break;
-            case 11:
-              GaTT ='LiquidBounc_';Rev = true;break;
-          }
-          break;
-        case "Obfus":
-          switch (GaTexProgress) {
-            case 0:
-              GaTT ='§kLiquidBounce';Rev=false;break;
-            case 1:
-              GaTT ='L§kiquidBounce';break;
-            case 2:
-              GaTT ='Li§kquidBounce';break;
-            case 3:
-              GaTT ='Liq§kuidBounce';break;
-            case 4:
-              GaTT ='Liqu§kidBounce';break;
-            case 5:
-              GaTT ='Liqui§kDBounce';break;
-            case 6:
-              GaTT ='Liquid§kBounce';break;
-            case 7:
-              GaTT ='LiquidB§kounce';break;
-            case 8:
-              GaTT ='LiquidBo§kunce';break;
-            case 9:
-              GaTT ='LiquidBou§knce';break;
-            case 10:
-              GaTT ='LiquidBoun§kce';break;
-            case 11:
-              GaTT ='LiquidBounc§ke';break;
-            case 12:
-              GaTT ='LiquidBounce';Rev = true;break;
-          }
-        }
-      switch (GTMode.get()) {
-        case "Rainbow":
-            switch (ColourProgress) {
-              case 0:
-                Colour = "§4";CRev=false;break;
-              case 1:
-                Colour = "§c";break;
-              case 2:
-                Colour = "§d";break;
-              case 3:
-                Colour = "§5";break;
-              case 4:
-                Colour = "§4";break;
-              case 5:
-                Colour = "§5";break;
-              case 6:
-                Colour = "§1";break;
-              case 7:
-                Colour = "§9";break;
-              case 8:
-                Colour = "§b";break;
-              case 9:
-                Colour = "§5";CRev=true;break;
-            }
-            break;
-        case "Gradation":
-          switch (GraColor.get()) {
-            case "Sakura/CherryBlossom": //hm its not working now. better to Adding Customized Color(Hex)
-              if(ColourTixes==ColourTix.get()) {if(CCQ) {Colour="§5"; CCQ=false}else{Colour="§7";CCQ=true}}
-              break;
-            case "Light": //this toooooooooooo
-              switch (ColourProgress) {
-                case 0:
-                  Colour = "§f";CRev=false;break;
-                case 1:
-                  Colour = "§7";break;
-                case 2:
-                  Colour = "§8";CRev=true;break;
-              }
-              break;
-            case "Gold": //Gold! Gold! Gold! 金!金!金!
-              if(ColourTixes==ColourTix.get()) {if(CCQ) {Colour="§2"; CCQ=false}else{Colour="§a";CCQ=true}}
-              break;
-            case "Green":
-              if(ColourTixes==ColourTix.get()) {if(CCQ) {Colour="§2"; CCQ=false}else{Colour="§a";CCQ=true}}
-              break;
-            case "Blue":
-              switch (ColourProgress) {
-                case 0:
-                  Colour = "§1";CRev=false;break;
-                case 1:
-                  Colour = "§9";break;
-                case 3:
-                  Colour = "§3";break;
-                case 4:
-                  Colour = "§b";CRev=true;break;
-              }
-            }
-            break;
-      }
-      // Set GaTex.
-      GaTex = Colour + GaTT;
     }
     //Manage SpeedJump /Fix Jump Boosting
     if(SpeedJump.get()) {
@@ -593,9 +397,27 @@ function ModuleManager() {
 
       //RenderSetter /fix Replaced by other user's Setting
     if(RenderSetting.get()) {
-      if(RSCounter.get()) {if(!ScaffoldModule.getValue("Counter").get()) {ScaffoldModule.getValue("Counter").set(true)};if(!TowerModule.getValue("Counter").get()) {TowerModule.getValue("Counter").set(true)}
-    }else{
-      if(ScaffoldModule.getValue("Counter").get()) {ScaffoldModule.getValue("Counter").set(false)}; if(TowerModule.getValue("Counter").get()) {TowerModule.getValue("Counter").set(false)}}
+      if(RSCounter.get()) {
+        if(ScaffoldModule.getValue("Counter").get() != RSCounter.get()) {
+          switch (RSCounter.get()) {
+            case "Off":
+              ScaffoldModule.getValue("Counter").set("Off")
+              break;
+            case "Simple":
+              ScaffoldModule.getValue("Counter").set("Simple")
+              break;
+            case "Sigma":
+              ScaffoldModule.getValue("Counter").set("Sigma")
+              break;
+            case "Advanced":
+              ScaffoldModule.getValue("Counter").set("Advanced")
+              break;
+            case "Novoline":
+              ScaffoldModule.getValue("Counter").set("Novoline")
+              break;
+          }
+        }
+      }
       //Mark
       if(RSMark.get() && !ScaffoldModule.getValue("Mark").get()) {ScaffoldModule.getValue("Mark").set(true)}else{ScaffoldModule.getValue("Mark").set(false)}
     };
@@ -644,7 +466,7 @@ function ModuleManager() {
           BlockESPModule.getValue("Block").set(1)
           break;
         default:
-          D("sorry, your server ip wasnt found on the list. now setting to your config")
+          D("sorry, your server ip isn't found on the list. now setting up to your config")
           FuckerModule.getValue("Block").set(id);
           BlockESPModule.getValue("Block").set(id);
           break;
@@ -677,11 +499,11 @@ function ModuleManager() {
     }
   }
   this.onMove = function () {
-    if(AntiVoid.get()) {
+    /*if(AntiVoid.get()) {
       if(!mc.thePlayer.onGround && mc.thePlayer.fallDistance >= MinFallDis.get()) {
         ScaffoldModule.state=true; WasFallen=true;
       }else if(WasFallen) {DC(DCV.get(),"MM",Color2.get(),"Catch detected. Disabling ScaffoldModule."); ScaffoldModule.state = false;WasFallen=false}
-    }
+    }*/
   }
   this.onKey = function (e) {
     //manager of config MM function
@@ -727,9 +549,6 @@ function ModuleManager() {
     AntiNoCritical.get() && NoFallModule.getState() && (NoFallModule.setState(false));
   };
 
-  this.onRender2D = function() {
-    if(GamingText.get()) {mc.ingameGUI.drawCenteredString(mc.fontRendererObj, GaTex, mc.displayWidth / Width.get(), (mc.displayHeight / height.get()) + 8, -1)}
-  }
 
   this.onWorld = function () {
     if(auto.get() && !FPSLimited) {//fixes fpslimiter has reseting for reboootowafawef
@@ -1066,10 +885,10 @@ function TSMM () {
     if(mc.thePlayer.onGround && mc.theWorld.getBlockState(new BlockPos(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ)).getBlock() instanceof SlabBlock) {mc.thePlayer.jump()}};
   //DownWards
     if(DownWards.get()) {
-      if(mc.gameSettings.keyBindSneak.isKeyDown()) { 
+      if(mc.gameSettings.keyBindSneak.isKeyDown()) {
         //mc.thePlayer.setSneaking(false)
         //Detectors of Scaffold Values
-        (ScaffoldModule.getValue("Mode").get() == "Expand") && (ScaffoldModule.getValue("Mode").set("Normal"), SMN=true)
+       (ScaffoldModule.getValue("Mode").get() == "Expand") && (ScaffoldModule.getValue("Mode").set("Normal"), SMN=true)
         ScaffoldModule.getValue("SameY").get() && (ScaffoldModule.getValue("SameY").set(false), SSW=true)
         ScaffoldModule.getValue("AirSafe").get() && (ScaffoldModule.getValue("Air").set(false), SAi =true)
       }else {
@@ -1218,6 +1037,130 @@ function ChatManager() {
   var i = 0;
   var delay = 0;
 
+
+function messageCont (spamlist, urname,randomish, BeforeR, AfterR, IncJP, AllowBet, RandomBet, RBA, BetStB, BetStA) {
+  var insultworda = "";
+  var clientnames = "";
+  if(IncJP) {insultworda = insultEN.concat(insultJA); clientnames = clientnameEN.concat(ClientNameJA)}else{insultworda = insultEN; clientnames = clientnameEN}
+  Mineplex = [
+    "Don't Worry Mineplex! You've server is rly not popular. Alts are Almost all unbanned! xd!!",
+    "Hello mineplex, you've BAN is doesn't have much of an effect at all. why? A is Simple you've server is not popular. ",
+    "Hi mineplex! Don't worry The hackers stop coming to play. you've server is rly not popular. ",
+    "mineplex, Do you want to banned hackers on this server? i think answer is not. ",
+    "Lol! lagplex! We can never BANNED! Don't Worryyyyy!!!",
+    "hey guys im back! ;) don't worry guys!",
+    "Good News! you've server is rly not popular! well, We Can't Never Banned! ;)",
+    "Mineplex AC, Staff, System is sucks go to Hypixel Now.",
+    "hacker are wanted playing your fucking shit server. don't ban us.",
+    "sigh dont ban us, your works are shit.",
+    "OMGGGGG! freealts pw is working on this shit server!! OMGGGGG!!!!!",
+    "wow! free alts gen is worked! thx!!! lagplex staffs!!!!!",
+    "we need thank to this idiot staffs. thx dumbers.",
+    "i love mp, why? free cheating, ez bypass, only this reason. LOL! hypixel is better server.",
+    "hypixel is good for everyone. but mp is good for ... ?",
+    "holy shit! free alt is working this server! OMGGGGGGGG!!!!",
+    "dont worry this server working free alt. we can never banned.",
+    "mineplex, give me Op. i can ban you'ves you've never needed on this server",
+    "please install Exrief. this is good AntiAnticheat.",
+  ]
+  GameEnd = [
+    "EZist haxied by " + urname + ", And " + rt(clientnames) + " Client. Download Now.",
+    "E Z! :) this game was fun!!! | HACKED BY " + urname + ", and " + rt(clientnames) + " Client.",
+    "E Z!! XD You are hacked by " + urname + ", and " + rt(clientnames) + " Client. ",
+    "hacked by " + urname + " and " + rt(clientnames) + " Client",
+    "gg! XD this game is rly fast ended! Guys Let's use " + rt(clientnames) + ", this's made 4 "+servername+ " Client!",
+    "yeah excited won in this game. i'm Used " + rt(clientnames) + " Client! Best for grade up pvp experience!!",
+    "gg! noobs. don't waste my time. you can't Never win!",
+    "THIS GAME WAS HAXIED BY "+urname+", and "+rt(clientnames)+"!",
+    "hahaha noobs, VanillaClient is sucks, Let's Use " +rt(clientnames)+" Client!",
+    "gg! you guys client are sucks, Download Modern "+rt(clientnames)+" Client! this is Update you gaming performance!"
+  ]
+  LiquidAd = [
+    rt(clientnames) + " is Best Client. Download Now.",
+    rt(clientnames) + " , is totaly Free!",
+     "Donate now " +rt(clientnames) + " Client!",
+     "Sigma Client Is sucks, FREEDOWNLOAD " +rt(clientnames) + " Now.",
+     "gg! XD this game is rly fast ended! Guys Let's use " + rt(clientnames) + ", this's made 4 "+servername+ " Client!",
+     "yeah excited won in this game. i'm Used " + rt(clientnames) + " Client! Best for grade up pvp experience!!",
+     "gg! noobs. don't waste my time. you can't Never win!",
+     "hahaha noobs, VanillaClient is sucks, Let's Use " +rt(clientnames)+" Client!",
+     "gg! you guys client are sucks, Download Modern "+rt(clientnames)+" Client! this is Update you gaming performance!"
+  ]
+  gaming = [
+    "im just wearning gaming socks.",
+    "im just sucks gaming air. it's good for corona impact and gaming",
+    "im just always drinking gaming Hydrogen water.",
+    "im just drinking gaming water.",
+    "im just always drinking gaming water",
+    "im just always sucking gaming cocaine",
+    "im just always using gaming onahole, lotion, condom! at night.",
+    "sorry guys im using gaming Electricity.",
+    "sorry guys im using gaming Electric power plant",
+    "sorry guys im using gaming weired cable. improve network speed.",
+    "sorry guys im fucking gaming girl at always time.",
+    "sorry guys im fucking gaming girl at night.",
+    "sorry guys, im not haxin, you guys are just sucks",
+    "sorry guys, im not haxin, you guys are just noob",
+    "sorry guys, im not haxin, you guys are just stup1d xd",
+    "hahaha guys you are totaly noob. im just pro",
+    "im just pro, but guys. wth!? i dont saw Beginners like you. xd!",
+    "im not using killaura, im just pro aiming, and sencivity is Maximum. plz understand.",
+    "Im not Scaffolding, it just NoShift. huh but noobs can't understand? xd!",
+    "im not using BHop, it just lagging sorry my internet is slower...",
+    "im not used hax, idk how to install Hax, i know they are scam and Malware.",
+    "Sorry Guys you are Vaccines are Fake. i'm Taken Gaming Vaccine. Sorry! im Elite Group.",
+    "Im Just Injected Gaming Vaccine."
+  ]
+  NoobInsult = [
+    "Fuck you Noobs",
+    "Hey fucking teams! GO to HELL Dumbers!",
+    "Hey fucking teams! GO DIE! Dumbers!",
+    "I can't Understand you've so dumb.",
+    "please suicide now. you are not needed on this Socical, world.",
+    "please use your fucked brain.",
+    "sorry, i was forgoten you guys are just Down's Syndromers. sadly..",
+    "sorry, i was forgoten you guys are just Asperger's Syndromers. sadly...",
+    "Oh Comeon plz fucking dumbers. Don't sabotage Pro Gaymers.",
+    "Oh Comeon plz fucking Fools. Don't sabotage Pro Gaymers.",
+    "fuck fuck fuckkkk Go die! fucking noobs!",
+  ]
+if(IncJP) {jps = ContJP}else{jps = ""}
+  if(randomish) {
+    if(AllowBet) {
+      if(RandomBet.get()) {
+        StB = randomString(RBA);
+        StA = randomString(RBA);
+      } else {
+        StB = BetStB;
+        StA = BetStA;
+      }
+    } else {
+      StB = "";
+      StA = "";
+    }
+    if(BeforeR) {br = StB + randomString(8) + StA}else {br = ""}
+    if(AfterR) { ar = StB + randomString(8) + StA}else {ar = ""}
+  }
+  switch (spamlist) {
+    case "Mineplex":
+      message = Mineplex;break;
+    case "GameEnd":
+      message = GameEnd;break;
+    case "LiquidAd":
+      message = LiquidAd;break;
+    case "Gaming":
+      message = gaming;break;
+    case "NoobInsult":
+      message = NoobInsult;break;
+    case "All": //Not working ?
+      message = 'you need? hm this is intersting for me.';break;
+  }
+  MSG = br + message[parseInt(Math.random()*message.length)] + ar;
+  mc.thePlayer.sendChatMessage(MSG);
+  rtt = rt(clientnames);
+  chat.print(rtt);
+}//used only for CM.
+
   var SpamMode = value.createList("Mode", ["onEnabled", "ValueChanged", "AutoSpam", "test.ccbluex.netBlockGiver"], "ValueChanged");
   var spamlist = value.createList("SpamProfile", ["Mineplex", "GameEnd", "Thx4Server", "LiquidAd", "Gaming", "DefaultLiquidSpammer", "NoobInsult", "All", "Custom//", ""], "");
   var yourname = value.createText("hackedBy", "[EnterNameHere]");
@@ -1233,22 +1176,22 @@ function ChatManager() {
   var BetStB = value.createText("StringBefore", ">");
   var BetStA = value.createText("StringAfter", "|");
 
-    this.addValues = function(v) {
-      v.add(SpamMode);
-      v.add(spamlist);
-      v.add(yourname);
-      v.add(MaxDelay);
-      v.add(MinDelay);
-      v.add(randomish);
-      v.add(BeforeR);
-      v.add(AfterR);
-      v.add(Incjp);
-      v.add(AllowBet);
-      v.add(RandomBet);
-      v.add(RBA);
-      v.add(BetStB);
-      v.add(BetStA);
-    }
+  this.addValues = function(v) {
+    v.add(SpamMode);
+    v.add(spamlist);
+    v.add(yourname);
+    v.add(MaxDelay);
+    v.add(MinDelay);
+    v.add(randomish);
+    v.add(BeforeR);
+    v.add(AfterR);
+    v.add(Incjp);
+    v.add(AllowBet);
+    v.add(RandomBet);
+    v.add(RBA);
+    v.add(BetStB);
+    v.add(BetStA);
+  }
 
 	this.getName = function () {
 		return "ChatManager";
@@ -1278,9 +1221,24 @@ function ChatManager() {
 }
 
 function tk400sAdditonalModule() {
+  var GaTex = 'LiquidBounce';
+  var GaTT = '';
+  var GaTexTix=ColourTixes=GaTexProgress=ColourProgress= 0;
+  var Rev=CRev=CCQ=false;
+  var Colour="§0";
   var ResetTimer = false;
   var On2d = false;
 
+  var GamingText = value.createBoolean("GamingText", false);
+  var GTMode = value.createList("AnimationMode", ["Rainbow", "Gradation"],"Rainbow");
+  var TextAnimationMode = value.createList("TextAnimationMode", ["RegisterString", "UnderbarChange","Obfus"],"RegisterString");
+  var GraColor = value.createList("GradationColorType", ["Sakura/CherryBlossom","Light","Gold","Green","Blue"],"Rainbow");
+  var ColourTix = value.createInteger("ColourTix", 10, 0, 50);
+  var TextDelay = value.createInteger("TextDelay", 10, 0, 30);
+  var GTDebug = value.createBoolean("DebugInfo", false);
+  var height = value.createFloat("Height", 2.5, 0, 50);
+  var Width = value.createFloat("Width", 4, 0, 50);
+  var Reseter = value.createBoolean("Reseter", false);
   var DCV = value.createBoolean("DebugChat", false);
   var Color = value.createText("Color", "6");
   var values = value.createText("values", "");
@@ -1304,6 +1262,16 @@ function tk400sAdditonalModule() {
   //var AntiTypo = value.createBoolean("AntiTypo", true);
 
     this.addValues = function(v) {
+      v.add(GamingText);
+      v.add(GTMode);
+      v.add(TextAnimationMode)
+      v.add(GraColor);
+      v.add(ColourTix);
+      v.add(TextDelay);
+      v.add(GTDebug);
+      v.add(height);
+      v.add(Width);
+      v.add(Reseter);
       v.add(DCV);
       v.add(Color);
       v.add(values);
@@ -1337,6 +1305,176 @@ function tk400sAdditonalModule() {
 		return "Player";
 	}
 	this.onUpdate = function () {
+    if(Reseter.get()) {
+      GaTexTix = 0;
+      Rev = false;
+      CRev = false;
+      GaTex = '';
+      ColourTixes =0;
+      GaTexProgress=0;
+      ColourProgress=0;
+      chat.print("§4[DEBUG]§1Reseted");
+      Reseter.set(false);
+    }
+    if(GamingText.get()) {//ehhhh i think this is not good for your PC?(im a not Computer Nerd)
+      GaTexTix+=1;ColourTixes+=1;//Counting Ticks
+      if(GaTexTix==TextDelay.get()) {
+        if(Rev) {GaTexTix=0;GaTexProgress-=1}else{GaTexTix=0;GaTexProgress+=1}
+      }
+      if(ColourTixes==ColourTix.get()) {
+        if(CRev) {ColourTixes=0;ColourProgress-=1}else{ColourTixes=0;ColourProgress+=1}
+        //i think this is stup1d making code. hmm.. sadly.
+      }
+      switch (TextAnimationMode.get()) {
+        case "RegisterString":
+          switch (GaTexProgress) {
+            case 0:
+              GaTT ='L';Rev=false;break;
+            case 1:
+              GaTT ='Li';break;
+            case 2:
+              GaTT ='Liq';break;
+            case 3:
+              GaTT ='Liqu';break;
+            case 4:
+              GaTT ='Liqui';break;
+            case 5:
+              GaTT ='Liquid';break;
+            case 6:
+              GaTT ='LiquidB';break;
+            case 7:
+              GaTT ='LiquidBo';break;
+            case 8:
+              GaTT ='LiquidBou';break;
+            case 9:
+              GaTT ='LiquidBoun';break;
+            case 10:
+              GaTT ='LiquidBounc';break;
+            case 11:
+              GaTT ='LiquidBounce';Rev = true;break;
+          }
+          break;
+        case "UnderbarChange":
+          switch (GaTexProgress) {
+            case 0:
+              GaTT ='_iquidBounce';Rev=false;break;
+            case 1:
+              GaTT ='L_quidBounce';break;
+            case 2:
+              GaTT ='Li_uidBounce';break;
+            case 3:
+              GaTT ='Liq_idBounce';break;
+            case 4:
+              GaTT ='Liqu_dBounce';break;
+            case 5:
+              GaTT ='Liqui_Bounce';break;
+            case 6:
+              GaTT ='Liquid_ounce';break;
+            case 7:
+              GaTT ='LiquidB_unce';break;
+            case 8:
+              GaTT ='LiquidBo_nce';break;
+            case 9:
+              GaTT ='LiquidBou_ce';break;
+            case 10:
+              GaTT ='LiquidBoun_e';break;
+            case 11:
+              GaTT ='LiquidBounc_';Rev = true;break;
+          }
+          break;
+        case "Obfus":
+          switch (GaTexProgress) {
+            case 0:
+              GaTT ='§kLiquidBounce';Rev=false;break;
+            case 1:
+              GaTT ='L§kiquidBounce';break;
+            case 2:
+              GaTT ='Li§kquidBounce';break;
+            case 3:
+              GaTT ='Liq§kuidBounce';break;
+            case 4:
+              GaTT ='Liqu§kidBounce';break;
+            case 5:
+              GaTT ='Liqui§kDBounce';break;
+            case 6:
+              GaTT ='Liquid§kBounce';break;
+            case 7:
+              GaTT ='LiquidB§kounce';break;
+            case 8:
+              GaTT ='LiquidBo§kunce';break;
+            case 9:
+              GaTT ='LiquidBou§knce';break;
+            case 10:
+              GaTT ='LiquidBoun§kce';break;
+            case 11:
+              GaTT ='LiquidBounc§ke';break;
+            case 12:
+              GaTT ='LiquidBounce';Rev = true;break;
+          }
+        }
+      switch (GTMode.get()) {
+        case "Rainbow":
+            switch (ColourProgress) {
+              case 0:
+                Colour = "§4";CRev=false;break;
+              case 1:
+                Colour = "§c";break;
+              case 2:
+                Colour = "§d";break;
+              case 3:
+                Colour = "§5";break;
+              case 4:
+                Colour = "§4";break;
+              case 5:
+                Colour = "§5";break;
+              case 6:
+                Colour = "§1";break;
+              case 7:
+                Colour = "§9";break;
+              case 8:
+                Colour = "§b";break;
+              case 9:
+                Colour = "§5";CRev=true;break;
+            }
+            break;
+        case "Gradation":
+          switch (GraColor.get()) {
+            case "Sakura/CherryBlossom": //hm its not working now. better to Adding Customized Color(Hex)
+              if(ColourTixes==ColourTix.get()) {if(CCQ) {Colour="§5"; CCQ=false}else{Colour="§7";CCQ=true}}
+              break;
+            case "Light": //this toooooooooooo
+              switch (ColourProgress) {
+                case 0:
+                  Colour = "§f";CRev=false;break;
+                case 1:
+                  Colour = "§7";break;
+                case 2:
+                  Colour = "§8";CRev=true;break;
+              }
+              break;
+            case "Gold": //Gold! Gold! Gold! 金!金!金!
+              if(ColourTixes==ColourTix.get()) {if(CCQ) {Colour="§2"; CCQ=false}else{Colour="§a";CCQ=true}}
+              break;
+            case "Green":
+              if(ColourTixes==ColourTix.get()) {if(CCQ) {Colour="§2"; CCQ=false}else{Colour="§a";CCQ=true}}
+              break;
+            case "Blue":
+              switch (ColourProgress) {
+                case 0:
+                  Colour = "§1";CRev=false;break;
+                case 1:
+                  Colour = "§9";break;
+                case 3:
+                  Colour = "§3";break;
+                case 4:
+                  Colour = "§b";CRev=true;break;
+              }
+            }
+            break;
+      }
+      // Set GaTex.
+      GaTex = Colour + GaTT;
+    }
     //moment Restener
     if(Criticals.get() == "FastJump/Timer") {if(ResetTimer) {if(mc.thePlayer.fallDistance || mc.thePlayer.onGround) {{mc.timer.timerSpeed = 1;ResetTimer=false; chat.print("Timer has reset")}}}}
     if(mc.thePlayer.isOnLadder()) {
@@ -1420,7 +1558,8 @@ function tk400sAdditonalModule() {
     }
   }
   this.onRender2D = function() {
-    if(On2d && DCV.get()) {mc.ingameGUI.drawCenteredString(mc.fontRendererObj, "§k|§cDon't Worry! NotBlocking is Fake! You've Blocking in ServerSided!§k|", mc.displayWidth / 4, (mc.displayHeight / 2.5) + 8, -1)}
+    //if(On2d && DCV.get()) {mc.ingameGUI.drawCenteredString(mc.fontRendererObj, "§k|§cDon't Worry! NotBlocking is Fake! You've Blocking in ServerSided!§k|", mc.displayWidth / 4, (mc.displayHeight / 2.5) + 8, -1)}
+    if(GamingText.get()) {mc.ingameGUI.drawCenteredString(mc.fontRendererObj, GaTex, mc.displayWidth / Width.get(), (mc.displayHeight / height.get()) + 8, -1)}
   }
   this.onAttack = function () {
     if(mc.thePlayer.onGround && !mc.gameSettings.keyBindSneak.pressed && mc.thePlayer.ticksExisted % DelayTick.get() == 0 && !mc.thePlayer.isOnLadder() && !mc.thePlayer.isInWeb && !mc.thePlayer.isInWater() && !mc.thePlayer.isInLava()) {
@@ -1722,7 +1861,7 @@ function onDisable() {
  * ->AutoL Script
  * 
  * ->and some people
- */
+*/
 
 /* function utils */
 
@@ -1778,129 +1917,6 @@ function playSound (name,a,b) {
   mc.theWorld.playSound(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ, name, a, b, false);
 }
 
-function messageCont (spamlist, urname,randomish, BeforeR, AfterR, IncJP, AllowBet, RandomBet, RBA, BetStB, BetStA) {
-  var insultworda = "";
-  var clientnames = "";
-  if(IncJP) {insultworda = insultEN.concat(insultJA); clientnames = clientnameEN.concat(ClientNameJA)}else{insultworda = insultEN; clientnames = clientnameEN}
-  Mineplex = [
-    "Don't Worry Mineplex! You've server is rly not popular. Alts are Almost all unbanned! xd!!",
-    "Hello mineplex, you've BAN is doesn't have much of an effect at all. why? A is Simple you've server is not popular. ",
-    "Hi mineplex! Don't worry The hackers stop coming to play. you've server is rly not popular. ",
-    "mineplex, Do you want to banned hackers on this server? i think answer is not. ",
-    "Lol! lagplex! We can never BANNED! Don't Worryyyyy!!!",
-    "hey guys im back! ;) don't worry guys!",
-    "Good News! you've server is rly not popular! well, We Can't Never Banned! ;)",
-    "Mineplex AC, Staff, System is sucks go to Hypixel Now.",
-    "hacker are wanted playing your fucking shit server. don't ban us.",
-    "sigh dont ban us, your works are shit.",
-    "OMGGGGG! freealts pw is working on this shit server!! OMGGGGG!!!!!",
-    "wow! free alts gen is worked! thx!!! lagplex staffs!!!!!",
-    "we need thank to this idiot staffs. thx dumbers.",
-    "i love mp, why? free cheating, ez bypass, only this reason. LOL! hypixel is better server.",
-    "hypixel is good for everyone. but mp is good for ... ?",
-    "holy shit! free alt is working this server! OMGGGGGGGG!!!!",
-    "dont worry this server working free alt. we can never banned.",
-    "mineplex, give me Op. i can ban you'ves you've never needed on this server",
-    "please install Exrief. this is good AntiAnticheat.",
-  ]
-  GameEnd = [
-    "EZist haxied by " + urname + ", And " + rt(clientnames) + " Client. Download Now.",
-    "E Z! :) this game was fun!!! | HACKED BY " + urname + ", and " + rt(clientnames) + " Client.",
-    "E Z!! XD You are hacked by " + urname + ", and " + rt(clientnames) + " Client. ",
-    "hacked by " + urname + " and " + rt(clientnames) + " Client",
-    "gg! XD this game is rly fast ended! Guys Let's use " + rt(clientnames) + ", this's made 4 "+servername+ " Client!",
-    "yeah excited won in this game. i'm Used " + rt(clientnames) + " Client! Best for grade up pvp experience!!",
-    "gg! noobs. don't waste my time. you can't Never win!",
-    "THIS GAME WAS HAXIED BY "+urname+", and "+rt(clientnames)+"!",
-    "hahaha noobs, VanillaClient is sucks, Let's Use " +rt(clientnames)+" Client!",
-    "gg! you guys client are sucks, Download Modern "+rt(clientnames)+" Client! this is Update you gaming performance!"
-  ]
-  LiquidAd = [
-    rt(clientnames) + " is Best Client. Download Now.",
-    rt(clientnames) + " , is totaly Free!",
-     "Donate now " +rt(clientnames) + " Client!",
-     "Sigma Client Is sucks, FREEDOWNLOAD " +rt(clientnames) + " Now.",
-     "gg! XD this game is rly fast ended! Guys Let's use " + rt(clientnames) + ", this's made 4 "+servername+ " Client!",
-     "yeah excited won in this game. i'm Used " + rt(clientnames) + " Client! Best for grade up pvp experience!!",
-     "gg! noobs. don't waste my time. you can't Never win!",
-     "hahaha noobs, VanillaClient is sucks, Let's Use " +rt(clientnames)+" Client!",
-     "gg! you guys client are sucks, Download Modern "+rt(clientnames)+" Client! this is Update you gaming performance!"
-  ]
-  gaming = [
-    "im just wearning gaming socks.",
-    "im just sucks gaming air. it's good for corona impact and gaming",
-    "im just always drinking gaming Hydrogen water.",
-    "im just drinking gaming water.",
-    "im just always drinking gaming water",
-    "im just always sucking gaming cocaine",
-    "im just always using gaming onahole, lotion, condom! at night.",
-    "sorry guys im using gaming Electricity.",
-    "sorry guys im using gaming Electric power plant",
-    "sorry guys im using gaming weired cable. improve network speed.",
-    "sorry guys im fucking gaming girl at always time.",
-    "sorry guys im fucking gaming girl at night.",
-    "sorry guys, im not haxin, you guys are just sucks",
-    "sorry guys, im not haxin, you guys are just noob",
-    "sorry guys, im not haxin, you guys are just stup1d xd",
-    "hahaha guys you are totaly noob. im just pro",
-    "im just pro, but guys. wth!? i dont saw Beginners like you. xd!",
-    "im not using killaura, im just pro aiming, and sencivity is Maximum. plz understand.",
-    "Im not Scaffolding, it just NoShift. huh but noobs can't understand? xd!",
-    "im not using BHop, it just lagging sorry my internet is slower...",
-    "im not used hax, idk how to install Hax, i know they are scam and Malware.",
-    "Sorry Guys you are Vaccines are Fake. i'm Taken Gaming Vaccine. Sorry! im Elite Group.",
-    "Im Just Injected Gaming Vaccine."
-  ]
-  NoobInsult = [
-    "Fuck you Noobs",
-    "Hey fucking teams! GO to HELL Dumbers!",
-    "Hey fucking teams! GO DIE! Dumbers!",
-    "I can't Understand you've so dumb.",
-    "please suicide now. you are not needed on this Socical, world.",
-    "please use your fucked brain.",
-    "sorry, i was forgoten you guys are just Down's Syndromers. sadly..",
-    "sorry, i was forgoten you guys are just Asperger's Syndromers. sadly...",
-    "Oh Comeon plz fucking dumbers. Don't sabotage Pro Gaymers.",
-    "Oh Comeon plz fucking Fools. Don't sabotage Pro Gaymers.",
-    "fuck fuck fuckkkk Go die! fucking noobs!",
-  ]
-if(IncJP) {jps = ContJP}else{jps = ""}
-  if(randomish) {
-    if(AllowBet) {
-      if(RandomBet.get()) {
-        StB = randomString(RBA);
-        StA = randomString(RBA);
-      } else {
-        StB = BetStB;
-        StA = BetStA;
-      }
-    } else {
-      StB = "";
-      StA = "";
-    }
-    if(BeforeR) {br = StB + randomString(8) + StA}else {br = ""}
-    if(AfterR) { ar = StB + randomString(8) + StA}else {ar = ""}
-  }
-  switch (spamlist) {
-    case "Mineplex":
-      message = Mineplex;break;
-    case "GameEnd":
-      message = GameEnd;break;
-    case "LiquidAd":
-      message = LiquidAd;break;
-    case "Gaming":
-      message = gaming;break;
-    case "NoobInsult":
-      message = NoobInsult;break;
-    case "All": //Not working ?
-      message = 'you need? hm this is intersting for me.';break;
-  }
-  MSG = br + message[parseInt(Math.random()*message.length)] + ar;
-  mc.thePlayer.sendChatMessage(MSG);
-  rtt = rt(clientnames);
-  chat.print(rtt);
-}//used only for CM.
-
 function Config(Mode, server) {
   if(Mode =="Save") {
     commandManager.executeCommand(".localautosettings save "+ server + " all")
@@ -1911,9 +1927,13 @@ function Config(Mode, server) {
   }
 }
 
-function randomString(length) {
+function randomString(length, adoptchara) {
   var text = "";
-  var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 " + jps;
+  if(adoptchara == null) {
+    var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  }else {
+    var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789".concat(adoptchara);
+  }
 
   for (var i = 0; i < length; i++) {
       text += possible.charAt(Math.floor(Math.random() * possible.length));
