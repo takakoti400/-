@@ -10,7 +10,7 @@
  * https://dl.ccbluex.net/skip/lgJeAGuKh9
  * 
  */
-var scriptName = "ModuleManager";
+var scriptName = "ModuleManager+";
 var scriptVersion = 1.42;
 var scriptAuthor = "shirouto Co-Da- tk400.";
 
@@ -35,7 +35,7 @@ var SprintModule = moduleManager.getModule("Sprint");
 var VelocityModule = moduleManager.getModule("Velocity");
 var ScaffoldModule = moduleManager.getModule("Scaffold");
 var TowerModule = moduleManager.getModule("Tower");
-var InvModule = moduleManager.getModule("InventoryCleaner");
+var InvModule = moduleManager.getModule("InvCleaner"); //this module has renamed from InventoryCleaner. :I
 var InvAAModule = moduleManager.getModule("AutoArmor");
 var BlinkModule = moduleManager.getModule("Blink");
 var ClickGUIModule = moduleManager.getModule("ClickGUI");
@@ -135,7 +135,7 @@ function ModuleManager() {
   var DSConfig = value.createBoolean("ServerDetect", false);
   var AntiESP = value.createBoolean("AntiNoControlableESP", false);
   var NoMouse = value.createBoolean("NoMouseWhenAttack", false);
-  var AntiVoid = value.createBoolean("AntiVoidFallingViaScaffold", false); //exist on LiquidBouncePlus,
+  //var AntiVoid = value.createBoolean("AntiVoidFallingViaScaffold", false); //exist on LiquidBouncePlus
   var MinFallDis = value.createFloat("MinFallDistance", 1.5, 0, 30);
   var auto = value.createBoolean("AutoFPSLimit", true);
   
@@ -197,7 +197,7 @@ function ModuleManager() {
 		return "ModuleManager";
 	};
 	this.getDescription = function () {
-		return "Management Disable, Setting, Modules. A Simple Script";
+		return "Management Disable, Setting, Modules. A Simple Script. coded for LB+.";
 	};
 	this.getCategory = function () {
 		return "Player";
@@ -394,14 +394,38 @@ function ModuleManager() {
     }
 
   /* Manage Modules Setting */
-
       //RenderSetter /fix Replaced by other user's Setting
     if(RenderSetting.get()) {
-      if(RSCounter.get()) {if(!ScaffoldModule.getValue("Counter").get()) {ScaffoldModule.getValue("Counter").set(true)};if(!TowerModule.getValue("Counter").get()) {TowerModule.getValue("Counter").set(true)}
-    }else{
-      if(ScaffoldModule.getValue("Counter").get()) {ScaffoldModule.getValue("Counter").set(false)}; if(TowerModule.getValue("Counter").get()) {TowerModule.getValue("Counter").set(false)}}
+      if(RSCounter.get()) {
+          switch (RSCounter.get()) {
+            case "Off":
+              ScaffoldModule.getValue("Counter").set("Off")
+              TowerModule.getValue("Counter").set("Off")
+              break;
+            case "Simple":
+              ScaffoldModule.getValue("Counter").set("Simple")
+              TowerModule.getValue("Counter").set("Simple")
+              break;
+            case "Sigma":
+              ScaffoldModule.getValue("Counter").set("Sigma")
+              TowerModule.getValue("Counter").set("Sigma")
+              break;
+            case "Advanced":
+              ScaffoldModule.getValue("Counter").set("Advanced")
+              TowerModule.getValue("Counter").set("Advanced")
+              break;
+            case "Novoline":
+              ScaffoldModule.getValue("Counter").set("Novoline")
+              TowerModule.getValue("Counter").set("Novoline")
+              break;
+          }
+      }
       //Mark
-      if(RSMark.get() && !ScaffoldModule.getValue("Mark").get()) {ScaffoldModule.getValue("Mark").set(true)}else{ScaffoldModule.getValue("Mark").set(false)}
+      if(RSMark.get()) {
+         if(!ScaffoldModule.getValue("Mark").get()) {
+            ScaffoldModule.getValue("Mark").set(true)
+         }else{ScaffoldModule.getValue("Mark").set(false)}
+      }
     };
     //Inv /This is ???
     if(Inv.get()) {
@@ -481,11 +505,11 @@ function ModuleManager() {
     }
   }
   this.onMove = function () {
-    if(AntiVoid.get()) {
+    /*if(AntiVoid.get()) {
       if(!mc.thePlayer.onGround && mc.thePlayer.fallDistance >= MinFallDis.get()) {
         ScaffoldModule.state=true; WasFallen=true;
       }else if(WasFallen) {DC(DCV.get(),"MM",Color2.get(),"Catch detected. Disabling ScaffoldModule."); ScaffoldModule.state = false;WasFallen=false}
-    }
+    }*/
   }
   this.onKey = function (e) {
     //manager of config MM function
