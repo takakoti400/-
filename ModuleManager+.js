@@ -44,9 +44,11 @@ var StoESPModule = moduleManager.getModule("StorageESP");
 var ESPModule = moduleManager.getModule("ESP");
 
 //Java. or unique code.
-LiquidBounce = Java.type("net.ccbluex.liquidbounce.LiquidBounce").moduleManager;
-KillAura = Java.type("net.ccbluex.liquidbounce.features.module.modules.combat.KillAura").class;
-Color = Java.type('java.awt.Color');
+var LiquidBounce = Java.type("net.ccbluex.liquidbounce.LiquidBounce").moduleManager;
+var KillAura = Java.type("net.ccbluex.liquidbounce.features.module.modules.combat.KillAura").class;
+var Color = Java.type('java.awt.Color');
+var Class = Java.type("java.lang.Class")
+var NetworkManager = Java.type('net.minecraft.network.NetworkManager')
 
 var servername = '';
 
@@ -57,6 +59,10 @@ var LAB=01
 //var clientchat = Java.type("net.minecraft.network.play.client.C01PacketChatMessage");
 var C0CPacketInput = Java.type('net.minecraft.network.play.client.C0CPacketInput');
 var C00PacketKeepAlive = Java.type('net.minecraft.network.play.client.C00PacketKeepAlive');
+var C03PacketPlayer = Java.type('net.minecraft.network.play.client.C03PacketPlayer');
+var C06PacketPlayerPosLook = Java.type('net.minecraft.network.play.client.C03PacketPlayer.C06PacketPlayerPosLook');
+var C0FPacketConfirmTransaction = Java.type('net.minecraft.network.play.client.C0FPacketConfirmTransaction');
+var C0BPacketEntityAction = Java.type('net.minecraft.network.play.client.C0BPacketEntityAction');
 
 //Player | Mob States
 EntityLiving = Java.type('net.minecraft.entity.EntityLivingBase');
@@ -351,11 +357,7 @@ function ModuleManager() {
     };
     //VelLJ /Hypixel Fix?
     if(VelLJManage.get()) {
-      if(VelocityModule.getState() && LJModule.getState()) {
-        VelocityModule.setState(false)
-      }else if(!LJModule.getState()) {
-        VelocityModule.setState(true);
-      }
+      if(VelocityModule.getState() == LJModule.getState()) VelocityModule.setState(!LJModule.getState());
     };
     //ReverseStepFix
     if(ReverseStepFix.get()) {
@@ -388,7 +390,7 @@ function ModuleManager() {
       if(BlinkModule.getState()) {
         for (var x in mc.theWorld.loadedEntityList) {
           var entities = mc.theWorld.loadedEntityList[x];//i think generate from Blink's Fakeplayer entityID is fixed for "-1337".
-            if((entities != mc.thePlayer) && (entities.getEntityId() == -1337)) {mc.theWorld.removeEntity(entities);DC(DCV.get(),"MM",Color2.get(),"Removed ClonedPlayer")}
+            if((entities != mc.thePlayer) && (entities.getEntityId() == -1337)) {mc.theWorld.removeEntity(entities);DC(DCV.get(),"MM",Color2.get(),"Removed ClonedPlayer.")}
         }
       }
     }
@@ -396,35 +398,16 @@ function ModuleManager() {
   /* Manage Modules Setting */
       //RenderSetter /fix Replaced by other user's Setting
     if(RenderSetting.get()) {
-      if(RSCounter.get()) {
-          switch (RSCounter.get()) {
-            case "Off":
-              ScaffoldModule.getValue("Counter").set("Off")
-              TowerModule.getValue("Counter").set("Off")
-              break;
-            case "Simple":
-              ScaffoldModule.getValue("Counter").set("Simple")
-              TowerModule.getValue("Counter").set("Simple")
-              break;
-            case "Sigma":
-              ScaffoldModule.getValue("Counter").set("Sigma")
-              TowerModule.getValue("Counter").set("Sigma")
-              break;
-            case "Advanced":
-              ScaffoldModule.getValue("Counter").set("Advanced")
-              TowerModule.getValue("Counter").set("Advanced")
-              break;
-            case "Novoline":
-              ScaffoldModule.getValue("Counter").set("Novoline")
-              TowerModule.getValue("Counter").set("Novoline")
-              break;
-          }
+      if(RSCounter.get() != "false") {
+        if(RSCounter.get() != (ScaffoldModule.getValue("Counter").get() || TowerModule.getValue("Counter").get())) {
+          chat.print("b")
+          ScaffoldModule.getValue("Counter").set(RSCounter.get())
+          TowerModule.getValue("Counter").set(RSCounter.get())
+        }
       }
       //Mark
-      if(RSMark.get()) {
-         if(!ScaffoldModule.getValue("Mark").get()) {
-            ScaffoldModule.getValue("Mark").set(true)
-         }else{ScaffoldModule.getValue("Mark").set(false)}
+      if(RSMark.get() != ScaffoldModule.getValue("Mark").get()) {
+        ScaffoldModule.getValue("Mark").set(RSMark.get());
       }
     };
     //Inv /This is ???
@@ -500,8 +483,8 @@ function ModuleManager() {
     };
     //AntiCESP
     if(AntiESP.get()) {
-      if(ESPModule.getValue("Mode").get()=="ShaderOutline" || ESPModule.getValue("Mode").get("ShaderGlow")) {ESPModule.getValue("Mode").set("2D");chat.print("Detected")}
-      if(StoESPModule.getValue("Mode").get()=="ShaderOutline" || StoESPModule.getValue("Mode").get("ShaderGlow")) {StoESPModule.getValue("Mode").set("2D");chat.print("detected")}
+      if(ESPModule.getValue("Mode").get()=="ShaderOutline" || ESPModule.getValue("Mode").get()=="ShaderGlow") {ESPModule.getValue("Mode").set("2D");chat.print("Detected")}
+      if(StoESPModule.getValue("Mode").get()=="ShaderOutline" || StoESPModule.getValue("Mode").get()=="ShaderGlow") {StoESPModule.getValue("Mode").set("2D");chat.print("detected")}
     }
   }
   this.onMove = function () {
@@ -558,7 +541,7 @@ function ModuleManager() {
 
   this.onWorld = function () {
     if(auto.get() && !FPSLimited) {//fixes fpslimiter has reseting for reboootowafawef
-      //mc.thePlayer.sendChatMessage("/fpslimit unlimited")
+      commandManager.executeCommand("/fpslimit unlimited")
       auto.set(false);FPSLimited=true;
     }
     //This is not Module, But i think this is useful (Ex:Mineplex) :)
@@ -580,7 +563,7 @@ function ModuleManager() {
         servername="Redesky"
       }else if(mc.getCurrentServerData().serverIP.match("gommehd.net")) {
         servername="GommeHD"
-      }
+      }else{servername="undetected"}
     // EXPEPIMENTAL //
     SavingName.set(servername);
     if(AutoSave.get() || AutoLoad.get()) {
@@ -1080,6 +1063,47 @@ function messageCont (spamlist, urname,randomish, BeforeR, AfterR, IncJP, AllowB
     "THIS GAME WAS HAXIED BY "+urname+", and "+rt(clientnames)+"!",
     "hahaha noobs, VanillaClient is sucks, Let's Use " +rt(clientnames)+" Client!",
     "gg! you guys client are sucks, Download Modern "+rt(clientnames)+" Client! this is Update you gaming performance!"
+  ]
+  HypixelFun = [
+    "Hey guys this server is sucks, lets join hypixel now!",
+    "Hey guys this server is sucks, lets join sexy hypixel now!",
+    "Hey guys this server is dumb, lets join smarter hypixel now!",
+    "lets try best server. join hypixel(dot)net now.",
+    "dont forget delete this server's IP and join hypixel.",
+    "dont forget remove this server's IP and join hypixel.",
+    "this server contains HIV. (made in China Virus). but hypixel have vaccine.",
+    "Hypixel is still best server.",
+    "Hypixel is still contining god server.",
+    "why you waiting for not joining to hypixel? dont waste your time.",
+    "hypixel can make you happy, but this server is...xd you can get stressness, Angry, Dumb, HIV, Corona",
+    "i'm warried you staying this tard server. lets join to hypixel now! don't worry! hypixel is good!",
+    "Hey! dont waste your health. join hypixel",
+    "plz leave from this idiotly server, are you dumb?",
+    "i'm thinking hypixel is best server, but this is... xd",
+    "i cant wait you've coming on our godness server! join hypixel(dot)net!",
+    "i love you! lets join hypixel!",
+    "okay hypixel is good, join hypixel now!",
+    "sorry for spaming. but i'm kind, i'm worried you, please join to hypixel",
+    "yay i can't wait you've joining hypixelation! i can't waaaaiiitttt!!!! Don't disappoint us!",
+    "hypixel is good.",
+    "Hacker love tard server, like this. but hypixel needed money for alt. but this is free gen working! LOL!",
+    "you can infected if you still staying this idiot server. j0in hypixel nooooooooowwwwwwwwww!!!!!!",
+    "dont make me sad. JOIN HYPIXEL NOW. DONT MAKE ME CRY",
+    "you received letter from hypixel! subject=> lets join us! (hypixel net) and leave from that poopest server!",
+    "you received letter from hypixel! subject=> you can join our server! Hypixel is waiting joining you!",
+    "you've not dumb. join to get more smart PvPer(xd)s! => hypixel net",
+    "hey you! had better to join hypixel!",
+    "hey you! had better to leave this tardederst server, and join hypixel!",
+    "i love you! dont cry me! join hypixelllll noowowwowowoow!!!!!!!!!",
+    "you can close this game. and you can Study, this server make you dumber.",
+    "you can make smarter brain for join hypixel.",
+    "you've not dumb. but this server make you dumber.",
+    "dont forget! you can not noob! but this server make you idiotly!",
+    "you can buy hypixel(NFA/SFA/Lifetime)AlT from alts(dot)top!(cheapest alts!)",
+    "why you waiting! this server located for CHINA! you can infect CoronaSigma! dont stayyyyy!!!!!!",
+    "plz plz plz... join hypixel now...",
+    "why still staying this idiot server!!!!! ARE YOU KIDDING ME!!!!?????",
+    "plz pzl zp lplz!!!!!!!!! dont waste your/my time!!!!! join hypixel nOooWwWWWwww!!!!",
   ]
   LiquidAd = [
     rt(clientnames) + " is Best Client. Download Now.",
@@ -1607,140 +1631,6 @@ function tk400sAdditonalModule() {
   }
 }
 
-function PacketManager() {
-  var KeepAlives = new (Java.type("java.util.ArrayList"))();
-  var Transactions = new (Java.type("java.util.ArrayList"))();
-  var currentTrans = 0;
-
-  var Disabler = value.createBoolean("Disable", true);
-  var Mode = value.createList("Mode", ["MineplexCombat", "Lunar", "Kauri", "OnlyMC", "HazelMC", "Verus Combat"], "MineplexCombat");
-  var SpamTiming = value.createList("SpamTiming", ["Update", "Attack"], "Update");
-
- this.addValues = function(v) {
-    v.add(Disabler);
-    v.add(Mode);
-    v.add(SpamTiming);
-  }
-
-  this.getName = function () {
-    return "PacketManager"; //or PacketManger, but i dont have idea like Packets'Mamager'.
-  }
-  this.getDescription = function () {
-    return "Allow you to Forget AntiCheats.";
-  }
-  this.getCategory = function () {
-    return "Exploit";
-  }
-  this.onEnable = function () {
-  }
-  this.onUpdate = function () {
-      if(Disabler.get()) {
-        switch (Mode.get()) {
-          case "MineplexCombat": //https://forums.ccbluex.net/topic/318/is-there-a-mineplex-reach-bypass-scipt/6
-            if(SpamTiming.get() == "Update") {
-            mc.thePlayer.sendQueue.addToSendQueue(new C00PacketKeepAlive);
-            mc.thePlayer.sendQueue.addToSendQueue(new C0CPacketInput);
-            }
-            break;
-          case "OnlyMC":
-          case "Lunar":
-              if(mc.thePlayer.ticksExisted % 20 == 0 && Transactions.size() > currentTrans) {
-                  sendPacket(Transactions.get[currentTrans++]);
-              }
-              if(mc.thePlayer.ticksExisted % 20 == 0) {
-                  for(var i = 0; i < KeepAlives.size(); i++) {
-                      var packet = KeepAlives.get(i);
-                      if(packet != null) {
-                          sendPacket(packet);
-                      }
-                  }
-                  KeepAlives.clear();
-              }
-              if(mc.thePlayer.ticksExisted % 5 == 0) {
-                  sendPacket(new C06PacketPlayerPosLook(mc.thePlayer.posX, mc.thePlayer.posY + 21, mc.thePlayer.posZ, mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch, true));
-              }
-              if(mc.thePlayer.ticksExisted % 30 == 0) {
-                  reset();
-              }
-              break;
-          case "HazelMC":
-              sendPacket(new C00PacketKeepAlive(0));
-              if(Transactions.size() > currentTrans) {
-                  sendPacket(Transactions.get[currentTrans++]);
-              }
-              if(mc.thePlayer.ticksExisted % 100 == 0) {
-                  for(var i = 0; i < KeepAlives.size(); i++) {
-                      var packet = KeepAlives.get(i);
-                      if(packet != null) {
-                          sendPacket(packet);
-                      }
-                  }
-                  KeepAlives.clear();
-              }
-              break;
-        }
-      }
-  }
-  this.onAttack = function() {
-    if(Disabler.get()) {
-        switch (Mode.get()) {
-          case "MineplexCombat": //https://forums.ccbluex.net/topic/318/is-there-a-mineplex-reach-bypass-scipt/6 /i think this is not working...
-            if(SpamTiming.get() == "Attack") {
-              mc.thePlayer.sendQueue.addToSendQueue(new C00PacketKeepAlive);
-              mc.thePlayer.sendQueue.addToSendQueue(new C0CPacketInput);
-            }
-          break;
-        }
-      }
-  }
-  this.onPacket = function (e) {
-    if(Disabler.get()) {
-    switch (Mode.get()) {
-      //They Script/Mode are stolen from Rilshrink?'s Script. thankyou..? and idk they working.
-      case "Kauri":
-          if(e.getPacket() instanceof C0FPacketConfirmTransaction) {
-              e.cancelEvent();
-          }
-          break;
-      case "Verus Combat":
-          if (e.getPacket() instanceof C0FPacketConfirmTransaction) {
-              if(currentTrans++>0) e.cancelEvent();
-          } else if(e.getPacket() instanceof C0BPacketEntityAction) {
-              e.cancelEvent();
-          }
-          break;
-      case "Lunar":
-      case "OnlyMC":
-          if(e.getPacket() instanceof C0FPacketConfirmTransaction) {
-              Transactions.add(e.getPacket());
-              e.cancelEvent();
-          }
-          if(e.getPacket() instanceof C00PacketKeepAlive) {
-              //Temporary until I can figure out how to e.getPacket().key -= 1337;
-              KeepAlives.add(e.getPacket());
-              e.cancelEvent();
-          }
-          if(e.getPacket() instanceof C03PacketPlayer) {
-              sendPacket(new C0CPacketInput());
-          }
-          break;
-      case "HazelMC":
-          if(e.getPacket() instanceof C0FPacketConfirmTransaction) {
-              Transactions.add(e.getPacket());
-              e.cancelEvent();
-          }
-          if(e.getPacket() instanceof C00PacketKeepAlive) {
-              KeepAlives.add(e.getPacket());
-              e.cancelEvent();
-          }
-          if(e.getPacket() instanceof C03PacketPlayer) {
-              sendPacket(new C0CPacketInput());
-          }
-          break;
-        }
-      }
-  }
-}
 
 function MCMusicPlayer() {
   var soviets =0;
@@ -1822,7 +1712,6 @@ var HypixelGameChange = moduleManager.registerModule(new HypixelGameChange);
 var ChatManager = moduleManager.registerModule(new ChatManager)
 //var Quiter = moduleManager.registerModule(new Quiter)
 var tk400sAdditonalModule = moduleManager.registerModule(new tk400sAdditonalModule)
-var PacketManager = moduleManager.registerModule(new PacketManager)
 var MCMusicPlayer = moduleManager.registerModule(new MCMusicPlayer)
 var ModuleRandomizer = moduleManager.registerModule(new ModuleRandomizer)
 
@@ -1833,7 +1722,6 @@ function onEnable() {
   ChatManager;
   //Quiter;
   tk400sAdditonalModule;
-  PacketManager;
   MCMusicPlayer;
   ModuleRandomizer;
 };
@@ -1845,7 +1733,6 @@ function onDisable() {
   moduleManager.unregisterModule(ChatManager);
   //moduleManager.unregisterModule(Quiter);
   moduleManager.unregisterModule(tk400sAdditonalModule);
-  moduleManager.unregisterModule(PacketManager);
   moduleManager.unregisterModule(MCMusicPlayer);
   moduleManager.unregisterModule(ModuleRandomizer);
 };
@@ -1942,45 +1829,12 @@ function randomString(length, adoptchara) {
   }
 
   for (var i = 0; i < length; i++) {
-      text += possible.charAt(Math.floor(Math.random() * possible.length));
+    text += possible.charAt(Math.floor(Math.random() * possible.length));
   }
   return text;
 }
 
-//Core.lib Injection
-function sendPacket(packet, triggerEvent) { //Stolen from Core.lib
-  _networkManager = mc.getNetHandler().getNetworkManager();
-  _flushOutboundQueueMethod = getMethod(NetworkManager, "func_150733_h");
-  _readWriteLockField = getField(NetworkManager, "field_181680_j");
-  _outboundPacketsQueueField = getField(NetworkManager, "field_150745_j");
-  
-  if (triggerEvent) _networkManager.sendPacket(packet);
-  else if (_networkManager.isChannelOpen()) {
-      _flushOutboundQueueMethod.invoke(_networkManager);
-      _dispatchPacketMethod.invoke(_networkManager, packet, null);
-  } else {
-      _readWriteLockField.get(_networkManager).writeLock().lock();
-      try {
-          _outboundPackets = _outboundPacketsQueueField.get(_networkManager);
-          _outboundPackets.add(new NetworkManager.InboundHandlerTuplePacketListener(packet, null));
-          _outboundPacketsQueueField.set(_networkManager, _outboundPackets);
-      } finally {
-          _readWriteLockField.get(_networkManager).writeLock().unlock();
-      }
-  }
-}
-
-function getField(clazz, fieldName) {
-  ((_field = getFields(clazz instanceof Class ? clazz : clazz.class).find(function (f) {f.getName() == fieldName})) && _field.setAccessible(true), _field);
-}
-function getMethod(clazz, methodName) {
-   ((_method = Java.from((clazz instanceof Class ? clazz : clazz.class).getDeclaredMethods()).find(function (m){ m.getName() == methodName})) && _method.setAccessible(true), _method);
-}
-function getMethods(clazz) {
-  _methods = Java.from((clazz = clazz instanceof Class ? clazz : clazz.class).getDeclaredMethods());
-  while (clazz = clazz.superclass) _methods = _methods.concat(Java.from(clazz.getDeclaredMethods()));
-  return _methods;
-}
+/* Rejected fucking code. */
 
 function reset() {
   currentTrans = 0;
