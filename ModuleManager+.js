@@ -46,9 +46,6 @@ var ESPModule = moduleManager.getModule("ESP");
 //Java. or unique code.
 var LiquidBounce = Java.type("net.ccbluex.liquidbounce.LiquidBounce").moduleManager;
 var KillAura = Java.type("net.ccbluex.liquidbounce.features.module.modules.combat.KillAura").class;
-var Color = Java.type('java.awt.Color');
-var Class = Java.type("java.lang.Class")
-var NetworkManager = Java.type('net.minecraft.network.NetworkManager')
 
 var servername = '';
 
@@ -357,21 +354,15 @@ function ModuleManager() {
     };
     //VelLJ /Hypixel Fix?
     if(VelLJManage.get()) {
-      if(VelocityModule.getState() == LJModule.getState()) VelocityModule.setState(!LJModule.getState());
+      if(VelocityModule.getState()==LJModule.getState()) {
+        VelocityModule.setState(!LJModule.getState())
+        chat.print("set to | " +!VelocityModule.getState())
+      };
     };
     //ReverseStepFix
     if(ReverseStepFix.get()) {
-      var RE=false;
-      if(RSModule.getState()) {
-        if(FlyModule.getState() || mc.theWorld.getBlockState(new BlockPos(mc.thePlayer.posX, mc.thePlayer.posY - 1, mc.thePlayer.posZ)).getBlock() instanceof SlimeBlock) {
-          RSModule.setState(false);RE=true;
-        }
-      }else
-      if(!FlyModule.getState()) {
-        if(mc.theWorld.getBlockState(new BlockPos(mc.thePlayer.posX, mc.thePlayer.posY - 1, mc.thePlayer.posZ)).getBlock() instanceof SlimeBlock) 
-        {}else{
-          if(RE) {RSModule.setState(true);RE=false}
-        }
+      if(RSModule.getState && (FlyModule.getState() || mc.theWorld.getBlockState(new BlockPos(mc.thePlayer.posX, mc.thePlayer.posY - 1, mc.thePlayer.posZ)).getBlock() instanceof SlimeBlock)) {
+        RSModule.setState(!FlyModule.getState() && !mc.theWorld.getBlockState(new BlockPos(mc.thePlayer.posX, mc.thePlayer.posY - 1, mc.thePlayer.posZ)).getBlock() instanceof SlimeBlock)
       }
     };
     //AntiNoCritical

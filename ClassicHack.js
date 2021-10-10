@@ -2,6 +2,8 @@ var scriptName = "Old Cheats";
 var scriptVersion = 1.0;
 var scriptAuthor = "tk400.";
 
+var C03PacketPlayer = Java.type('net.minecraft.network.play.client.C03PacketPlayer');
+
 function MoonJump() {
 
     var Mode = value.createList("Mode", ["MoonJump", "Creative"], "MoonJump");
@@ -24,20 +26,24 @@ function MoonJump() {
 	}
 
 	this.onUpdate = function () {
-        if(GroundSpoof.get() == true) {mc.thePlayer.onGround = true}
         switch (Mode.get()) {
             case "MoonJump":
-        if(mc.gameSettings.keyBindJump.pressed) {mc.thePlayer.jump()}
-        break;
+                if(mc.gameSettings.keyBindJump.pressed) {mc.thePlayer.jump()}
+                break;
             case "Creative":
                 mc.thePlayer.capabilities.isFlying = true;
-        break;
+                break;
         }
   }
 
   this.onDisable = function() {
-      if(mc.thePlayer.capabilities.isFlying) {
-            mc.thePlayer.capabilities.isFlying = false}
+    mc.thePlayer.capabilities.isFlying && (mc.thePlayer.capabilities.isFlying = false)
+  }
+  this.onPacket = function (e) {
+    var packet = e.getPacket();
+    if (GroundSpoof.get() && packet instanceof C03PacketPlayer) {
+      packet.onGround = true;
+   }
   }
 }
 

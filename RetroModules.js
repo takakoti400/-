@@ -89,14 +89,42 @@ function CubeFloat() {
    }
 }
 
+function HackedTheCubeSpeed() {
+   var Mode = value.createList("Mode", ["SimpleTeleport", ""], "");
+   var Jump = value.createList("Jump", ["false","onGround", "OnlyEnabled", "VClip"], "false");
+
+   this.addValues = function(v) {
+      v.add()
+   }
+   this.getName = function() {
+      return "CubeSpeed"
+   }  
+   this.getDescription = function() {
+      return "it was Allowed you can get faster moving on Cubecrafted."
+   }  
+   this.getCategory = function() {
+      return "Movement"
+   }
+
+   this.onMove = function() {
+      HClip(hc.get())
+   }
+   this.onEnable = function() {}
+   this.onDisable = function() {}
+}
+
 
 var CubeFloat = moduleManager.registerModule(new CubeFloat)
+var HackedTheCubeSpeed = moduleManager.registerModule(new HackedTheCubeSpeed);
+
 function onEnable() {
     CubeFloat;
+    HackedTheCubeSpeed;
 };
 
 function onDisable() {
     moduleManager.unregisterModule(CubeFloat);
+    moduleManager.unregisterModule(HackedTheCubeSpeed);
 };
 
 function VClip(offset) {
