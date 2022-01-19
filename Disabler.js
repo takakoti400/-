@@ -1,6 +1,6 @@
 ///api_version=2
 /*
-    Requires core.lib to use!
+   Requires core.lib to use!
 */
 (script = registerScript({
    name: "PacketManager", //LiquidBoucne+ including Disabler Module. fixing Module/Values duplication
@@ -17,7 +17,7 @@ list = [
 
 module = {
    category: "Exploit",
-   description: "Anticheat no work",
+   description: "Allow you to make good bye for AntiCheat",
    values: list,
 
    onPacket: function(e) {
@@ -110,7 +110,7 @@ module = {
          case "NaNPos":
             var packet = e.getPacket();
             if (packet instanceof C03PacketPlayer) {
-               packet.x = packet.x = packet.x = Double.NaN;
+               packet.x = packet.y = packet.z = Double.NaN; // i'm thinking Double Method is not working.
             }
             break;
          case "CustomYPos":
@@ -137,7 +137,7 @@ module = {
          case "PositiveInfinite":
             cv = 1/0;break;
          case "NegativeInfinite":
-            cv = (-0/0);break;
+            cv = (-1/0);break;
          case "+Infinite":
             cv = Number.POSITIVE_INFINITY;break;
          case "-Infinite":
@@ -152,8 +152,8 @@ module = {
       DisablerModule.tag = mode.get();
       switch (mode.get()) {
          case "MineplexCombat":
-            sendPacket(new C00PacketKeepAlive());
-            sendPacket(new C0CPacketInput());
+            mc.thePlayer.sendQueue.addToSendQueue(new C00PacketKeepAlive(0));
+            mc.thePlayer.sendQueue.addToSendQueue(new C0CPacketInput());
             break;
          case "OnlyMC":
          case "Lunar":

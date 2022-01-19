@@ -6,7 +6,7 @@ var C03PacketPlayer = Java.type('net.minecraft.network.play.client.C03PacketPlay
 
 function MoonJump() {
 
-    var Mode = value.createList("Mode", ["MoonJump", "Creative"], "MoonJump");
+    var Mode = value.createList("Mode", ["MoonJump", "Creative", "Off"], "MoonJump");
     var GroundSpoof = value.createBoolean("GroundSpoof", false);
 	
 
