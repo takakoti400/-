@@ -8,11 +8,14 @@
    version: "1.1" // Actually remembered to change it!
 })).import("Core.lib");
 
-var cv = 0;
+var cv=cvx=cvy=cvz=0;
 
 list = [
-   mode = value.createList("Mode", ["MineplexCombat", "Lunar", "OnlyMC", "HazelMC", "NoPayload", "Offset", "C03 Cancel", "C06 Only", "Spectate", "VerusCombat", "VerusOld", "NaNPlace", "CustomPlace", "NaNPos", "CustomPos"], "MineplexCombat"),
-   customvalue = value.createList("CustomType", ["null", "NaN", "PositiveInfinite", "NegativeInfinite", "+Infinite","-Infinite", "MAX_VALUE", "MAX_SAFE_INTEGER","MIN_SAFE_INTEGER"], "null"),
+   mode = value.createList("Mode", ["MineplexCombat", "Lunar", "OnlyMC", "HazelMC", "NoPayload", "Offset", "C03 Cancel", "C06 Only", "Spectate", "VerusCombat", "VerusOld", "NaNPlace", "CustomPlace", "NaNPos", "CustomOnlyYPos", "CustomPos"], "MineplexCombat"),
+   customvalue = value.createList("CustomType", ["null", "undefiend", "NaN", "PositiveInfinite", "NegativeInfinite", "+Infinity","-Infinity", "MAX_VALUE", "MAX_SAFE_INTEGER","MIN_SAFE_INTEGER", "CalcValueFromYou"], "null"),
+   NVX = value.createFloat("CustomFloatValueX", 0, -255,255),
+   NVY = value.createFloat("CustomFloatValueY", 0, -255,255),
+   NVZ = value.createFloat("CustomFloatValueZ", 0, -255,255),
 ]
 
 module = {
@@ -106,22 +109,34 @@ module = {
             sendPacket(new C08PacketPlayerBlockPlacement(new BlockPos(Double.NaN, Double.NaN, Double.NaN), 1, null, 0, 0, 0));
             break;
          case "CustomPlace":
-            sendPacket(new C08PacketPlayerBlockPlacement(new BlockPos(cv,cv,cv), 1, null, 0, 0, 0));break;
+            if(customvalue.get() == "CalcValueFromYou") {
+               sendPacket(new C08PacketPlayerBlockPlacement(new BlockPos(mc.thePlayer.posX + NVX.get(),mc.thePlayer.posY + NVY.get(),mc.thePlayer.posZ + NVZ.get()), 1, null, 0, 0, 0));
+            }else{
+               sendPacket(new C08PacketPlayerBlockPlacement(new BlockPos(cv,cv,cv), 1, null, 0, 0, 0));
+            }break;
          case "NaNPos":
             var packet = e.getPacket();
             if (packet instanceof C03PacketPlayer) {
-               packet.x = packet.y = packet.z = Double.NaN; // i'm thinking Double Method is not working.
+               packet.x = packet.y = packet.z = Double.NaN; // i think Double Method is not working.
             }
             break;
-         case "CustomYPos":
+         case "CustomOnlyYPos":
             var packet = e.getPacket();
             if (packet instanceof C03PacketPlayer) {
-               packet.y= cv;
+               if(customvalue.get() == "CalcValueFromYou") {
+                  packet.y = mc.thePlayer.posY + NVY.get();
+               }else{
+                  packet.y= cv;
+               }
             }break;
          case "CustomPos":
             var packet = e.getPacket();
             if (packet instanceof C03PacketPlayer) {
-               packet.x = packet.y = packet.z = cv;
+               if(customvalue.get() == "CalcValueFromYou") {
+                  packet.x = mc.thePlayer.posX + NVX.get(); packet.y = mc.thePlayer.posY + NVY.get();packet.z=mc.thePlayer.posZ + NVZ.get();
+               }else{
+                  packet.x = packet.y = packet.z = cv;
+               }
             }break;
       }
    },
@@ -132,15 +147,17 @@ module = {
       switch (customvalue.get()) {// ... this can not make disable anticheats, it can make crashes...huh
          case "null":
             cv = null;break;
+         case "undefiend":
+            cv = undefined;break;
          case "NaN":
             cv = Number.NaN;break;
          case "PositiveInfinite":
             cv = 1/0;break;
          case "NegativeInfinite":
             cv = (-1/0);break;
-         case "+Infinite":
+         case "+Infinity":
             cv = Number.POSITIVE_INFINITY;break;
-         case "-Infinite":
+         case "-Infinity":
             cv = Number.NEGATIVE_INFINITY;break;
          case "MAX_VALUE":
             cv = Number.MAX_VALUE;break;
@@ -152,7 +169,7 @@ module = {
       DisablerModule.tag = mode.get();
       switch (mode.get()) {
          case "MineplexCombat":
-            mc.thePlayer.sendQueue.addToSendQueue(new C00PacketKeepAlive(0));
+            mc.thePlayer.sendQueue.addToSendQueue(new C00PacketKeepAlive());
             mc.thePlayer.sendQueue.addToSendQueue(new C0CPacketInput());
             break;
          case "OnlyMC":
