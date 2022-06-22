@@ -36,7 +36,7 @@ var SprintModule = moduleManager.getModule("Sprint");
 var VelocityModule = moduleManager.getModule("Velocity");
 var ScaffoldModule = moduleManager.getModule("Scaffold");
 var TowerModule = moduleManager.getModule("Tower");
-var InvModule = moduleManager.getModule("InvCleaner"); //this module has renamed from InventoryCleaner. :I
+var InvModule = moduleManager.getModule("InvManager"); //this module has renamed from InventoryCleaner. fuck sake.
 var InvAAModule = moduleManager.getModule("AutoArmor");
 var BlinkModule = moduleManager.getModule("Blink");
 var ClickGUIModule = moduleManager.getModule("ClickGUI");
@@ -105,6 +105,7 @@ function ModuleManager() {
   //var azoz = 0;
   //var azoz2 = 0;
 
+  var DMode = value.createBoolean("DevMode", false);
   var test = value.createBoolean("test", false);
   var ReadMe = value.createBoolean("ReadMe.js", false);
   var MMMode = value.createList("MMMode", ["Original", "LiquidBounce+"], "");
@@ -126,15 +127,13 @@ function ModuleManager() {
   var VelLJManage = value.createBoolean("VelLongJump", true);
   var AutoKAJump = value.createBoolean("AutoKAJump", false);
 
-
-
   var ReverseStepFix = value.createBoolean("ReverseStepFix", true); //using for Slime Motion Jumping, Falling on when you Floating from block.
   var AntiNoCritical = value.createBoolean("AntiNoCritical", false); //Fixes? Not Criticalizing Bug. when you using Critical with NoFall.
   var AutoFClear = value.createBoolean("AutoFClear", false);
   var NoCPBlink = value.createBoolean("ClonedPlayerRemover", false);
   var Text2 = value.createText("§l>InvModeManager", "");
   var Inv = value.createBoolean("Inv", true);
-  var InvList = value.createList("Mode", ["None", "Open", "Simulate", "Both"], "None");
+  var InvList = value.createList("Mode", ["None", "Open", "Simulate", "Both", "InvSpoof","InvSpoof-Old","Both-Old"], "None");
   var Text3 = value.createText(">BlockRenderManager", "");
   var RenderSetting = value.createBoolean("RenderSetting", true);
   var RSCounter = value.createList("Counter", ["false", "Off", "Simple", "Advanced", "Sigma", "Novoline"], "false");
@@ -161,11 +160,11 @@ function ModuleManager() {
   var NoMouse = value.createBoolean("NoMouseWhenAttack", false);
   //var AntiVoid = value.createBoolean("AntiVoidFallingViaScaffold", false); //exist on LiquidBouncePlus
   var MinFallDis = value.createFloat("MinFallDistance", 1.5, 0, 30);
-  var auto = value.createBoolean("AutoFPSLimit", true);
+  //var auto = value.createBoolean("AutoFPSLimit", true);
   var PSID = value.createBoolean("PrintSessionID", false);
 
   this.addValues = function(v) {
-    v.add(test)
+    v.add(DMode)
     v.add(ReadMe);
     v.add(MMMode);
     v.add(Text1);
@@ -216,7 +215,7 @@ function ModuleManager() {
     v.add(NoMouse);
     //v.add(AntiVoid) //exist on LiquidBouncePlus
     v.add(MinFallDis);
-    v.add(auto);
+    //v.add(auto);
     v.add(PSID);
   };
 
@@ -232,11 +231,17 @@ function ModuleManager() {
   this.getTag = function() {
     return SLT.get();
   };
-  this.onEnabled = function() {}
+  this.onJump = function(e) {
+    if (SpeedJump.get() && DMode.get()) {
+      if (SpeedModule.getState() && mc.thePlayer.onGround) {
+        if (MoveCheck()) {
+          e.cancelEvent();
+          DC(DCV.get(), "MM", Color2.get(), "Disabled Jump.");
+        }
+      }
+    };
+  }
   this.onUpdate = function() {
-    if (test.get()) {
-      hclip(3)
-    }
     if(PSID.get()) {
       chat.print(mc.getSession().getToken())
     }
@@ -245,10 +250,10 @@ function ModuleManager() {
       ReadMe.set(false);
     }
     //Manage SpeedJump /Fix Jump Boosting
-    if (SpeedJump.get()) {
+    if (SpeedJump.get()  && !DMode.get()) {
       if (SpeedModule.getState() && mc.thePlayer.onGround) {
         if (mc.gameSettings.keyBindJump.pressed) {
-          if (mc.gameSettings.keyBindForward.pressed || mc.gameSettings.keyBindRight.pressed || mc.gameSettings.keyBindLeft.pressed || mc.gameSettings.keyBindBack.pressed) {
+          if (MoveCheck()) {
             mc.gameSettings.keyBindJump.pressed = false;
             DC(DCV.get(), "MM", Color2.get(), "Disabled Jump.");
           }
@@ -394,12 +399,22 @@ function ModuleManager() {
         }
       }
     } //SpeedDisabler
-    if (SpeedsDisabler.get()) {
-      if ((SpeedModule.getState() || LJModule.getState()) && (FlyModule.getState() || FreeCamModule.getState() || ScaffoldModule.getState() || TowerModule.getState())) {
-        SpeedModule.setState(false) || LJModule.setState(false);
-        DC(DCV.get(), "MM", Color2.get(), "Disabled Speed or LongJump.");
-      }
-    };
+    switch (MMMode.get()) {
+      case "LiquidBounce+":
+        if (SpeedsDisabler.get()) {
+          if ((SpeedModule.getState() || LJModule.getState()) && (FlyModule.getState() || FreeCamModule.getState() || ScaffoldModule.getState())) {
+            SpeedModule.setState(false) || LJModule.setState(false);
+            DC(DCV.get(), "MM", Color2.get(), "Disabled Speed or LongJump.");
+          }
+        };break;
+      case "Original":
+        if (SpeedsDisabler.get()) {
+          if ((SpeedModule.getState() || LJModule.getState()) && (FlyModule.getState() || FreeCamModule.getState() || ScaffoldModule.getState() || TowerModule.getState())) {
+            SpeedModule.setState(false) || LJModule.setState(false);
+            DC(DCV.get(), "MM", Color2.get(), "Disabled Speed or LongJump.");
+          }
+        };break;
+    }
     //VelLJ /Hypixel Fix?
     if (VelLJManage.get()) {
       if (VelocityModule.getState() == LJModule.getState()) {
@@ -454,10 +469,8 @@ function ModuleManager() {
       if (RSCounter.get() != "false") {
         switch (MMMode.get()) {
           case "LiquidBounce+":
-            if (RSCounter.get() != (ScaffoldModule.getValue("Counter").get() || TowerModule.getValue("Counter").get())) {
-              chat.print("b")
+            if (RSCounter.get() != ScaffoldModule.getValue("Counter").get()) {
               ScaffoldModule.getValue("Counter").set(RSCounter.get())
-              TowerModule.getValue("Counter").set(RSCounter.get())
             }
             break;
           case "Original":
@@ -478,63 +491,69 @@ function ModuleManager() {
     };
     //Inv /This is ???
     if (Inv.get()) {
-      switch (InvList.get()) {
-        case "None":
-          if (InvModule.getValue("invOpen").get()) {
-            InvModule.getValue("invOpen").set(false)
-          };
-          if (InvModule.getValue("SimulateInventory").get()) {
-            InvModule.getValue("SimulateInventory").set(false)
-          }
-          if (InvAAModule.getValue("invOpen").get()) {
-            InvAAModule.getValue("invOpen").set(false)
-          };
-          if (InvAAModule.getValue("SimulateInventory").get() == true) {
-            InvAAModule.getValue("SimulateInventory").set(false)
-          }
-          break;
-        case "Open":
-          if (InvModule.getValue("invOpen").get(false)) {
-            InvModule.getValue("invOpen").set(true)
-          };
-          if (InvModule.getValue("SimulateInventory").get()) {
-            InvModule.getValue("SimulateInventory").set(false)
-          }
-          if (InvAAModule.getValue("invOpen").get(false)) {
-            InvAAModule.getValue("invOpen").set(true)
-          };
-          if (InvAAModule.getValue("SimulateInventory").get() == true) {
-            InvAAModule.getValue("SimulateInventory").set(false)
-          }
-          break;
-        case "Simulate":
-          if (InvModule.getValue("invOpen").get()) {
-            InvModule.getValue("invOpen").set(false)
-          };
-          if (InvModule.getValue("SimulateInventory").get(false)) {
-            InvModule.getValue("SimulateInventory").set(true)
-          }
-          if (InvAAModule.getValue("invOpen").get()) {
-            InvAAModule.getValue("invOpen").set(false)
-          };
-          if (InvAAModule.getValue("SimulateInventory").get(false)) {
-            InvAAModule.getValue("SimulateInventory").set(true)
+      switch(MMMode.get()) {
+        case "Original":
+          switch (InvList.get()) {
+            case "None":
+              if (InvModule.getValue("invOpen").get()) {InvModule.getValue("invOpen").set(false)};
+              if (InvModule.getValue("SimulateInventory").get()) {InvModule.getValue("SimulateInventory").set(false)}
+              if (InvAAModule.getValue("invOpen").get()) {InvAAModule.getValue("invOpen").set(false)};
+              if (InvAAModule.getValue("SimulateInventory").get() == true) {InvAAModule.getValue("SimulateInventory").set(false)}
+              break;
+            case "Open":
+              if (InvModule.getValue("invOpen").get(false)) {InvModule.getValue("invOpen").set(true)};
+              if (InvModule.getValue("SimulateInventory").get()) {InvModule.getValue("SimulateInventory").set(false)}
+              if (InvAAModule.getValue("invOpen").get(false)) {InvAAModule.getValue("invOpen").set(true)};
+              if (InvAAModule.getValue("SimulateInventory").get() == true) {InvAAModule.getValue("SimulateInventory").set(false)}
+              break;
+            case "Simulate":
+              if (InvModule.getValue("invOpen").get()) {InvModule.getValue("invOpen").set(false)};
+              if (InvModule.getValue("SimulateInventory").get(false)) {InvModule.getValue("SimulateInventory").set(true)}
+              if (InvAAModule.getValue("invOpen").get()) {InvAAModule.getValue("invOpen").set(false)};
+              if (InvAAModule.getValue("SimulateInventory").get(false)) {InvAAModule.getValue("SimulateInventory").set(true)}
+              break;
+            case "Both":
+              if (InvModule.getValue("invOpen").get(false)) {InvModule.getValue("invOpen").set(true)};
+              if (InvModule.getValue("SimulateInventory").get(false)) {InvModule.getValue("SimulateInventory").set(true)}
+              if (InvAAModule.getValue("invOpen").get(false)) {InvAAModule.getValue("invOpen").set(true)};
+              if (InvAAModule.getValue("SimulateInventory").get(false)) {InvAAModule.getValue("SimulateInventory").set(true)}
+              break;
           }
           break;
-        case "Both":
-          if (InvModule.getValue("invOpen").get(false)) {
-            InvModule.getValue("invOpen").set(true)
-          };
-          if (InvModule.getValue("SimulateInventory").get(false)) {
-            InvModule.getValue("SimulateInventory").set(true)
-          }
-          if (InvAAModule.getValue("invOpen").get(false)) {
-            InvAAModule.getValue("invOpen").set(true)
-          };
-          if (InvAAModule.getValue("SimulateInventory").get(false)) {
-            InvAAModule.getValue("SimulateInventory").set(true)
-          }
-          break;
+        case "LiquidBounce+":
+          switch (InvList.get()) {
+            case "None":
+              InvModule.getValue("invOpen").get() && InvModule.getValue("invOpen").set(false)
+              InvModule.getValue("InvSpoof").get() && InvModule.getValue("InvSpoof").set(false)
+              InvModule.getValue("InvSpoof-Old").get() && InvModule.getValue("InvSpoof-Old").set(false)
+              break;
+            case "Open":
+              !InvModule.getValue("invOpen").get() && InvModule.getValue("invOpen").set(true)
+              InvModule.getValue("InvSpoof").get() && InvModule.getValue("InvSpoof").set(false)
+              InvModule.getValue("InvSpoof-Old").get() && InvModule.getValue("InvSpoof-Old").set(false)
+              break;
+            case "InvSpoof":
+              InvModule.getValue("invOpen").get() && InvModule.getValue("invOpen").set(false)
+              !InvModule.getValue("InvSpoof").get() && InvModule.getValue("InvSpoof").set(true)
+              InvModule.getValue("InvSpoof-Old").get() && InvModule.getValue("InvSpoof-Old").set(false)
+              break;
+            case "InvSpoof-Old":
+              InvModule.getValue("invOpen").get() && InvModule.getValue("invOpen").set(false)
+              !InvModule.getValue("InvSpoof").get() && InvModule.getValue("InvSpoof").set(true)
+              !InvModule.getValue("InvSpoof-Old").get() && InvModule.getValue("InvSpoof-Old").set(true)
+              break;
+            case "Both":
+              !InvModule.getValue("invOpen").get() && InvModule.getValue("invOpen").set(true)
+              !InvModule.getValue("InvSpoof").get() && InvModule.getValue("InvSpoof").set(true)
+              InvModule.getValue("InvSpoof-Old").get() && InvModule.getValue("InvSpoof-Old").set(false)
+              break;
+            case "Both-Old":
+              !InvModule.getValue("invOpen").get() && InvModule.getValue("invOpen").set(true)
+              !InvModule.getValue("InvSpoof").get() && InvModule.getValue("InvSpoof").set(true)
+              !InvModule.getValue("InvSpoof-Old").get() && InvModule.getValue("InvSpoof-Old").set(true)
+              break;
+            default:break;
+          }break;
       }
     }
     //Selection
@@ -603,22 +622,15 @@ function ModuleManager() {
     };
     //AntiCESP /this function is useful for me.
     if (AntiESP.get()) {
-      if (ESPModule.getValue("Mode").get() == "ShaderOutline" || ESPModule.getValue("Mode").get() == "ShaderGlow") {
+      if (ESPModule.getValue("Mode").get() !=="ShaderOutline" || ESPModule.getValue("Mode").get()!=="ShaderGlow") {
         ESPModule.getValue("Mode").set("2D");
         chat.print("Detected")
       }
-      if (StoESPModule.getValue("Mode").get() == "ShaderOutline" || StoESPModule.getValue("Mode").get() == "ShaderGlow") {
+      if (StoESPModule.getValue("Mode").get() !=="ShaderOutline" || StoESPModule.getValue("Mode").get()!=="ShaderGlow") {
         StoESPModule.getValue("Mode").set("2D");
         chat.print("detected")
       }
     }
-  }
-  this.onMove = function() {
-    /*if(AntiVoid.get()) {
-      if(!mc.thePlayer.onGround && mc.thePlayer.fallDistance >= MinFallDis.get()) {
-        ScaffoldModule.state=true; WasFallen=true;
-      }else if(WasFallen) {DC(DCV.get(),"MM",Color2.get(),"Catch detected. Disabling ScaffoldModule."); ScaffoldModule.state = false;WasFallen=false}
-    }*/
   }
   this.onKey = function(e) {
     //manager of config MM function
@@ -714,173 +726,22 @@ function ModuleManager() {
       }
     }
   }
-  this.onClickBlock = function(e) {//修正すんのめんどくさい!やだ!
-    //if(MidClick.get()) {
-    //  chat.print(e.getClickedBlock())
-    //  //id =mc.theWorld.getBlockState(new BlockPos(e.getClickedBlock())).getBlock()
-    //  //fucker.get() && FuckerModule.getValue("Block").set(id);
-    //  //blockesp.get()&&BlockESPModule.getValue("Block").set(id) 
-    //  MidClick.set(false)
-    //}
-  }
-  this.onLoad = function() {
-    if (auto.get() && !FPSLimited) { //fixes fpslimiter has reseting for reboootowafawef
-      commandManager.executeCommand("/fpslimit unlimited")
-      auto.set(false);
-      FPSLimited = true;
-    }
-  }
-}
-/* gokuhi project ?
-function TargetStrafation() {
-  var rotYawVal = rotationYaw = 0;
-  var azoz = 0;
-  var target = null;
-  var sin = cos = 0;
-  var Fsin = Fcos = 0;
-  var targetposX = targetposZ = 0;
-  var FtargetposX = FtargetposZ = 0;
-  var NegTarRot = PosTarRot = rot = 0;
-  var posX = posZ = NearestX = NearestZ = tan = 0
-  var ticks = 0;
-  var state = 'Null'
-  var ratate = 360;
-  var RState=0;
-  var speed=0;
-  var test1 = 0;
-  var test2 = 0;
-  var yaw=speed=0;
-
-  var mode = value.createList("Mode", ["AimBottedLegitTS", "LegitlyRotateY","SetXZ", "MotionXZ", "None"], "") //Δ version
-  var fl = value.createInteger("FixLength", 10, 0, 100) //Δ version
-  var range = value.createFloat("Range", 3.25, 0, 8) //Δ version
-  var Rect = value.createInteger("Rectangle", 8, 0, 36) //Δ version
-  var Tole = value.createFloat("Tolerances", 0.3, 0, 1) //Δ version
-  //var Boost = value.createFloat("Boost", 0.1, 0, 180) //Δ version
-  var DegValue = value.createFloat("Deg", 8, 40, 360)
-  //var rotatemode = value.createList("RotateMode", ["Default", "AlwaysRotate", "random"], "Default")
-
-  this.addValues = function(v) {
-    v.add(mode);
-    v.add(fl);
-    v.add(range);
-    v.add(Rect);
-    v.add(Tole);
-    v.add(DegValue);
-    //v.add(rotatemode);
-  }
-  this.getName = function() {
-    return "TargetStrafation"
-  }
-  this.getDescription = function() {
-    return "TargetStrafation"
-  }
-  this.getCategory = function() {
-    return "Fun"
-  }
-  this.onAttack = function(e) {
-    target = e.getTargetEntity();
-  }
-  this.onStrafe = function(e) {
-    yaw =Math.atan2(target.posX -mc.thePlayer.posX , target.posZ - mc.thePlayer.posZ) / Math.PI * 180 *-1
-    speed =pitagora(mc.thePlayer.motionX,mc.thePlayer.motionZ)
-
-    e.setX(-Math.sin(yaw / 180 * Math.PI)* speed)
-    e.setZ(Math.cos(yaw / 180 * Math.PI)* speed)
-      mc.thePlayer.motionX -= Math.sin(yaw / 180 * Math.PI)* speed
-      mc.thePlayer.motionZ += Math.cos(yaw / 180 * Math.PI)* speed
-    //yaw =Math.atan2(target.posX-mc.thePlayer.posX, target.poZ - mc.thePlayer.posZ) / Math.PI * 180
-    //speed = pitagora(mc.thePlayer.motionX,mc.thePlayer.motionZ)
-//
-    //  mc.thePlayer.motionX = -Math.sin(yaw * Math.PI / 180)* speed
-    //  mc.thePlayer.motionZ =  Math.cos(yaw * Math.PI / 180)* speed
-    if(_2DRoundCheck(target.posX - Math.sin(ratate / 180 * Math.PI) * range.get(),target.posZ + Math.cos(ratate / 180 * Math.PI) * range.get(),Tole.get())) {
-      chat.print("test")
-      if(ratate >= 360) {
-        ratate = 360 / Rect.get()
-      }else{
-        ratate += (360 / Rect.get())
-      }
-    }
-  }
-  this.onUpdate = function() {
-    if (target != null && !target.isDead && !target.getHealth() <= 0) {
-      switch (mode.get()) {//umm bad code... but.. ah um.
-        
-        case "AimBottedLegitTS":
-          AimBotFunc(target.posX, target.posZ)
-
-          //rot = target.rotationYaw;
-          if ((target.rotationYaw + DegValue.get()) > 180) {
-            PosTarRot = ((-180) + (DegValue.get() - (180 - target.rotationYaw)))
-          } else {
-            PosTarRot = (target.rotationYaw + DegValue.get())
-          }
-          if ((target.rotationYaw - DegValue.get()) < -180) {
-            NegTarRot = (180 - (DegValue.get() - (180 - target.rotationYaw)))
-          } else {
-            NegTarRot = (target.rotationYaw - DegValue.get())
-          }
-          //Calculation of LookLength.
-          azoz = Math.atan2(target.posX - mc.thePlayer.posX, target.posZ - mc.thePlayer.posZ)
-          //Shape of range
-          if ((azoz / Math.PI * 180) <= PosTarRot && (azoz / Math.PI * 180) >= NegTarRot) {
-            if(mc.thePlayer.keyBindLeft.pressed) {
-              mc.gameSettings.keyBindLeft.pressed = false;
-              mc.gameSettings.keyBindRight.pressed = true;
-            }
-            if(mc.thePlayer.keyBindRight.pressed) {
-              mc.gameSettings.keyBindRight.pressed = false;
-              mc.gameSettings.keyBindLeft.pressed = true;
-            }
-          }
-          //Controller of F/B.
-          if (ticks == 0) {
-            switch (state) {
-              case 'outsided':
-                if (Math.sqrt(Math.pow(mc.thePlayer.posX - target.posX, 2) + Math.pow(mc.thePlayer.posZ - target.posZ, 2)) < range.get()) {
-                  mc.gameSettings.keyBindForward.pressed = true;
-                  ticks = fl.get()
-                }
-                break;
-              case 'inseded':
-                if (Math.sqrt(Math.pow(mc.thePlayer.posX - target.posX, 2) + Math.pow(mc.thePlayer.posZ - target.posZ, 2)) > range.get()) {
-                  mc.gameSettings.keyBindBack.pressed = true;
-                  ticks = fl.get()
-                }
-                break;
-            }
-            if (Math.sqrt(Math.pow(mc.thePlayer.posX - target.posX, 2) + Math.pow(mc.thePlayer.posZ - target.posZ, 2)) < range.get()) {
-              state = 'inseded'
-            }
-            if (Math.sqrt(Math.pow(mc.thePlayer.posX - target.posX, 2) + Math.pow(mc.thePlayer.posZ - target.posZ, 2)) > range.get()) {
-              state = 'outsided'
-            }
-          } else {ticks--}
-          break;
-        case "LegitlyRotateY":
-          chat.print("ratate="+ratate)
-          AimBotFunc(target.posX - Math.sin(ratate / 180 * Math.PI) * range.get(), target.posZ + Math.cos(ratate / 180 * Math.PI) * range.get())
-          if(_2DRoundCheck(target.posX - Math.sin(ratate / 180 * Math.PI) * range.get(),target.posZ + Math.cos(ratate / 180 * Math.PI) * range.get(),Tole.get())) {
-            chat.print("test")
-            if(ratate >= 360) {ratate = 360 / Rect.get()
-            }else{
-              if(mc.gameSettings.keyBindForward.pressed) {ratate += (360 / Rect.get())}
-              else if(mc.gameSettings.keyBindBack.pressed) {ratate -= (360 / Rect.get())}
-            }
-          }
-          break;
-      case "SetXZ":
-        break;
-      case "MotionXZ":
-      }
-    }
-  }
-  this.onEnable = function() {wasDown = false}
-  this.onMove = function(e) {}
-  this.onDisable = function() {
-    neared = false;
-  }
+  //this.onClickBlock = function(e) {
+  //  //if(MidClick.get()) {
+  //  //  chat.print(e.getClickedBlock())
+  //  //  //id =mc.theWorld.getBlockState(new BlockPos(e.getClickedBlock())).getBlock()
+  //  //  //fucker.get() && FuckerModule.getValue("Block").set(id);
+  //  //  //blockesp.get()&&BlockESPModule.getValue("Block").set(id) 
+  //  //  MidClick.set(false)
+  //  //}
+  //}
+  //this.onLoad = function() {
+  //  if (auto.get() && !FPSLimited) { //fixes fpslimiter has reseting for reboootowafawef
+  //    commandManager.executeCommand("/fpslimit unlimited")
+  //    auto.set(false);
+  //    FPSLimited = true;
+  //  }
+  //}
 }
 
 function ABAssis() {
@@ -967,10 +828,6 @@ function ModuleRandomizer() { //Beta Module
   var min = value.createInteger("Min", 0, 0, 20);
   var minn = value.createInteger("Min-Min", 0, 0, 20);
   var C = value.createBoolean("ChargeNow", false); //Debugy
-  //var RVel = value.createBoolean("RandomVelocity", false);//Novo Clone / it exist on LiqB+.
-  //var RVMode = value.createList("VelMode", ["Simple", "Reverse1", "Reverse2"], "Simple");
-  //var RVelMin = value.createInteger("MinChance", 0, 0, 100);
-  //var RVelMax = value.createInteger("MaxChance", 100, 0, 100);
 
   this.addValues = function(v) {
     v.add(KAMR)
@@ -987,10 +844,6 @@ function ModuleRandomizer() { //Beta Module
     v.add(min)
     v.add(minn)
     v.add(C)
-    //v.add(RVel)
-    //v.add(RVMode)
-    //v.add(RVelMin)
-    //v.add(RVelMax)
   }
   this.getName = function() {
     return "ImJustProGaymer" //aka AntiBAN/BANPreventor
@@ -1054,19 +907,6 @@ function ModuleRandomizer() { //Beta Module
         }
       }
     }
-    //if (RVel.get()) {
-    //  switch (RVMode.get()) {
-    //    case "Simple":
-    //      VelocityModule.getValue("").set()
-    //      break;
-    //    case "Reverse1":
-    //      VelocityModule.getValue("").set()
-    //      break;
-    //    case "Reverse2":
-    //      VelocityModule.getValue("").set()
-    //      break;
-    //  }
-    //}
   }
   this.onAttack = function() {
     if (UseHT.get() && htime>0) {htime--}
@@ -1083,11 +923,11 @@ function ModuleRandomizer() { //Beta Module
     KAModule.getValue("MaxCPS").set(xCPS)
     KAModule.getValue("MinCPS").set(nCPS)
   }
-}*/
+}
 // TSMM by tk400 //
 
 
-/* TIP: if ScaffoldJump is set Off, you can Sprint ScaffoldingJump. like shitgma(Jello? XD). */
+/* TIP: if ScaffoldJump has set Off, you can Sprint ScaffoldingJump. like shitgma(Jello? XD). */
 
 function TSMM() {
   var i = r = z = 0;
@@ -1097,12 +937,16 @@ function TSMM() {
   //var ghostremoved = false;
   var SMN = SSW = SAi = false;
   var JumpCalnceler = false;
+  var RESSNK = false
   //var hideScaffold; var hideTower;
 
+  var TSMMMode = value.createList("TSMMMode", ["Original","LiquidBounce+"],"LiquidBounce+");
+  var NAT = value.createBoolean("NoAutoTower", false); //wtf?
   var Color = value.createText("TSMMCustomColor", "a");
   var DCV = value.createBoolean("TSMMDebugChat", false);
   var BR = value.createBoolean("BodyReverser", false);
-  var TSMMMode = value.createList("ScaffoldJump", ["Off", "Sprint", "XZR", "VClip"], "Off");
+  var ScJMode = value.createList("ScaffoldJump", ["Off", "Sprint", "XZR", "VClip"], "Off");
+  var SCJReset = value.createList("SCJSReset", ["Same","Ground","Air"], "Same");
   var PotionTower = value.createBoolean("PotionTower", false);
   var SCATower = value.createBoolean("UseScaffoldsLegitTower", false);
   var TowerDelayer = value.createBoolean("TowerDelayer", false);
@@ -1128,10 +972,13 @@ function TSMM() {
   var NoXZMotion = value.createList("NoXZMotion", ["Off", "MotionZero", "NoKeyBoard", "BothAlgorism", "ZeroXZEvent", "EventCanceler"], "Off");
 
   this.addValues = function(v) {
+    v.add(TSMMMode);
+    v.add(NAT);
     v.add(Color);
     v.add(DCV);
     v.add(BR);
-    v.add(TSMMMode);
+    v.add(ScJMode);
+    v.add(SCJReset)
     v.add(PotionTower);
     v.add(SCATower);
     v.add(TowerDelayer);
@@ -1166,7 +1013,7 @@ function TSMM() {
     return "Player";
   }
   this.getTag = function() {
-    return TSMMMode.get();
+    return ScJMode.get();
   }
   this.onEnable = function() {
     //Array Remover
@@ -1183,21 +1030,22 @@ function TSMM() {
       mc.thePlayer.rotationYaw += 180
     }
     ScaffoldModule.setState(true);
-    TowerModule.setState(false);
+    if(TSMMMode.get() == "Original") {
+      TowerModule.setState(false);
+    }
     if (JumpScaffolding.get()) {
-      TSMMMode.set("Off");
-      if (!ScaffoldModule.getValue("SameY").get()) {
-        ScaffoldModule.getValue("SameY").set(true)
-      }
+      ScJMode.set("Off");
+      if (!ScaffoldModule.getValue("SameY").get()) {ScaffoldModule.getValue("SameY").set(true)}
     }
     // //
     if (WithBlinkAPI.get()) {
-      BlinkModule.setState(true)
-      if (RemoveGhost.get()) {
-        for (var x in mc.theWorld.loadedEntityList) {
-          var entities = mc.theWorld.loadedEntityList[x]; //i think generate from Blink's Fakeplayer entityID is fixed for "-1337".
-          if ((entities != mc.thePlayer) && (entities.getEntityId() == -1337)) {
-            mc.theWorld.removeEntity(entities)
+      if(BlinkModule.getState()) {
+        if (RemoveGhost.get()) {
+          for (var x in mc.theWorld.loadedEntityList) {
+            var entities = mc.theWorld.loadedEntityList[x]; //i think generate from Blink's Fakeplayer entityID is fixed for "-1337".
+            if ((entities != mc.thePlayer) && (entities.getEntityId() == -1337)) {
+              mc.theWorld.removeEntity(entities)
+            }
           }
         }
       }
@@ -1205,85 +1053,157 @@ function TSMM() {
     DC(DCV.get(), "TS", Color.get(), "§a+Enabled TSMM and Scaffold and Tower")
   };
   this.onUpdate = function() {
-    if (TowerDelayer.get()) {
-      if(CoolTimeB) {
-        CoolTime++
-        if (CoolTime>=CT.get()) {
-          CoolTime = 0
-          CoolTimeB = false
-        } else {
-          mc.gameSettings.keyBindJump.pressed = false;
-          DCV.get() && chat.print("you are now in CoolTime")
+    switch (TSMMMode.get()) {
+      case "Original":
+        if (TowerDelayer.get()) {
+              if(CoolTimeB) {
+                CoolTime++
+                if (CoolTime>=CT.get()) {
+                  CoolTime = 0
+                  CoolTimeB = false
+                } else {
+                  mc.gameSettings.keyBindJump.pressed = false;
+                  DCV.get() && chat.print("you are now in CoolTime")
+                }
+              }
+              if (TowerModule.getState() && z>=TDDelay.get()) {
+                z = CoolTime = 0
+                CoolTimeB = true;
+                TowerModule.setState(false);
+                DCV.get() && chat.print("test");
+              } else {z++}
         }
-      }
-      if (TowerModule.getState() && z>=TDDelay.get()) {
-        z = CoolTime = 0
-        CoolTimeB = true;
-        TowerModule.setState(false);
-        DCV.get() && chat.print("test");
-      } else {z++}
-    }
-    if (!ScaffoldModule.getState()) {
-      if (!mc.gameSettings.keyBindJump.pressed) {
-        ScaffoldModule.setState(true);
-        TowerModule.setState(false);
-        DC(DCV.get(), "TS", Color.get(), "Enabled Scaffold, Disabled Tower")
-      }
-    } else if (!TowerModule.getState()) {
-      if (!mc.gameSettings.keyBindJump.pressed) {
-        (TSMMMode == "Sprint") && (ScaffoldModule.getValue("Sprint").set(true))
-      } else if (mc.thePlayer.onGround) {
-        switch (TSMMMode.get()) {
-          case "Sprint":
-            ScaffoldModule.getValue("Sprint").set(false);
-            break;
-          case "XZR":
-            mc.thePlayer.motionX = mc.thePlayer.motionZ = 0;
-            break;
-          case "VClip":
-            JumpCalnceler = true, mc.thePlayer.setPosition(mc.thePlayer.posX, mc.thePlayer.posY += 1, mc.thePlayer.posZ);
-            break;
-        }
-      }
-    }
-    //if press mc.gameSettings.keyBindJump.pressed = enable Tower, and Managing
-    if (!SCATower.get()) {
-      if (!TowerModule.getState() && mc.thePlayer.onGround && mc.gameSettings.keyBindJump.pressed && !mc.gameSettings.keyBindForward.pressed) {
-        if (PotionTower.get()) {
-          if (!mc.thePlayer.isPotionActive(Potion.jump)) {
+        //if (!SCATower.get()) {
+        //  if (!TowerModule.getState() && mc.thePlayer.onGround && mc.gameSettings.keyBindJump.pressed && !mc.gameSettings.keyBindForward.pressed) {
+        //    if (PotionTower.get()) {
+        //      if (!mc.thePlayer.isPotionActive(Potion.jump)) {
+        //        ScaffoldModule.setState(false);
+        //        TowerModule.setState(true);
+        //        DC(DCV.get(), "TS", Color.get(), "Enabled Speed.")
+        //      }
+        //    } else if (!TowerModule.getState() && mc.thePlayer.onGround && mc.gameSettings.keyBindJump.pressed && !mc.gameSettings.keyBindForward.pressed) {
+        //      ScaffoldModule.setState(false);
+        //      TowerModule.setState(true);
+        //      DC(DCV.get(), "TS", Color.get(), "Enabled Tower, Disabled Scaffold")
+        //    };
+        //  }
+        //}
+        //if press mc.gameSettings.keyBindJump.pressed = enable Tower, and Managing
+        if (TowerModule.getState()) {
+          switch (NoXZMotion.get()) {
+            case "MotionZero":
+              mc.thePlayer.motionX = mc.thePlayer.motionZ = 0;
+              break;
+            case "NoKeyBoard":
+              mc.gameSettings.keyBindForward.pressed = mc.gameSettings.keyBindLeft.pressed = mc.gameSettings.keyBindRight.pressed = mc.gameSettings.keyBindBack.pressed = false;
+              break;
+            case "BothAlgorism":
+              mc.gameSettings.keyBindForward.pressed = mc.gameSettings.keyBindLeft.pressed = mc.gameSettings.keyBindRight.pressed = mc.gameSettings.keyBindBack.pressed = false;
+              mc.thePlayer.motionX = mc.thePlayer.motionZ = 0;
+              break;
+          }
+        } else if(SCATower.get() && mc.thePlayer.onGround && mc.gameSettings.keyBindJump.pressed && !mc.gameSettings.keyBindForward.pressed) {
+          if (PotionTower.get()) {
+            if (!mc.thePlayer.isPotionActive(Potion.jump)) {
+              ScaffoldModule.setState(false);
+              TowerModule.setState(true);
+              DC(DCV.get(), "TS", Color.get(), "Enabled Speed.")
+            }
+          } else if (!TowerModule.getState() && mc.thePlayer.onGround && mc.gameSettings.keyBindJump.pressed && !mc.gameSettings.keyBindForward.pressed) {
             ScaffoldModule.setState(false);
             TowerModule.setState(true);
-            DC(DCV.get(), "TS", Color.get(), "Enabled Speed.")
+            DC(DCV.get(), "TS", Color.get(), "Enabled Tower, Disabled Scaffold")
+          };
+        }
+        //ForceSprint /Fix Can't sprinting Bug... or my setting? /* Fixed in LiquidBounce+!
+        if (ForceSprint.get() && ScaffoldModule.getState()) {
+          mc.thePlayer.setSprinting(true)
+        }
+        if (!ScaffoldModule.getState()) {
+          if (!mc.gameSettings.keyBindJump.pressed) {
+            ScaffoldModule.setState(true);
+            TSMMMode.get("Original") && TowerModule.setState(false)
+            DC(DCV.get(), "TS", Color.get(), "Enabled Scaffold, Disabled Tower")
           }
-        } else if (!TowerModule.getState() && mc.thePlayer.onGround && mc.gameSettings.keyBindJump.pressed && !mc.gameSettings.keyBindForward.pressed) {
-          ScaffoldModule.setState(false);
-          TowerModule.setState(true);
-          DC(DCV.get(), "TS", Color.get(), "Enabled Tower, Disabled Scaffold")
-        };
-      }
-    }
-    if (TowerModule.getState()) {
-      switch (NoXZMotion.get()) {
-        case "MotionZero":
-          mc.thePlayer.motionX = mc.thePlayer.motionZ = 0;
-          break;
-        case "NoKeyBoard":
-          mc.gameSettings.keyBindForward.pressed = mc.gameSettings.keyBindLeft.pressed = mc.gameSettings.keyBindRight.pressed = mc.gameSettings.keyBindBack.pressed = false;
-          break;
-        case "BothAlgorism":
-          mc.gameSettings.keyBindForward.pressed = mc.gameSettings.keyBindLeft.pressed = mc.gameSettings.keyBindRight.pressed = mc.gameSettings.keyBindBack.pressed = false;
-          mc.thePlayer.motionX = mc.thePlayer.motionZ = 0;
-          break;
-      }
-    };
-    //ForceSprint /Fix Can't sprinting Bug... or my setting?
-    if (ForceSprint.get() && ScaffoldModule.getState()) {
-      mc.thePlayer.setSprinting(true)
+        } else {
+          if (!TowerModule.getState()) {
+            if (!mc.gameSettings.keyBindJump.pressed) {
+              ScJMode.get("Sprint") && (ScaffoldModule.getValue("Sprint").set(true))
+            } else if (mc.thePlayer.onGround) {
+              switch (ScJMode.get()) {
+                case "Sprint":
+                  ScaffoldModule.getValue("Sprint").set(false);
+                  break;
+                case "XZR":
+                  mc.thePlayer.motionX = mc.thePlayer.motionZ = 0;
+                  break;
+                case "VClip":
+                  JumpCalnceler = true, mc.thePlayer.setPosition(mc.thePlayer.posX, mc.thePlayer.posY += 1, mc.thePlayer.posZ);
+                  break;
+              }
+            }
+          }
+        }
+        //MLGScaffold Code
+        if (MLGScaffold.get()) {
+          mc.gameSettings.keyBindSneak.pressed = true;
+          ScaffoldModule.getValue("Sprint").set(false);
+          SprintModule.setState(false);
+          if (mc.thePlayer.onGround) {mc.gameSettings.keyBindJump.pressed = true};
+          SprintModule.getState() && (SprintModule.setState(false))
+        }
+        break;
+      case "LiquidBounce+":
+        if(NAT.get()) {
+          if(mc.gameSettings.keyBindJump.isKeyDown() && !MoveCheck("OnlyKey")) {
+            mc.gameSettings.keyBindJump.pressed = false;//i finaly found this combo code! yay!!!
+            ScaffoldModule.getValue("EnableTower").set(true)
+          }else{
+            ScaffoldModule.getValue("EnableTower").set(false)
+          }
+        }
+        if(TowerDelayer.get()) {
+          if(CoolTimeB) {
+            CoolTime++
+            if (CoolTime>=CT.get()) {
+              CoolTime = 0
+              CoolTimeB = false
+            } else {
+              mc.gameSettings.keyBindJump.pressed = false;
+              DCV.get() && chat.print("you are now in CoolTime")
+            }
+          }
+          if(ScaffoldModule.getValue("EnableTower").get()) {
+            if(mc.gameSettings.keyBindJump.pressed && z>=TDDelay.get()) {
+              z = CoolTime = 0
+              CoolTimeB = true;
+              mc.gameSettings.keyBindJump.pressed = false;
+              DCV.get() && chat.print("test");
+            }
+          }
+        }
+        ForceSprint.get() && ForceSprint.set(false)
+        if (!mc.gameSettings.keyBindJump.pressed) {
+          ScJMode.get("Sprint") && (ScaffoldModule.getValue("SprintMode").set(SCJReset.get())) //fuck.
+        } else if (mc.thePlayer.onGround) {
+          switch (ScJMode.get()) {
+            case "Sprint":
+              ScaffoldModule.getValue("SprintMode").set("Off");
+              break;
+            case "XZR":
+              mc.thePlayer.motionX = mc.thePlayer.motionZ = 0;
+              break;
+            case "VClip":
+              JumpCalnceler = true, mc.thePlayer.setPosition(mc.thePlayer.posX, mc.thePlayer.posY += 1, mc.thePlayer.posZ);
+              break;
+          }
+        }
+        break;
     }
     //AntiSlab
     if (AntiHalf.get()) {
       if (mc.thePlayer.onGround && mc.theWorld.getBlockState(new BlockPos(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ)).getBlock() instanceof SlabBlock) {
-        mc.thePlayer.jump()
+        mc.gameSettings.keyBindJump.pressed = true;
       }
     };
     //DownWards
@@ -1316,24 +1236,11 @@ function TSMM() {
               mc.thePlayer.motionY = JSV.get();
               break;
             case "TP":
-              mc.thePlayer.setPosition(mc.thePlayer.posX, mc.thePlayer.posY + JSV.get(), mc.thePlayer.posZ);
+              mc.thePlayer.setPosition(mc.thePlayer.posX, mc.thePlayer.posY += JSV.get(), mc.thePlayer.posZ);//smh i was a coder of noob...
               JumpCalnceler = true;
               break;
           }
         }
-      }
-    }
-    //MLGScaffold
-    if (MLGScaffold.get()) {
-      mc.gameSettings.keyBindSneak.pressed = true;
-      mc.gameSettings.keyBindJump.pressed = false;
-      ScaffoldModule.getValue("Sprint").set(false);
-      SprintModule.setState(false);
-      if (mc.thePlayer.onGround) {
-        mc.thePlayer.jump()
-      };
-      if (SprintModule.getState()) {
-        SprintModule.setState(false)
       }
     }
   };
@@ -1345,17 +1252,20 @@ function TSMM() {
     }
   }
   this.onMove = function(e) {
-    if (TowerModule.getState()) {
-      switch (NoXZMotion.get()) {
-        case "ZeroXZEvent":
-          e.zeroXZ();
-          break;
-        case "EventCanceler":
-          if (e.getX() || e.getZ()) {
-            e.cancelEvent();
+    if(TSMMMode.get() =="Original") {
+      chat.print("Crap")
+        if (TowerModule.getState()) {
+          switch (NoXZMotion.get()) {
+            case "ZeroXZEvent":
+              e.zeroXZ();
+              break;
+            case "EventCanceler":
+              if (e.getX() || e.getZ()) {
+                e.cancelEvent();
+              }
+              break;
           }
-          break;
-      }
+        }
     }
     if (invBlock.get()) {
       if (mc.theWorld.getBlockState(new BlockPos(mc.thePlayer.posX, mc.thePlayer.posY - 1, mc.thePlayer.posZ)).getBlock() instanceof Furnace) {
@@ -1373,28 +1283,19 @@ function TSMM() {
       }
       //AutoSneaker
       if (AutoSneak.get()) {
-        if (!mc.gameSettings.keyBindJump.isKeyDown()) {
-          if (i == delay) {
-            mc.gameSettings.keyBindSneak.pressed = true;
-            delay = DelayCal(MaxDelay.get(), MinDelay.get());
-            i = 0;
-          } else {
-            switch (RAutoSneak.get()) {
-              case "Instant":
-                mc.gameSettings.keyBindSneak.pressed = false;
-                break;
-              case "Delay":
-                r += 1;
-                RDelay = DelayCal(RMaxDelay.get(), RMinDelay.get());
-                if (r == RDelay) {
-                  mc.gameSettings.keyBindSneak.pressed = false;
-                  r = 0
-                }
-                break;
-            }
-            i += 1
+        if(i>=delay && !RESSNK) {
+          mc.gameSettings.keyBindSneak.pressed = true;
+          RANDOMIZA&&(RESDelay=DelayCal(RMinDelay,RMaxDelay),RANDOMIZA=false)
+          switch (RAutoSneak.get()) {
+            case "Instant":
+              mc.gameSettings.keyBindSneak.pressed = false,i=0
+              break;
+            case "Delay":
+              RESSNKDEL++
+              if(RESSNKDEL>=RESDelay) {RESSNK=RANDOMIZA=true,i=RESSNKDEL=0}
+              break;
           }
-        }
+        }else {i++}
       }
     }
   }
@@ -1402,22 +1303,25 @@ function TSMM() {
     JumpCalnceler && (e.cancelEvent(), JumpCalnceler = false)
   }
   this.onDisable = function() {
-      ScaffoldModule.state = TowerModule.state = false;
-      //ScaffoldModule.array = hideScaffold; TowerModule.array = hideTower;
-      DC(DCV.get(), "TS", Color.get(), "Disabled TSMM.")
-      if (BR.get()) {
-        mc.thePlayer.rotationYaw += 180
-      } /*Fix Head Rotation. only this code...*/
-      if (MLGSprint.get()) {
-        SprintModule.setState(true)
-      } else {
-        SprintModule.setState(false)
-      }
-      WithBlinkAPI.get() && BlinkModule.setState(false);
+    switch (TSMMMode.get()) {
+      case "Original":
+        ScaffoldModule.getState() && ScaffoldModule.setState(false)
+        TowerModule.getState() && TowerModule.setState(false);
+        if (MLGSprint.get()) {
+          SprintModule.setState(true)
+        } else {
+          SprintModule.setState(false)
+        }break;
+      case "LiquidBounce+":
+        ScaffoldModule.getState() && ScaffoldModule.setState(false);break;
     }
-    /*this.onRender2D = function() {
-      if(TSMMisEnabled == true) {mc.ingameGUI.drawCenteredString(mc.fontRendererObj, TSMMchat + "§c-Disabled TSMM and Scaffold and Tower", mc.displayWidth / 4, (mc.displayHeight / 2.5) + 8, -1)}
-    }*/
+    //ScaffoldModule.array = hideScaffold; TowerModule.array = hideTower;
+    DC(DCV.get(), "TS", Color.get(), "Disabled TSMM.")
+    if (BR.get()) {
+      mc.thePlayer.rotationYaw += 180
+    } /*Fix Head Rotation. only this code...*/
+    WithBlinkAPI.get() && BlinkModule.setState(false);
+  }
 }
 
 /* v: 0.01, Auther: tk400, Desc: Allow Changing Hypixel Games*/
@@ -1511,286 +1415,7 @@ function HypixelGameChange() {
 
 
 //Add Hypixel Bypasser later and AutoReplay? xd // i think it importing to AutoReport/AutoL Script.
-function ChatManager() {//修正する気になんてなれないさ...
-  var jps = "",
-    br = "",
-    ar = "";
-  ContJP = ["あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをんアイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン　"]
-  clientnameEN = ["LiqBounce", "Bounce of Liquidz", "LaquidBounce", "LiquidBounce", "Bounce of liquid", "LIQUIDBOUNCE"]
-  insultEN = ["Fools", "Foolishes", "Dumbs", "Idiots", "GAYMER", "Loser", "GarbageHuman"]
-  insultJA = ["馬鹿", "間抜け", "愚者", "クソ雑魚", "阿呆", "あほ", "馬鹿者", "キチガイ", "穀潰し", "無能", "ボケナス", "ゴミ", "カス", "役立たず", "愚か者", "社会の癌", "短小"]
-  ClientNameJA = ["リキッドバウンス", "リキッドバウンス。net", "りきっどばうんす♡", "リクィッドバウンス", "リキッドバウンス"]
-  var i = 0;
-  var delay = 0;
 
-
-  function messageCont(spamlist, urname, randomish, BeforeR, AfterR, IncJP, AllowBet, RandomBet, RBA, BetStB, BetStA) {
-    var insultworda = "";
-    var clientnames = "";
-    if (IncJP) {
-      insultworda = insultEN.push(insultJA);
-      clientnames = clientnameEN.push(ClientNameJA)
-    } else {
-      insultworda = insultEN;
-      clientnames = clientnameEN
-    }
-    Mineplex = [
-      "Don't Worry Mineplex! You've server is rly not popular. Alts are Almost all unbanned! xd!!",
-      "Hello mineplex, you've BAN is doesn't have much of an effect at all. why? A is Simple you've server is not popular. ",
-      "Hi mineplex! Don't worry The hackers stop coming to play. you've server is rly not popular. ",
-      "mineplex, Do you want to banned hackers on this server? i think answer is not. ",
-      "Lol! lagplex! We can never BANNED! Don't Worryyyyy!!!",
-      "hey guys im back! ;) don't worry guys!",
-      "Good News! you've server is rly not popular! well, We Can't Never Banned! ;)",
-      "Mineplex AC, Staff, System is sucks go to Hypixel Now.",
-      "hacker are wanted playing your fucking shit server. don't ban us.",
-      "sigh dont ban us, your works are shit.",
-      "OMGGGGG! freealts pw is working on this shit server!! OMGGGGG!!!!!",
-      "wow! free alts gen is worked! thx!!! lagplex staffs!!!!!",
-      "we need thank to this idiot staffs. thx dumbers.",
-      "i love mp, why? free cheating, ez bypass, only this reason. LOL! hypixel is better server.",
-      "hypixel is good for everyone. but mp is good for ... ?",
-      "holy shit! free alt is working this server! OMGGGGGGGG!!!!",
-      "dont worry this server working free alt. we can never banned.",
-      "mineplex, give me Op. i can ban you'ves you've never needed on this server",
-      "please install Exrief. this is good AntiAnticheat.",
-    ]
-    GameEnd = [
-      "EZist haxied by " + urname + ", And " + rt(clientnames) + " Client. Download Now.",
-      "E Z! :) this game was fun!!! | HACKED BY " + urname + ", and " + rt(clientnames) + " Client.",
-      "E Z!! XD You are hacked by " + urname + ", and " + rt(clientnames) + " Client. ",
-      "hacked by " + urname + " and " + rt(clientnames) + " Client",
-      "gg! XD this game is rly fast ended! Guys Let's use " + rt(clientnames) + ", this's made 4 " + servername + " Client!",
-      "yeah excited won in this game. i'm Used " + rt(clientnames) + " Client! Best for grade up pvp experience!!",
-      "gg! noobs. don't waste my time. you can't Never win!",
-      "THIS GAME WAS HAXIED BY " + urname + ", and " + rt(clientnames) + "!",
-      "hahaha noobs, VanillaClient is sucks, Let's Use " + rt(clientnames) + " Client!",
-      "gg! you guys client are sucks, Download Modern " + rt(clientnames) + " Client! this is Update you gaming performance!"
-    ]
-    HypixelFun = [
-      "Hey guys this server is sucks, lets join hypixel now!",
-      "Hey guys this server is sucks, lets join sexy hypixel now!",
-      "Hey guys this server is dumb, lets join smarter hypixel now!",
-      "lets try best server. join hypixel(dot)net now.",
-      "dont forget delete this server's IP and join hypixel.",
-      "dont forget remove this server's IP and join hypixel.",
-      "this server contains HIV. (made in China Virus). but hypixel have vaccine.",
-      "Hypixel is still best server.",
-      "Hypixel is still contining god server.",
-      "why you waiting for not joining to hypixel? dont waste your time.",
-      "hypixel can make you happy, but this server is...xd you can get stressness, Angry, Dumb, HIV, Corona",
-      "i'm warried you staying this tard server. lets join to hypixel now! don't worry! hypixel is good!",
-      "Hey! dont waste your health. join hypixel",
-      "plz leave from this idiotly server, are you dumb?",
-      "i'm thinking hypixel is best server, but this is... xd",
-      "i cant wait you've coming on our godness server! join hypixel(dot)net!",
-      "i love you! lets join hypixel!",
-      "okay hypixel is good, join hypixel now!",
-      "sorry for spaming. but i'm kind, i'm worried you, please join to hypixel",
-      "yay i can't wait you've joining hypixelation! i can't waaaaiiitttt!!!! Don't disappoint us!",
-      "hypixel is good.",
-      "Hacker love tard server, like this. but hypixel needed money for alt. but this is free gen working! LOL!",
-      "you can infected if you still staying this idiot server. j0in hypixel nooooooooowwwwwwwwww!!!!!!",
-      "dont make me sad. JOIN HYPIXEL NOW. DONT MAKE ME CRY",
-      "you received letter from hypixel! subject=> lets join us! (hypixel net) and leave from that poopest server!",
-      "you received letter from hypixel! subject=> you can join our server! Hypixel is waiting joining you!",
-      "you've not dumb. join to get more smart PvPer(xd)s! => hypixel net",
-      "hey you! had better to join hypixel!",
-      "hey you! had better to leave this tardederst server, and join hypixel!",
-      "i love you! dont cry me! join hypixelllll noowowwowowoow!!!!!!!!!",
-      "you can close this game. and you can Study, this server make you dumber.",
-      "you can make smarter brain for join hypixel.",
-      "you've not dumb. but this server make you dumber.",
-      "dont forget! you can not noob! but this server make you idiotly!",
-      "you can buy hypixel(NFA/SFA/Lifetime)AlT from alts(dot)top!(cheapest alts!)",
-      "why you waiting! this server located for CHINA! you can infect CoronaSigma! dont stayyyyy!!!!!!",
-      "plz plz plz... join hypixel now...",
-      "why still staying this idiot server!!!!! ARE YOU KIDDING ME!!!!?????",
-      "plz pzl zp lplz!!!!!!!!! dont waste your/my time!!!!! join hypixel nOooWwWWWwww!!!!",
-    ]
-    LiquidAd = [
-      rt(clientnames) + " is Best Client. Download Now.",
-      rt(clientnames) + " , is totaly Free!",
-      "Donate now " + rt(clientnames) + " Client!",
-      "Sigma Client Is sucks, FREEDOWNLOAD " + rt(clientnames) + " Now.",
-      "gg! XD this game is rly fast ended! Guys Let's use " + rt(clientnames) + ", this's made 4 " + servername + " Client!",
-      "yeah excited won in this game. i'm Used " + rt(clientnames) + " Client! Best for grade up pvp experience!!",
-      "gg! noobs. don't waste my time. you can't Never win!",
-      "hahaha noobs, VanillaClient is sucks, Let's Use " + rt(clientnames) + " Client!",
-      "gg! you guys client are sucks, Download Modern " + rt(clientnames) + " Client! this is Update you gaming performance!"
-    ]
-    gaming = [
-      "im just wearning gaming socks.",
-      "im just sucks gaming air. it's good for corona impact and gaming",
-      "im just always drinking gaming Hydrogen water.",
-      "im just drinking gaming water.",
-      "im just always drinking gaming water",
-      "im just always sucking gaming cocaine",
-      "im just always using gaming onahole, lotion, condom! at night.",
-      "sorry guys im using gaming Electricity.",
-      "sorry guys im using gaming Electric power plant",
-      "sorry guys im using gaming weired cable. improve network speed.",
-      "sorry guys im fucking gaming girl at always time.",
-      "sorry guys im fucking gaming girl at night.",
-      "sorry guys, im not haxin, you guys are just sucks",
-      "sorry guys, im not haxin, you guys are just noob",
-      "sorry guys, im not haxin, you guys are just stup1d xd",
-      "hahaha guys you are totaly noob. im just pro",
-      "im just pro, but guys. wth!? i dont saw Beginners like you. xd!",
-      "im not using killaura, im just pro aiming, and sencivity is Maximum. plz understand.",
-      "Im not Scaffolding, it just NoShift. huh but noobs can't understand? xd!",
-      "im not using BHop, it just lagging sorry my internet is slower...",
-      "im not used hax, idk how to install Hax, i know they are scam and Malware.",
-      "Sorry Guys you are Vaccines are Fake. i'm Taken Gaming Vaccine. Sorry! im Elite Group.",
-      "Im Just Injected Gaming Vaccine.",
-      "cough cough i think infected Gaming Corona...",
-      "i'm infected gaming Virus! dont report me."
-    ]
-    NoobInsult = [
-      "Fuck you Noobs",
-      "Hey fucking teams! GO to HELL Dumbers!",
-      "Hey fucking teams! GO DIE! Dumbers!",
-      "I can't Understand you've so dumb.",
-      "please suicide now. you are not needed on this Socical, world.",
-      "please use your fucked brain.",
-      "sorry, i was forgoten you guys are just Down's Syndromers. sadly..",
-      "sorry, i was forgoten you guys are just Asperger's Syndromers. sadly...",
-      "Oh Comeon plz fucking dumbers. Don't sabotage Pro Gaymers.",
-      "Oh Comeon plz fucking Fools. Don't sabotage Pro Gaymers.",
-      "fuck fuck fuckkkk Go die! fucking noobs!",
-    ]
-    if (IncJP) {
-      jps = ContJP
-    } else {
-      jps = ""
-    }
-    if (randomish) {
-      if (AllowBet) {
-        if (RandomBet.get()) {
-          StB = randomString(RBA);
-          StA = randomString(RBA);
-        } else {
-          StB = BetStB;
-          StA = BetStA;
-        }
-      } else {
-        StB = "";
-        StA = "";
-      }
-      if (BeforeR) {
-        br = StB + randomString(8) + StA
-      } else {
-        br = ""
-      }
-      if (AfterR) {
-        ar = StB + randomString(8) + StA
-      } else {
-        ar = ""
-      }
-    }
-    switch (spamlist) {
-      case "Mineplex":
-        message = Mineplex;
-        break;
-      case "GameEnd":
-        message = GameEnd;
-        break;
-      case "LiquidAd":
-        message = LiquidAd;
-        break;
-      case "Gaming":
-        message = gaming;
-        break;
-      case "NoobInsult":
-        message = NoobInsult;
-        break;
-      case "All": //Not working ?
-        message = 'you need? hm this is intersting for me.';
-        break;
-    }
-    MSG = br + message[parseInt(Math.random() * message.length)] + ar;
-    mc.thePlayer.sendChatMessage(MSG);
-    rtt = rt(clientnames);
-    chat.print(rtt);
-  } //used only for CM.
-
-  var SpamMode = value.createList("Mode", ["onEnabled", "ValueChanged", "AutoSpam", "test.ccbluex.netBlockGiver"], "ValueChanged");
-  var spamlist = value.createList("SpamProfile", ["Mineplex", "GameEnd", "Thx4Server", "LiquidAd", "Gaming", "DefaultLiquidSpammer", "NoobInsult", "All", "Custom//", ""], "");
-  var yourname = value.createText("hackedBy", "[EnterNameHere]");
-  var MaxDelay = value.createInteger("MaxDelay", 400, 0, 5000); // 10 = 1s.
-  var MinDelay = value.createInteger("MinDelay", 100, 0, 5000);
-  var randomish = value.createBoolean("Ramdomizer", true);
-  var BeforeR = value.createBoolean("Before", false);
-  var AfterR = value.createBoolean("After", false);
-  var Incjp = value.createBoolean("#IncludeJapaneseString", false);
-  var AllowBet = value.createBoolean("Between", false); //Im Recommanding set false.
-  var RandomBet = value.createBoolean("RandomBetween", false);
-  var RBA = value.createInteger("Amount", 1, 1, 5);
-  var BetStB = value.createText("StringBefore", ">");
-  var BetStA = value.createText("StringAfter", "|");
-
-  this.addValues = function(v) {
-    v.add(SpamMode);
-    v.add(spamlist);
-    v.add(yourname);
-    v.add(MaxDelay);
-    v.add(MinDelay);
-    v.add(randomish);
-    v.add(BeforeR);
-    v.add(AfterR);
-    v.add(Incjp);
-    v.add(AllowBet);
-    v.add(RandomBet);
-    v.add(RBA);
-    v.add(BetStB);
-    v.add(BetStA);
-  }
-
-  this.getName = function() {
-    return "ChatManager";
-  }
-  this.getDescription = function() {
-    return "Spammer, But Addition Profiler Mode, Simple Code";
-  }
-  this.getCategory = function() {
-    return "Misc";
-  }
-  this.onEnable = function() {
-    spamlist.set() == "";
-    i = 0;
-    delay = Math.floor(Math.random() * ((MaxDelay.get() - MinDelay.get()) + 1) + MinDelay.get());
-    if (SpamMode.get() == "onEnabled") {
-      messageCont(spamlist.get(), yourname.get(), randomish.get(), BeforeR.get(), AfterR.get(), Incjp.get(), AllowBet.get(), RandomBet.get(), RBA.get(), BetStB.get(), BetStA.get())
-    }
-  }
-  this.onUpdate = function() {
-    switch (SpamMode.get()) {
-      case "ValueChanged":
-        if (!spamlist.get() == "") {
-          messageCont(spamlist.get(), yourname.get(), randomish.get(), BeforeR.get(), AfterR.get(), Incjp.get(), AllowBet.get(), RandomBet.get(), RBA.get(), BetStB.get(), BetStA.get());
-          spamlist.set("")
-        }
-        break;
-      case "AutoSpam":
-        if (i == delay) {
-          messageCont(spamlist.get(), yourname.get(), randomish.get(), BeforeR.get(), AfterR.get(), Incjp.get(), AllowBet.get(), RandomBet.get(), RBA.get(), BetStB.get(), BetStA.get());
-          delay = DelayCal(MaxDelay.get(), MinDelay.get());
-          i = 0
-        } else {
-          i += 1
-        }
-        break;
-      case "test.ccbluex.netBlockGiver":
-        if (i == 50) {
-          mc.thePlayer.sendChatMessage("/give planks 64");
-          i = 0
-        } else {
-          i += 1
-        }
-        break;
-    }
-  }
-}
 
 function tk400sAdditonalModule() {
   var DelayTick = value.createInteger("DelayTicks", 1, 0, 30);
@@ -1954,15 +1579,6 @@ function tk400sAdditonalModule() {
         //Fix? canceling Opening Inv.
         LiquidBounce.getModule(KillAura).blockingStatus && (mc.thePlayer.swingProgress = animation.get());
         break;
-        /*case "BlockBlock":
-          if(LiquidBounce.getModule(KillAura).blockingStatus){LiquidBounce.getModule(KillAura).blockingStatus = false;On2d = true}else{On2d=false}
-          break;*/
-    }
-  }
-  this.onRender2D = function() {
-    //if(On2d && DCV.get()) {mc.ingameGUI.drawCenteredString(mc.fontRendererObj, "§k|§cDon't Worry! NotBlocking is Fake! You've Blocking in ServerSided!§k|", mc.displayWidth / 4, (mc.displayHeight / 2.5) + 8, -1)}
-    if (GamingText.get()) {
-      mc.ingameGUI.drawCenteredString(mc.fontRendererObj, GaTex, mc.displayWidth / Width.get(), (mc.displayHeight / height.get()) + 8, -1)
     }
   }
   this.onAttack = function() {
@@ -2016,100 +1632,6 @@ function tk400sAdditonalModule() {
 
   this.onDisable = function() {}
 }
-
-function MCMusicPlayer() {
-  var soviets = 0;
-
-  var PlayingMusic = value.createList("Music", ["Roup", "Soviet", ""], "SovietMusic"); //i want create another template. but...hm
-  var Volume = value.createFloat("Volume", 10, 0, 255);
-
-  this.addValues = function(v) {
-    v.add(PlayingMusic);
-    v.add(Volume);
-  }
-
-  this.getName = function() {
-    return "MCMusicPlayer";
-  }
-  this.getDescription = function() {
-    return "Allow you to hear Music. But its played by Minecraft Sounds.";
-  }
-  this.getCategory = function() {
-    return "Fun";
-  }
-
-  this.onEnable = function() {
-    playSound("random.anvil_use", 10, 1);
-  }
-
-  this.onUpdate = function() {
-    switch (PlayingMusic.get()) {
-      case "Soviet":
-        if (soviets >= 216) {
-          soviets = 0
-        } else {
-          soviets += 1
-        }
-        switch (soviets) {
-          case soviets > 0 && soviets < 30:
-            playSound("note.harp", Volume.get(), 1.7);
-            break;
-          case 40:
-            playSound("note.harp", Volume.get(), 1.3);
-            break;
-          case 55:
-            playSound("note.harp", Volume.get(), 1.7);
-            break;
-          case 65:
-            playSound("note.harp", Volume.get(), 1.3);
-            break;
-          case 75:
-            playSound("note.harp", Volume.get(), 1.4);
-            break;
-          case 82:
-            playSound("note.harp", Volume.get(), 1.6);
-            break;
-          case 90 || 95:
-            playSound("note.harp", Volume.get(), 1.1);
-            break;
-          case 100:
-            playSound("note.harp", Volume.get(), 1.4);
-            break;
-          case 115:
-            playSound("note.harp", Volume.get(), 1.3);
-            break;
-          case 125:
-            playSound("note.harp", Volume.get(), 1.2);
-            break;
-          case 135:
-            playSound("note.harp", Volume.get(), 1.3);
-            break;
-          case 145:
-            playSound("note.harp", Volume.get(), 0.85);
-            break;
-          case 155:
-            playSound("note.harp", Volume.get(), 0.85);
-            break;
-          case 165 || 180:
-            playSound("note.harp", Volume.get(), 0.95);
-            break;
-          case 190:
-            playSound("note.harp", Volume.get(), 1.05);
-            break;
-          case 200:
-            playSound("note.harp", Volume.get(), 1.15);
-            break;
-          case 215:
-            playSound("note.harp", Volume.get(), 1.25);
-            break;
-        }
-        break;
-    }
-  }
-
-  this.onDisable = function() {}
-}
-
 /*function FightBot() {//dead projekt
   var test = value.createFloat("test", 1.5, 0, 30);
  
@@ -2118,20 +1640,25 @@ function MCMusicPlayer() {
   }
   this.getName = function() {
     return "FightBot"
-  }  
+  }
   this.getDescription = function() {
-    return "like a WURST's FightBot"
-  }  
+    return "A Module from ReverseEngineered WURST's FightBot."
+  }
   this.getCategory = function() {
     return "Combat"
   }
- 
-  this.onUpdate = function() {}
-  this.onMove = function() {
- 
+
+  this.onEnable = function() {
+    chat.print("ude ga naru ZE~")
   }
-  this.onEnable = function() {}
-  this.onDisable = function() {}
+  this.onUpdate = function() {}
+  this.onAttack = function(e) {}
+  this.onMove = function(e) {}
+  this.onStrafe = function(e) {}
+  this.onPacket = function(e) {}
+  this.onDisable = function() {
+    chat.print(null)
+  }
 }*/
 
 
@@ -2145,11 +1672,7 @@ function MCMusicPlayer() {
 var ModuleManager = moduleManager.registerModule(new ModuleManager)
 var TSMM = moduleManager.registerModule(new TSMM);
 var HypixelGameChange = moduleManager.registerModule(new HypixelGameChange);
-var ChatManager = moduleManager.registerModule(new ChatManager)
-//var Quiter = moduleManager.registerModule(new Quiter)
 var tk400sAdditonalModule = moduleManager.registerModule(new tk400sAdditonalModule)
-var MCMusicPlayer = moduleManager.registerModule(new MCMusicPlayer)
-var TargetStrafation = moduleManager.registerModule(new TargetStrafation);
 var ABAssis = moduleManager.registerModule(new ABAssis);
 var ModuleRandomizer = moduleManager.registerModule(new ModuleRandomizer)
 
@@ -2157,11 +1680,7 @@ function onEnable() {
   ModuleManager;
   TSMM;
   HypixelGameChange;
-  ChatManager;
-  //Quiter;
   tk400sAdditonalModule;
-  MCMusicPlayer;
-  TargetStrafation;
   ModuleRandomizer;
   ABAssis;
 };
@@ -2170,11 +1689,7 @@ function onDisable() {
   moduleManager.unregisterModule(ModuleManager);
   moduleManager.unregisterModule(TSMM);
   moduleManager.unregisterModule(HypixelGameChange);
-  moduleManager.unregisterModule(ChatManager);
-  //moduleManager.unregisterModule(Quiter);
   moduleManager.unregisterModule(tk400sAdditonalModule);
-  moduleManager.unregisterModule(MCMusicPlayer);
-  moduleManager.unregisterModule(TargetStrafation);
   moduleManager.unregisterModule(ModuleRandomizer);
   moduleManager.unregisterModule(ABAssis);
 };
@@ -2231,21 +1746,22 @@ function GroundChecker(target, abst) { //i think you can use like if(GC()) {chat
   }
 }
 
+
 function getMoveYaw() {
   var moveYaw = mc.thePlayer.rotationYaw
   if (mc.thePlayer.moveForward != 0 && mc.thePlayer.moveStrafing == 0) {
-      if(mc.thePlayer.moveForward > 0) {moveYaw +=0} else {moveYaw +=180}
+    if(mc.thePlayer.moveForward > 0) {moveYaw += 0} else {moveYaw += 180}
   } else if (mc.thePlayer.moveForward != 0 && mc.thePlayer.moveStrafing != 0) {
       if (mc.thePlayer.moveForward > 0) {
-          if (mc.thePlayer.moveStrafing > 0) {moveYaw += -45} else {moveYaw+=45}
+        if (mc.thePlayer.moveStrafing > 0) {moveYaw += -45} else {moveYaw += 45}
       } else {
-          if (mc.thePlayer.moveStrafing > 0) {moveYaw -=-45} else {moveYaw-= -45}
+        if (mc.thePlayer.moveStrafing > 0) {moveYaw -= -45} else {moveYaw -= 45}
       }
-      if(mc.thePlayer.moveForward > 0) {moveYaw +=0} else {moveYaw +=180}
+    if(mc.thePlayer.moveForward > 0) {moveYaw += 0} else {moveYaw += 180}
   } else if (mc.thePlayer.moveStrafing != 0 && mc.thePlayer.moveForward == 0) {
-      if(mc.thePlayer.moveStrafing > 0) {moveYaw += -90} else {moveYaw +=90}
+      if(mc.thePlayer.moveStrafing > 0) {moveYaw += -90} else {moveYaw += 90}
   }
-  return moveYaw
+return moveYaw
 }
 
 function MoveCheck(cl) { //only check XZ. not Jump Falling, etc..
@@ -2258,6 +1774,12 @@ function MoveCheck(cl) { //only check XZ. not Jump Falling, etc..
   } else if (cl != null || cl == "Zero" || cl != 0) {
     if ((mc.thePlayer.motionX < cl || mc.thePlayer.motionX > cl) || (mc.thePlayer.motionZ < cl || mc.thePlayer.motionZ > cl)) {
       return true; //[D☆] Player has Moving.
+    }
+  } else if(cl =="OnlyKey" || cl =="OK") {
+    if(mc.gameSettings.keyBindForward || mc.gameSettings.keyBindBack || mc.gameSettings.keyBindLeft || mc,gameSettings.keyBindRight) {
+      return true;
+    }else{
+      return false;
     }
   }
 }
