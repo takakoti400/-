@@ -1,8 +1,8 @@
 var AntiBot = Java.type("net.ccbluex.liquidbounce.features.module.modules.misc.AntiBot");
 //LiquidBounce's Util
 //var hogehoge = Java.type("").class;
-var EntityUtils = Java.type("net.ccbluex.liquidbounce.utils.EntityUtils").class;
-var RotationUtils = Java.type("net.ccbluex.liquidbounce.utils.RotationUtils").class;
+var EntityUtils = Java.type("net.ccbluex.liquidbounce.utils.EntityUtils");
+var RotationUtils = Java.type("net.ccbluex.liquidbounce.utils.RotationUtils");
 
 function TargetMover() {
   var target=null
@@ -65,7 +65,7 @@ function TargetMover() {
       //  }
       //  break;
     }
-    if(target != null && !target.isDead && (target.getHealth() >0) && !AntiBot.isBot(target) && (target != mc.thePlayer)) {
+    if(target != null && !target.isDead && (target.getHealth() <=0) && !AntiBot.isBot(target) && (target != mc.thePlayer)) {
       //chat.print("a")
       switch(Pos.get()) {
         case "Behind":
@@ -126,175 +126,3 @@ var TargetMover = moduleManager.registerModule(new TargetMover);
 TargetMover;
 
 moduleManager.unregisterModule(TargetMover);
-
-//function TargetStrafation() {
-//  var rotYawVal = rotationYaw = 0;
-//  var azoz = 0;
-//  var target = null;
-//  var sin = cos = 0;
-//  var Fsin = Fcos = 0;
-//  var targetposX = targetposZ = 0;
-//  var FtargetposX = FtargetposZ = 0;
-//  var NegTarRot = PosTarRot = rot = 0;
-//  var posX = posZ = NearestX = NearestZ = tan = 0
-//  var ticks = 0;
-//  var state = 'Null'
-//  var ratate = 360;
-//  var wasDown=jump = false
-//  var yaw=speed=0
-//  var prefkey=0
-//
-//  var mode = value.createList("Mode", ["AimBottedLegitTS", "LegitlyRotateY","SetXZ", "MotionXZ", "None"], "") //Δ version
-//  var fl = value.createInteger("FixLength", 10, 0, 100) //Δ version
-//  var range = value.createFloat("Range", 3.25, 0, 8) //Δ version
-//  var Rect = value.createInteger("Rectangle", 8, 0, 36) //Δ version
-//  var Tole = value.createFloat("Tolerances", 0.3, 0, 1) //Δ version
-//  //var Boost = value.createFloat("Boost", 0.1, 0, 180) //Δ version
-//  var DegValue = value.createFloat("Deg", 8, 40, 360)
-//  //var rotatemode = value.createList("RotateMode", ["Default", "AlwaysRotate", "random"], "Default")
-//
-//  this.addValues = function(v) {
-//    v.add(mode);
-//    v.add(fl);
-//    v.add(range);
-//    v.add(Rect);
-//    v.add(Tole);
-//    v.add(DegValue);
-//    //v.add(rotatemode);
-//  }
-//  this.getName = function() {
-//    return "TargetStrafation"
-//  }
-//  this.getDescription = function() {
-//    return "TargetStrafation"
-//  }
-//  this.getCategory = function() {
-//    return "Movement"
-//  }
-//  this.onAttack = function(e) {
-//    target = e.getTargetEntity();
-//  }
-//
-//  this.onEnable = function() {
-//   wasDown = false
-//  }
-//  /*
-//  this.onJump = function(e) {
-//    if(jump) {e.cancelEvent()}
-//  }
-//  this.onMove = function(e) {
-//    chat.print(e.getX())
-//    chat.print(e.getZ())
-//    if(mc.gameSettings.keyBindForward.pressed) {
-//      prefkey =mc.gameSettings.keyBindForward.getKeyCode()
-//      mc.gameSettings.keyBindForward.setKeyCode(255)
-//    }else{
-//      mc.gameSettings.keyBindForward.setKeyCode(prefkey)
-//    }
-//    //e.cancelEvent()
-//    speed = pitagora(mc.thePlayer.motionX,mc.thePlayer.motionZ)
-//    motionX = (mc.thePlayer.motionX * 0)
-//    motionZ = (mc.thePlayer.motionZ * 0)
-//    if (!(mc.thePlayer.movementInput.moveForward != 0 || mc.thePlayer.movementInput.moveStrafe != 0)) {
-//        return
-//    }
-//    yaw = getMoveYaw()
-//    mc.thePlayer.motionX = (((-Math.sin(yaw / 180 * Math.PI) * speed) + motionX))
-//    mc.thePlayer.motionZ = ((( Math.cos(yaw / 180 * Math.PI) * speed) + motionZ))
-//  }*/
-//  this.onUpdate = function() {
-//    /*
-//    if (mc.thePlayer.onGround && mc.gameSettings.keyBindJump.isKeyDown && allDirectionsJumpValue.get() && (mc.thePlayer.movementInput.moveForward != 0 || mc.thePlayer.movementInput.moveStrafe != 0) && !(mc.thePlayer.isInWater || mc.thePlayer.isInLava || mc.thePlayer.isOnLadder || mc.thePlayer.isInWeb)) {
-//        if (mc.gameSettings.keyBindJump.isKeyDown) {
-//            mc.gameSettings.keyBindJump.pressed = false
-//            wasDown = true
-//        }
-//        yaw = mc.thePlayer.rotationYaw
-//        mc.thePlayer.rotationYaw = getMoveYaw()
-//        mc.thePlayer.jump()
-//        mc.thePlayer.rotationYaw = yaw
-//        jump = true
-//        if (wasDown) {
-//            mc.gameSettings.keyBindJump.pressed = true
-//            wasDown = false
-//        }
-//    } else {
-//        jump = false
-//    }
-//    */
-//    if (target != null && !target.isDead && !target.getHealth() <= 0) {
-//      switch (mode.get()) {//umm bad code... but.. ah um.
-//        
-//        case "AimBottedLegitTS":
-//          AimBotFunc(target.posX, target.posZ)
-//
-//          //rot = target.rotationYaw;
-//          if ((target.rotationYaw + DegValue.get()) > 180) {
-//            PosTarRot = ((-180) + (DegValue.get() - (180 - target.rotationYaw)))
-//          } else {
-//            PosTarRot = (target.rotationYaw + DegValue.get())
-//          }
-//          if ((target.rotationYaw - DegValue.get()) < -180) {
-//            NegTarRot = (180 - (DegValue.get() - (180 - target.rotationYaw)))
-//          } else {
-//            NegTarRot = (target.rotationYaw - DegValue.get())
-//          }
-//          //Calculation of LookLength.
-//          azoz = Math.atan2(target.posX - mc.thePlayer.posX, target.posZ - mc.thePlayer.posZ)
-//          //Shape of range
-//          if ((azoz / Math.PI * 180) <= PosTarRot && (azoz / Math.PI * 180) >= NegTarRot) {
-//            if(mc.thePlayer.keyBindLeft.pressed) {
-//              mc.gameSettings.keyBindLeft.pressed = false;
-//              mc.gameSettings.keyBindRight.pressed = true;
-//            }
-//            if(mc.thePlayer.keyBindRight.pressed) {
-//              mc.gameSettings.keyBindRight.pressed = false;
-//              mc.gameSettings.keyBindLeft.pressed = true;
-//            }
-//          }
-//          //Controller of F/B.
-//          if (ticks == 0) {
-//            switch (state) {
-//              case 'outsided':
-//                if (Math.sqrt(Math.pow(mc.thePlayer.posX - target.posX, 2) + Math.pow(mc.thePlayer.posZ - target.posZ, 2)) < range.get()) {
-//                  mc.gameSettings.keyBindForward.pressed = true;
-//                  ticks = fl.get()
-//                }
-//                break;
-//              case 'inseded':
-//                if (Math.sqrt(Math.pow(mc.thePlayer.posX - target.posX, 2) + Math.pow(mc.thePlayer.posZ - target.posZ, 2)) > range.get()) {
-//                  mc.gameSettings.keyBindBack.pressed = true;
-//                  ticks = fl.get()
-//                }
-//                break;
-//            }
-//            if (Math.sqrt(Math.pow(mc.thePlayer.posX - target.posX, 2) + Math.pow(mc.thePlayer.posZ - target.posZ, 2)) < range.get()) {
-//              state = 'inseded'
-//            }
-//            if (Math.sqrt(Math.pow(mc.thePlayer.posX - target.posX, 2) + Math.pow(mc.thePlayer.posZ - target.posZ, 2)) > range.get()) {
-//              state = 'outsided'
-//            }
-//          } else {ticks--}
-//          break;
-//        case "LegitlyRotateY":
-//          chat.print("ratate="+ratate)
-//          AimBotFunc(target.posX - Math.sin(ratate / 180 * Math.PI) * range.get(), target.posZ + Math.cos(ratate / 180 * Math.PI) * range.get())
-//          if(_2DRoundCheck(target.posX - Math.sin(ratate / 180 * Math.PI) * range.get(),target.posZ + Math.cos(ratate / 180 * Math.PI) * range.get(),Tole.get())) {
-//            chat.print("test")
-//            if(ratate >= 360) {ratate = 360 / Rect.get()
-//            }else{
-//              if(mc.gameSettings.keyBindForward.pressed) {ratate += (360 / Rect.get())}
-//              else if(mc.gameSettings.keyBindBack.pressed) {ratate -= (360 / Rect.get())}
-//            }
-//          }
-//          break;
-//      case "SetXZ":
-//        break;
-//      case "MotionXZ":
-//      }
-//    }
-//  }
-//  this.onDisable = function() {
-//    neared = false;
-//  }
-//}
