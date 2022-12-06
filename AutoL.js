@@ -10,6 +10,7 @@ script.import("texts.js") //for spam texts.
 
 var chatPrefix = "§8[§9AutoL Config§8]";
 var filepath="/AutoLConfig.json"
+var ALname = null;
 var presets = [
    //{name: "",list: []}
 ]
@@ -19,7 +20,6 @@ var presets = [
 function AutoLModule() {
    var Ldelayes = 0;
 	var target = null;
-	var ALname = null;
 	var ALRate = null;
 	var PANList = [];
 	var PALIdList = [];
@@ -31,7 +31,6 @@ function AutoLModule() {
       DebugyAL = value.createBoolean("DebugCheck", false),
       Debugy = value.createBoolean("Debug", false),
       Textsets = value.createText("Textset", ""),
-      SLists = value.createBoolean("PessetList", false),
       LPrev = value.createBoolean("PreventDupeL", false),
       DebugyAL = value.createBoolean("Debug!DetectAllEntity", false),
       ALDmode = value.createList("DeadCheckMode", ["PacketChat", "DeadCheck"], ""), // tired coding.
@@ -106,14 +105,15 @@ function AutoLModule() {
             chat.print(LRate.get() + "/" + ALRate);
          } else {
             if (LRate.get() >= ALRate) {
-               (ALname == null) && (ALname = PANList[0]);
                if (Ldelayes == null) {
                   Ldelayes = DelayCal(Lxdelay.get(), Lndelay.get());
                } else {
                   if (Ldelayes <= 0) {
-                     var text=rt(texts)
-                     if (Debugy.get()) {chat.print("said :§c" + AutosendChat(text))};
-                     sendChat(AutosendChat(text));
+                     ALname = PANList[0];
+                     //var text=rt(texts)
+                     var text=AutosendChat(texts)
+                     if (Debugy.get()) {chat.print("said :§c" + text)};
+                     sendChat(text);
                      PANList.shift();
                      //LedPlayers.push(ALname);
                      chat.print("§6§l[AutoL]§r Successfully L §f§l" + ALname + "§a§l");
@@ -313,9 +313,8 @@ function loadConfig() {
    } catch (err) {}
 }
 
-
 function AutosendChat(msg) {
-   mc.thePlayer.sendChatMessage(rt(msg)
+   return rt(msg)
       .replace(/(%playername%|%name%|%s%)/gi, ALname)
       .replace(/%MyHealth%/gi, Math.floor(mc.thePlayer.getHealth()))
       .replace(/%insult_EN%/gi, rt(insultEN))
@@ -325,9 +324,9 @@ function AutosendChat(msg) {
       .replace(/%clientN_JA%/gi,rt(ClientNameJA))
       .replace(/%clientN_BI%/gi,rt(ClientNameEN.concat(ClientNameJA)))
       .replace(/%me_ja%/gi,rt(meJA))
-      .replace(/%rn%/gi, Math.floor(Math.random()*10))
-   );
+      .replace(/%rn%/gi, Math.floor(Math.random()*10));
 }
+
 function log(message, isError) {
    if (isError) {
        chat.print(chatPrefix + " §c" + message);
