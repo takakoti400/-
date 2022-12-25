@@ -2,13 +2,13 @@ var Keyboard = Java.type("org.lwjgl.input.Keyboard");
 var LiquidBounce = Java.type("net.ccbluex.liquidbounce.LiquidBounce");
 var type=""
 
+
 var File = Java.type("java.io.File");
 var FileReader = Java.type("java.io.FileReader");
 var BufferedReader = Java.type("java.io.BufferedReader");
 var FileWriter = Java.type("java.io.FileWriter");
 var BufferedWriter = Java.type("java.io.BufferedWriter");
 var Timer = Java.type("java.util.Timer");
-
 /* Detect LiquidBounce Build. */
 if((LiquidBounce.CLIENT_NAME).contains("+")) {
 	//if(LiquidBounce.CLIENT_VERSION.toString() =="reborn") {type="R"}else{type="Plus"}//these build are dosent have any diffence now.
@@ -53,7 +53,23 @@ if(type=="Original") {
   var TowerModule = moduleManager.getModule("Tower");
 } else if(type=="Plus") {
   var InvModule = moduleManager.getModule("InvManager");
+  var TowerModule = ScaffoldModule.getValue("EnableTower").get();
 }
+
+/* LBUtils */
+//var hogehoge = Java.type("").class;
+var RotationUtils = Java.type("net.ccbluex.liquidbounce.utils.RotationUtils");
+var EntityUtils = Java.type('net.ccbluex.liquidbounce.utils.EntityUtils');
+var ServerUtils = Java.type("net.ccbluex.liquidbounce.utils.ServerUtils");
+var RenderUtils = Java.type("net.ccbluex.liquidbounce.utils.render.RenderUtils");
+var MovementUtils = Java.type("net.ccbluex.liquidbounce.utils.MovementUtils");
+var BlockUtils = Java.type("net.ccbluex.liquidbounce.utils.block.BlockUtils");
+
+//Liq classes
+var KillAura = Java.type("net.ccbluex.liquidbounce.features.module.modules.combat.KillAura");
+var AntiBot = Java.type("net.ccbluex.liquidbounce.features.module.modules.misc.AntiBot"); //? Plus says world, but it not found???
+//var Teams = Java.type("net.ccbluex.liquidbounce.features.module.modules.misc.Teams");
+//var prefix = LiquidBounce.commandManager.getPrefix();
 
 
 /* Objection! */
@@ -67,26 +83,13 @@ var EntityLiving = Java.type('net.minecraft.entity.EntityLivingBase');
 var EntityPlayer = Java.type('net.minecraft.entity.player.EntityPlayer');
 var playerController = Java.type('net.minecraft.client.multiplayer.PlayerControllerMP');
 var ItemArmor = Java.type('net.minecraft.item.ItemArmor');
-
-/* LBUtils */
-//var hogehoge = Java.type("").class;
-var RotationUtils = Java.type("net.ccbluex.liquidbounce.utils.RotationUtils");
-var EntityUtils = Java.type('net.ccbluex.liquidbounce.utils.EntityUtils');
-var ServerUtils = Java.type("net.ccbluex.liquidbounce.utils.ServerUtils");
-var RenderUtils = Java.type("net.ccbluex.liquidbounce.utils.render.RenderUtils");
-var MovementUtils = Java.type("net.ccbluex.liquidbounce.utils.MovementUtils");
-var BlockUtils = Java.type("net.ccbluex.liquidbounce.utils.block.BlockUtils");
+var Item = Java.type('net.minecraft.item.Item');
 
 /* MCUtil */
 var Rotations = Java.type("net.minecraft.util.Rotations")
 var EnumFacing = Java.type('net.minecraft.util.EnumFacing');
 var BlockPos = Java.type('net.minecraft.util.BlockPos');
 
-//Liq classes
-var KillAura = Java.type("net.ccbluex.liquidbounce.features.module.modules.combat.KillAura");
-var AntiBot = Java.type("net.ccbluex.liquidbounce.features.module.modules.misc.AntiBot"); //? Plus says world, but it not found???
-//var Teams = Java.type("net.ccbluex.liquidbounce.features.module.modules.misc.Teams");
-//var prefix = LiquidBounce.commandManager.getPrefix();
 
 /* Packets */
 //var S12PacketEntityVelocity = Java.type('net.minecraft.network.play.server.S12PacketEntityVelocity');
@@ -165,7 +168,7 @@ function writeFile(path, string) {
 
 
 function addValue(values, v) {
-  for (x=0;x<values.length;x=(x+1)|0) {
+  for (var x=0;x<values.length;x=(x+1)|0) {
      v.add(values[x])
   }
 }
