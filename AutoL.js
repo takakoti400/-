@@ -48,7 +48,6 @@ var DetAE = value.createBoolean("Debug!DetectAllEntity", false);
 var AutoLvalues=[
    ExpAdvDtct,
    DetAE,
-   refl = value.createList("RefreshPlayerlist", ["onWorld", "onEnable", "Both", "Off"], "onEnable"),
    Textsets = value.createText("Presset", ""),
    LPrev = value.createBoolean("PreventDupeL", false),
    ALDmode = value.createList("DeadCheckMode", ["PacketChat", "DeadCheck"], ""), // tired coding.
@@ -61,7 +60,6 @@ var AutoRvalues = [
    Reseter = value.createBoolean("Reset", false),
    ExpAdvDtct,
    DetAE,
-   refl = value.createList("RefreshPlayerlist", ["onWorld", "onEnable", "Both", "Off"], "onEnable"),
    RMode = value.createList("ReportMode", ["Command","Chat"], "Command"),
    Mode = value.createList("CommandType", ["Hypixel", "Redesky", "/report","Custom"], "Hypixel"),
    reasonMode = value.createList("Reason", ["Randomized","Custom"],"Randomized"),
@@ -96,9 +94,9 @@ function KillDetector() {
    this.onEnable = function() {moduleManager.getModule(this.getName()).array = false}
    this.onAttack = function(e) {
       target = e.getTargetEntity()
+      var TargetName=target.getName()
       //chat.print(ServerUtils.getRemoteIp())
       if ((DetAE.get() ? (target instanceof EntityMobs || target instanceof EntityLiving || target instanceof EntityPlayer) : target instanceof EntityPlayer) && !AntiBot.isBot(target) && target != null && !target.isDead && target != mc.thePlayer && (!ExpAdvDtct.get() || mc.playerController.getCurrentGameType() != "ADVENTURE")) {
-         var TargetName=target.getName()
          if (!TargetNames.includes(TargetName) && !PANList.includes(TargetName) && !PRP.includes(TargetName)  /*  && !PIdList.includes(entity.getEntityId()) */) {
             if(/mineplex/i.test(ServerUtils.getRemoteIp().toLowerCase())) {
                if(!TeamMates.includes(TargetName)) {TargetNames.push(TargetName);chat.print("Added Player '"+TargetName+"' -> ["+TargetNames+"]")}
@@ -118,10 +116,10 @@ function KillDetector() {
             if(TargetNames.includes(EntName)) {
                function addPlayer() {
                   if (entity.isDead || entity.getHealth() <= 0) {//detect Target isDead.
-                     chat.print("detected dead player '"+EntName+"' -> " +(AutoRToggle ? +"AutoR["+PRP+"]" : "")+ (AutoLToggle ? "AutoL["+PANList+"]" : ""))
                      AutoRToggle &&     (PRP.push(EntName))
                      AutoLToggle && (PANList.push(EntName))
                      TargetNames.splice(TargetNames.indexOf(EntName), 1);
+                     chat.print("detected dead player '"+EntName+"' -> " +(AutoRToggle ? +"AutoR["+PRP+"]" : "")+ (AutoLToggle ? "AutoL["+PANList+"]" : ""))
                   }
                }
                if(/mineplex/i.test(ServerUtils.getRemoteIp().toLowerCase())) {
@@ -233,6 +231,7 @@ function KillDetector() {
 }
 
 function AutoLModule() {
+   var refl = value.createList("RefreshPlayerlist", ["onWorld", "onEnable", "Both", "Off"], "onEnable")
    this.getName = function() {
       return "AutoL"
    }
@@ -247,10 +246,12 @@ function AutoLModule() {
    }
    this.onLoad = function () {loadConfig()}
    this.onEnable = function () {
-      if(["onEnable","Both"].includes(refl.get())) {ALname=ALRate=null;Ldelayes = 0;PANList=[]}
+      if(["onEnable", "Both"].includes(refl.get())) {chat.print("aaa4");ALname=ALRate = null;Ldelayes = 0;PANList=[]}
       moduleManager.getModule("KillDetector").state =AutoLToggle = true;
       texts=[];
-      if(Textsets.get() != "") {
+      if(Textsets.get() == "") {
+         texts=["undefined text."]
+      }else{
          for(var x=0;x<presets.length;x=(x+1)|0) {
             if(Textsets.get()==presets[x].name) {
                for(var z=0;z<presets[x].list.length;z=(z+1)|0) {
@@ -262,20 +263,22 @@ function AutoLModule() {
                }
             }
          }
-      }else{texts=["undefined text."]}
-   }
-   this.onDisable = function() {
+      }
    }
    this.onWorld = function() {
-      if(["onWorld","Both"].includes(refl.get())) {ALname=ALRate = null;Ldelayes = 0;PANList=[]}
+      chat.print(refl.get())
+      if(["onWorld", "Both"].includes(refl.get())) {chat.print("aaa3");ALname=ALRate = null;Ldelayes = 0;PANList=[]}
    }
    this.addValues = function(v) {
+      v.add(refl)
       addValue(AutoLvalues,v)
    }
 }
 
 function AutoReportModule() {
+   var refl = value.createList("RefreshPlayerlist", ["onWorld", "onEnable", "Both", "Off"], "onEnable")
    this.addValues = function(v) {
+      v.add(refl)
       addValue(AutoRvalues,v)
    }
    this.getName = function() {
@@ -288,11 +291,11 @@ function AutoReportModule() {
       return "Player"
    }
    this.getTag = function () {
-      return (PRP.length > 1 ? PRP.toString+"("+delayes/10+")":"")
+      return (PRP.length > 1 ? PRP.toString()+"("+delayes/10+")":"")
    }
-   this.onEnable = function() {moduleManager.getModule("KillDetector").state = AutoRToggle = true;if(["onEnable","Both"].includes(refl.get())) {PRP=[]; delayes = 0;target = null;reportedPlayers = [];ARname=nullReason = '';Reportablerate = null;ReasShow = [];Rerray='';Reaz=[]}}
+   this.onEnable = function() {moduleManager.getModule("KillDetector").state = AutoRToggle = true;if(["onEnable", "Both"].includes(refl.get())) {chat.print("aaa1");PRP=[]; delayes = 0;target = null;reportedPlayers = [];ARname=nullReason = '';Reportablerate = null;ReasShow = [];Rerray='';Reaz=[]}}
    this.onDisable = function() {AutoRToggle = true}
-   this.onWorld = function () {if(["onWorld","Both"].includes(refl.get())) {PRP=[]; delayes = 0;target = null;reportedPlayers = [];ARname=nullReason = '';Reportablerate = null;ReasShow = [];Rerray='';Reaz=[]}}
+   this.onWorld = function () {if(["onWorld", "Both"].includes(refl.get())) {chat.print("aaa2");PRP=[]; delayes = 0;target = null;reportedPlayers = [];ARname=nullReason = '';Reportablerate = null;ReasShow = [];Rerray='';Reaz=[]}}
    this.onUpdate = function() {
       if (ReasL.get() != 'ClickValueToAdd/Remove!') {
          if (ReasShow.includes(ReasL.get())) { //Remove
