@@ -4,6 +4,8 @@ var scriptVersion = 1.6;
 
 var chatPrefix = "§8[§9§lLiquidBounce§8]";
 
+var GameMode = Java.type('net.minecraft.world.WorldSettings.GameType')
+
 function log(message, isError) {
     if (isError) {
         chat.print(chatPrefix + " §c" + message);
@@ -29,6 +31,39 @@ function SampleCommand() {
         }
 
         commandManager.executeCommand(".say " + args[1]);
+    }
+}
+
+function HClipcommand() {
+    var sin = 0;
+    var cos = 0;
+    var sinr = 0;
+    var cosr = 0;
+    var X = 0;
+    var Z = 0;
+
+    this.getName = function() {
+        return "hclipScript";
+    }
+
+    this.getAliases = function() {
+        return [];
+    }
+
+    this.execute = function(offset) {
+        if (offset.length < 2) {
+            log("tHiS iS lOG (Error)", true);
+            return;
+        }
+
+        var sin = Math.sin(mc.thePlayer.rotationYaw / 180 * Math.PI)
+        var cos = Math.cos(mc.thePlayer.rotationYaw / 180 * Math.PI)
+        var sinr = Math.round(sin*1000) / 1000
+        var cosr = Math.round(cos*1000) / 1000
+        var X = sinr * offset
+        var Z = cosr * offset
+        chat.print("sin "+sin+" /cos "+cos+" /sinr "+sinr+" /cosr "+cosr+" /X "+X+" /Z "+Z)
+        mc.thePlayer.setPosition(mc.thePlayer.posX -=X, mc.thePlayer.posY, mc.thePlayer.posZ+=Z);
     }
 }
 
@@ -62,7 +97,7 @@ function CLCommand() {
         return [];
     }
 
-    this.execute = function(args) {
+    this.execute = function() {
         commandManager.executeCommand(".config list");
     }
 }
@@ -212,42 +247,63 @@ function MJumpCommand() {
         mc.thePlayer.motionY = args[1];
     }
 }
+function KillMeLiquid() {
 
-var SampleCommand = new SampleCommand();
-var SampleCommand;
+    this.getName = function() {
+        return "kill";
+    }
 
-var CCommand = new CCommand();
-var CCommandClient;
+    this.getAliases = function() {
+        return [];
+    }
 
-var CLCommand = new CLCommand();
-var CLCommandClient;
+    this.execute = function(args) {
+        var PlayerHealth = mc.thePlayer.getHealth();
+        if(args[1] == "AAC") {
+            commandManager.executeCommand(".hurt aac")
+        }else if (args[1] == null) {
+            commandManager.executeCommand(".damage "+ PlayerHealth)
+        }else{
+            switch (GameMode.GameType) {
+                case "CREATIVE":
+                    mc.thePlayer.sendChatMessage("/Kill");break;
+                case "SURVIVAL" || "ADVENTURE":
+                    commandManager.executeCommand(".hurt " + PlayerHealth);break;
+            }
+        }
+    }
+}
+function evaler() {
+    this.getName = function() {
+        return "eval";
+    }
+    this.getAliases = function() {
+        return [];
+    }
+    this.execute = function(args) {
+        args=args.replace(".eval ","")
+        eval(args)
+    }
+}
 
-var LSSCommand = new LSSCommand();
-var LSSCommandClient;
-
-var LLSCommand = new LLSCommand();
-var LLSCommandClient;
-
-var LSDCommand = new LSDCommand();
-var LSDCommandClient;
-
-var LSLCommand = new LSLCommand();
-var LSLCommandClient;
-
-var GMCommand = new GMCommand();
-var GMCommandClient;
-
-var ForceSetCommand = new ForceSetCommand();
-var ForceSetCommandClient;
-
-var JumpCommand = new JumpCommand();
-var JumpCommandClient;
-
-var MJumpCommand = new MJumpCommand();
-var MJumpCommandClient;
+var SampleCommand = new SampleCommand();var SampleCommandClient;
+var HClipcommand = new HClipcommand();var HClipcommandClient;
+var CCommand = new CCommand();var CCommandClient;
+var CLCommand = new CLCommand();var CLCommandClient;
+var LSSCommand = new LSSCommand();var LSSCommandClient;
+var LLSCommand = new LLSCommand();var LLSCommandClient;
+var LSDCommand = new LSDCommand();var LSDCommandClient;
+var LSLCommand = new LSLCommand();var LSLCommandClient;
+var GMCommand = new GMCommand();var GMCommandClient;
+var ForceSetCommand = new ForceSetCommand();var ForceSetCommandClient;
+var JumpCommand = new JumpCommand();var JumpCommandClient;
+var MJumpCommand = new MJumpCommand();var MJumpCommandClient;
+var KillMeLiquid = new KillMeLiquid();var KillMeLiquid;
+var evaler = new evaler();var evaler;
 
 function onEnable() {
-    SampleCommand = commandManager.registerCommand(SampleCommand);
+    SampleCommandClient = commandManager.registerCommand(SampleCommand);
+    HClipcommandClient = commandManager.registerCommand(HClipcommand);
     CCommandClient = commandManager.registerCommand(CCommand);
     CLCommandClient = commandManager.registerCommand(CLCommand);
     LSSCommandClient = commandManager.registerCommand(LSSCommand);
@@ -258,10 +314,12 @@ function onEnable() {
     ForceSetCommandClient = commandManager.registerCommand(ForceSetCommand);
     JumpCommandClient = commandManager.registerCommand(JumpCommand);
     MJumpCommandClient = commandManager.registerCommand(MJumpCommand);
+    KillMeLiquidClient = commandManager.registerCommand(KillMeLiquid);
+    evalerClient = commandManager.registerCommand(evaler);
 }
 
 function onDisable() {
-    commandManager.unregisterCommand(SampleCommand);
+    commandManager.unregisterCommand(SampleCommandClient);
     commandManager.unregisterCommand(CCommandClient);
     commandManager.unregisterCommand(CLCommandClient);
     commandManager.unregisterCommand(LSSCommandClient);
@@ -271,4 +329,6 @@ function onDisable() {
     commandManager.unregisterCommand(GMCommandClient);
     commandManager.unregisterCommand(JumpCommandClient);
     commandManager.unregisterCommand(MJumpCommandClient);
+    commandManager.unregisterCommand(KillMeLiquidClient);
+    commandManager.unregisterCommand(evalerClient);
 }
